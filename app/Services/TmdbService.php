@@ -129,6 +129,17 @@ class TmdbService
 
     /**
      * Get image URL
+     * 
+     * Available sizes:
+     * - Poster: w92, w154, w185, w342, w500, w780, original
+     * - Backdrop: w300, w780, w1280, original
+     * - Profile: w45, w185, h632, original
+     * - Logo: w45, w92, w154, w185, w300, w500, original
+     * - Still: w92, w185, w300, original
+     * 
+     * @param string|null $path Image path from TMDB
+     * @param string $size Image size (default: w500 for posters)
+     * @return string Full image URL
      */
     public function getImageUrl($path, $size = 'w500')
     {

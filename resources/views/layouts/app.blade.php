@@ -341,6 +341,214 @@
         html.dark textarea::placeholder {
             color: #666666 !important;
         }
+        
+        /* Additional Dark Mode Rules for Cards and Text */
+        body.dark-mode article,
+        html.dark article {
+            background-color: #1F1F1F !important;
+        }
+        
+        body.dark-mode article h2,
+        html.dark article h2 {
+            color: #FFFFFF !important;
+        }
+        
+        body.dark-mode article p,
+        html.dark article p {
+            color: #B3B3B3 !important;
+        }
+        
+        body.dark-mode article .text-gray-900,
+        html.dark article .text-gray-900 {
+            color: #FFFFFF !important;
+        }
+        
+        body.dark-mode article .text-gray-600,
+        html.dark article .text-gray-600 {
+            color: #B3B3B3 !important;
+        }
+        
+        body.dark-mode article .text-gray-500,
+        html.dark article .text-gray-500 {
+            color: #808080 !important;
+        }
+        
+        body.dark-mode .bg-white,
+        html.dark .bg-white {
+            background-color: #1F1F1F !important;
+        }
+        
+        body.dark-mode .text-gray-900,
+        html.dark .text-gray-900 {
+            color: #FFFFFF !important;
+        }
+        
+        body.dark-mode .text-gray-600,
+        html.dark .text-gray-600 {
+            color: #B3B3B3 !important;
+        }
+        
+        body.dark-mode .text-gray-500,
+        html.dark .text-gray-500 {
+            color: #808080 !important;
+        }
+        
+        body.dark-mode .border-gray-200,
+        html.dark .border-gray-200 {
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        
+        body.dark-mode .bg-gray-50,
+        html.dark .bg-gray-50 {
+            background-color: #2A2A2A !important;
+        }
+        
+        body.dark-mode .bg-gray-100,
+        html.dark .bg-gray-100 {
+            background-color: #2A2A2A !important;
+        }
+        
+        body.dark-mode .hover\:bg-gray-50:hover,
+        html.dark .hover\:bg-gray-50:hover {
+            background-color: #2A2A2A !important;
+        }
+        
+        /* Force dark mode styles for all elements */
+        html.dark body article,
+        body.dark-mode article {
+            background-color: #1F1F1F !important;
+        }
+        
+        html.dark body article div,
+        body.dark-mode article div {
+            background-color: #1F1F1F !important;
+        }
+        
+        html.dark body article h2,
+        body.dark-mode article h2 {
+            color: #FFFFFF !important;
+        }
+        
+        html.dark body article h2 span,
+        body.dark-mode article h2 span {
+            color: #B3B3B3 !important;
+        }
+        
+        /* Ensure titles are always visible - Light Mode */
+        article h2 {
+            color: #1F1F1F !important;
+        }
+        
+        article h2 span {
+            color: #666666 !important;
+        }
+        
+        /* Ensure titles are always visible - Dark Mode */
+        html.dark article h2,
+        body.dark-mode article h2 {
+            color: #FFFFFF !important;
+        }
+        
+        html.dark article h2 span,
+        body.dark-mode article h2 span {
+            color: #B3B3B3 !important;
+        }
+        
+        /* Override any inline styles for titles */
+        html.dark article h2[style*="color"],
+        body.dark-mode article h2[style*="color"] {
+            color: #FFFFFF !important;
+        }
+        
+        html.dark article h2 span[style*="color"],
+        body.dark-mode article h2 span[style*="color"] {
+            color: #B3B3B3 !important;
+        }
+        
+        html.dark body article p,
+        body.dark-mode article p {
+            color: #B3B3B3 !important;
+        }
+        
+        html.dark body article .text-gray-500,
+        body.dark-mode article .text-gray-500 {
+            color: #808080 !important;
+        }
+        
+        html.dark body .bg-white,
+        body.dark-mode .bg-white {
+            background-color: #1F1F1F !important;
+        }
+        
+        html.dark body .text-gray-900,
+        body.dark-mode .text-gray-900 {
+            color: #FFFFFF !important;
+        }
+        
+        html.dark body .text-gray-600,
+        body.dark-mode .text-gray-600 {
+            color: #B3B3B3 !important;
+        }
+        
+        html.dark body .text-gray-500,
+        body.dark-mode .text-gray-500 {
+            color: #808080 !important;
+        }
+        
+        html.dark body .border-gray-200,
+        body.dark-mode .border-gray-200 {
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        
+        /* Sidebar dark mode fixes */
+        html.dark body .lg\:col-span-1 div,
+        body.dark-mode .lg\:col-span-1 div {
+            background-color: #1F1F1F !important;
+        }
+        
+        html.dark body .lg\:col-span-1 h3,
+        body.dark-mode .lg\:col-span-1 h3 {
+            color: #FFFFFF !important;
+        }
+        
+        html.dark body .lg\:col-span-1 h4,
+        body.dark-mode .lg\:col-span-1 h4 {
+            color: #FFFFFF !important;
+        }
+        
+        html.dark body .lg\:col-span-1 p,
+        body.dark-mode .lg\:col-span-1 p {
+            color: #B3B3B3 !important;
+        }
+        
+        html.dark body .lg\:col-span-1 .border-b,
+        body.dark-mode .lg\:col-span-1 .border-b {
+            border-color: rgba(255, 255, 255, 0.1) !important;
+        }
+        
+        /* Pagination dark mode */
+        html.dark body .mt-8 a,
+        body.dark-mode .mt-8 a {
+            background-color: #1F1F1F !important;
+            color: #B3B3B3 !important;
+        }
+        
+        html.dark body .mt-8 a:hover,
+        body.dark-mode .mt-8 a:hover {
+            background-color: #2A2A2A !important;
+            color: #FFFFFF !important;
+        }
+        
+        html.dark body .mt-8 .bg-accent,
+        body.dark-mode .mt-8 .bg-accent {
+            background-color: #E50914 !important;
+            color: #FFFFFF !important;
+        }
+        
+        html.dark body .mt-8 span,
+        body.dark-mode .mt-8 span {
+            color: #B3B3B3 !important;
+        }
     </style>
 </head>
 <body>

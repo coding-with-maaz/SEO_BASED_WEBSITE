@@ -106,7 +106,7 @@
                class="group relative bg-bg-card rounded-xl overflow-hidden border border-border-secondary hover:border-accent/50 transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-accent/20 cursor-pointer">
                 <!-- Image Container -->
                 <div class="relative overflow-hidden aspect-[2/3] bg-gradient-to-br from-bg-card to-bg-card-hover">
-                    <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($recommended['poster_path'] ?? null) }}" 
+                    <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($recommended['poster_path'] ?? null, 'w342') }}" 
                          alt="{{ $recommended['name'] ?? 'TV Show' }}" 
                          class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
                          onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
