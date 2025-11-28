@@ -37,6 +37,20 @@ class MovieSeeder extends Seeder
                 'backdrop_path' => 'https://via.placeholder.com/1280x720?text=Test+Movie+Backdrop',
                 'watch_link' => 'https://kdfeevideo.rpmvid.com/#heuz8d',
                 'download_link' => 'https://example.com/download/movie.mp4',
+                'servers' => [
+                    [
+                        'name' => 'Server 1',
+                        'url' => 'https://kdfeevideo.rpmvid.com/#heuz8d',
+                        'quality' => 'HD',
+                        'active' => true,
+                    ],
+                    [
+                        'name' => 'Server 2',
+                        'url' => 'https://example.com/watch/movie',
+                        'quality' => 'HD',
+                        'active' => true,
+                    ],
+                ],
                 'sort_order' => 0,
                 'is_featured' => false,
             ]
@@ -46,8 +60,22 @@ class MovieSeeder extends Seeder
         if ($movie->wasRecentlyCreated === false) {
             $movie->watch_link = 'https://kdfeevideo.rpmvid.com/#heuz8d';
             $movie->download_link = 'https://example.com/download/movie.mp4';
+            $movie->servers = [
+                [
+                    'name' => 'Server 1',
+                    'url' => 'https://kdfeevideo.rpmvid.com/#heuz8d',
+                    'quality' => 'HD',
+                    'active' => true,
+                ],
+                [
+                    'name' => 'Server 2',
+                    'url' => 'https://example.com/watch/movie',
+                    'quality' => 'HD',
+                    'active' => true,
+                ],
+            ];
             $movie->save();
-            $this->command->info("Updated watch and download links for existing movie.");
+            $this->command->info("Updated watch, download links, and servers for existing movie.");
         }
 
         // Ensure slug is generated if it doesn't exist
@@ -60,6 +88,7 @@ class MovieSeeder extends Seeder
         $this->command->info("Movie slug: {$movie->slug}");
         $this->command->info("Watch link: {$movie->watch_link}");
         $this->command->info("Download link: {$movie->download_link}");
+        $this->command->info("Servers count: " . count($movie->servers ?? []));
         $this->command->info("✅ Movie seeded successfully!");
         $this->command->info("Movie URL: /movies/{$movie->slug}");
         $this->command->info("Manage Movie: /admin/contents/{$movie->id}");
