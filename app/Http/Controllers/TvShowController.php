@@ -47,14 +47,33 @@ class TvShowController extends Controller
 
     public function show($id)
     {
+        // Check if it's a custom content
+        if (str_starts_with($id, 'custom_')) {
+            $contentId = str_replace('custom_', '', $id);
+            $content = Content::with(['episodes.servers'])->findOrFail($contentId);
+            
+            return view('tv-shows.show', [
+                'content' => $content,
+                'isCustom' => true,
+            ]);
+        }
+
         $tvShow = $this->tmdb->getTvShowDetails($id);
 
         if (!$tvShow) {
             abort(404);
         }
 
+        // Check if there's a custom content linked to this TMDB ID
+        $customContent = Content::where('tmdb_id', $id)
+            ->whereIn('type', ['tv_show', 'web_series', 'anime', 'reality_show', 'talk_show'])
+            ->with(['episodes.servers'])
+            ->first();
+
         return view('tv-shows.show', [
             'tvShow' => $tvShow,
+            'content' => $customContent,
+            'isCustom' => false,
         ]);
     }
 }

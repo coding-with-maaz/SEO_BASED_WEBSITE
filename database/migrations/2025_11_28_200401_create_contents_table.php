@@ -24,6 +24,12 @@ return new class extends Migration
             $table->decimal('rating', 3, 1)->default(0);
             $table->integer('episode_count')->nullable(); // For TV shows
             $table->string('status')->default('published'); // published, draft, upcoming
+            $table->string('series_status')->nullable(); // ongoing, completed, cancelled, upcoming
+            $table->string('network')->nullable(); // TVING, Netflix, etc.
+            $table->date('end_date')->nullable(); // For completed series
+            $table->integer('duration')->nullable(); // Duration in minutes
+            $table->string('country')->nullable(); // South Korea, etc.
+            $table->string('director')->nullable(); // Director name(s)
             $table->json('genres')->nullable();
             $table->json('cast')->nullable();
             $table->string('language')->nullable();

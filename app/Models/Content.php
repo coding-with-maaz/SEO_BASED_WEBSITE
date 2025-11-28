@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Content extends Model
 {
@@ -21,6 +22,12 @@ class Content extends Model
         'rating',
         'episode_count',
         'status',
+        'series_status',
+        'network',
+        'end_date',
+        'duration',
+        'country',
+        'director',
         'genres',
         'cast',
         'language',
@@ -34,14 +41,32 @@ class Content extends Model
 
     protected $casts = [
         'release_date' => 'date',
+        'end_date' => 'date',
         'rating' => 'decimal:1',
         'genres' => 'array',
         'cast' => 'array',
         'is_featured' => 'boolean',
         'views' => 'integer',
         'episode_count' => 'integer',
+        'duration' => 'integer',
         'sort_order' => 'integer',
     ];
+
+    /**
+     * Get episodes for this content
+     */
+    public function episodes()
+    {
+        return $this->hasMany(Episode::class)->published()->ordered();
+    }
+
+    /**
+     * Get all episodes (including unpublished)
+     */
+    public function allEpisodes()
+    {
+        return $this->hasMany(Episode::class)->ordered();
+    }
 
     /**
      * Get available content types
@@ -79,6 +104,20 @@ class Content extends Model
             'punjabi' => 'Punjabi',
             'kannada' => 'Kannada',
             'malayalam' => 'Malayalam',
+        ];
+    }
+
+    /**
+     * Get available series statuses
+     */
+    public static function getSeriesStatuses(): array
+    {
+        return [
+            'ongoing' => 'Ongoing',
+            'completed' => 'Completed',
+            'cancelled' => 'Cancelled',
+            'upcoming' => 'Upcoming',
+            'on_hold' => 'On Hold',
         ];
     }
 
