@@ -10,7 +10,27 @@
             @php
                 $allContent = [];
                 
-                // Combine movies and TV shows
+                // Add custom content first (higher priority)
+                if (!empty($customContent)) {
+                    foreach ($customContent as $content) {
+                        $allContent[] = [
+                            'type' => $content->type === 'tv_show' ? 'tv' : 'movie',
+                            'id' => 'custom_' . $content->id,
+                            'title' => $content->title,
+                            'date' => $content->release_date ? $content->release_date->format('Y-m-d') : null,
+                            'rating' => $content->rating ?? 0,
+                            'backdrop' => $content->backdrop_path ?? $content->poster_path ?? null,
+                            'poster' => $content->poster_path ?? null,
+                            'overview' => $content->description ?? '',
+                            'is_custom' => true,
+                            'content_id' => $content->id,
+                            'content_type' => $content->type,
+                            'dubbing_language' => $content->dubbing_language,
+                        ];
+                    }
+                }
+                
+                // Combine movies and TV shows from TMDB
                 if (!empty($popularMovies)) {
                     foreach (array_slice($popularMovies, 0, 20) as $movie) {
                         $allContent[] = [
@@ -22,6 +42,7 @@
                             'backdrop' => $movie['backdrop_path'] ?? $movie['poster_path'] ?? null,
                             'poster' => $movie['poster_path'] ?? null,
                             'overview' => $movie['overview'] ?? '',
+                            'is_custom' => false,
                         ];
                     }
                 }
@@ -37,14 +58,19 @@
                             'backdrop' => $tvShow['backdrop_path'] ?? $tvShow['poster_path'] ?? null,
                             'poster' => $tvShow['poster_path'] ?? null,
                             'overview' => $tvShow['overview'] ?? '',
+                            'is_custom' => false,
                         ];
                     }
                 }
                 
-                // Sort by date (newest first)
+                // Sort by date (newest first), custom content first if same date
                 usort($allContent, function($a, $b) {
                     $dateA = $a['date'] ?? '1970-01-01';
                     $dateB = $b['date'] ?? '1970-01-01';
+                    if ($dateA === $dateB) {
+                        // If same date, prioritize custom content
+                        return ($b['is_custom'] ?? false) <=> ($a['is_custom'] ?? false);
+                    }
                     return strcmp($dateB, $dateA);
                 });
             @endphp
@@ -53,13 +79,20 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 @foreach(array_slice($allContent, 0, 20) as $item)
                 <article class="group relative bg-white overflow-hidden cursor-pointer dark:!bg-bg-card transition-all duration-300">
-                    <a href="{{ $item['type'] === 'movie' ? route('movies.show', $item['id']) : route('tv-shows.show', $item['id']) }}" class="block">
+                    <a href="{{ ($item['is_custom'] ?? false) ? '#' : ($item['type'] === 'movie' ? route('movies.show', $item['id']) : route('tv-shows.show', $item['id'])) }}" class="block">
                         <!-- Full Image - Backdrop Image with 16:9 Aspect Ratio -->
                         <div class="relative overflow-hidden w-full aspect-video bg-gray-200 dark:bg-gray-800">
-                            <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($item['backdrop'] ?? $item['poster'], 'w780') }}" 
-                                 alt="{{ $item['title'] }}" 
-                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                                 onerror="this.src='https://via.placeholder.com/780x439?text=No+Image'">
+                            @if($item['is_custom'] ?? false)
+                                <img src="{{ $item['backdrop'] ? (str_starts_with($item['backdrop'], 'http') ? $item['backdrop'] : asset('storage/' . $item['backdrop'])) : ($item['poster'] ? (str_starts_with($item['poster'], 'http') ? $item['poster'] : asset('storage/' . $item['poster'])) : 'https://via.placeholder.com/780x439?text=No+Image') }}" 
+                                     alt="{{ $item['title'] }}" 
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                                     onerror="this.src='https://via.placeholder.com/780x439?text=No+Image'">
+                            @else
+                                <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($item['backdrop'] ?? $item['poster'], 'w780') }}" 
+                                     alt="{{ $item['title'] }}" 
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                                     onerror="this.src='https://via.placeholder.com/780x439?text=No+Image'">
+                            @endif
                         </div>
                         
                         <!-- Card Content -->
@@ -76,10 +109,18 @@
                             
                             <!-- Content Details - Like "Hindi Dubbed [ Episode 6 ADD ]" -->
                             <p class="text-gray-600 text-xs mb-1 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400; line-height: 1.4;">
-                                @if($item['type'] === 'movie')
-                                    Movie - [ Full Movie ]
+                                @if($item['is_custom'] ?? false)
+                                    @php
+                                        $typeLabel = ucfirst(str_replace('_', ' ', $item['content_type'] ?? 'Movie'));
+                                        $dubbing = $item['dubbing_language'] ? ucfirst($item['dubbing_language']) . ' Dubbed' : '';
+                                    @endphp
+                                    {{ $typeLabel }}@if($dubbing) - {{ $dubbing }}@endif
                                 @else
-                                    TV Series - [ Episode 1 ADD ]
+                                    @if($item['type'] === 'movie')
+                                        Movie - [ Full Movie ]
+                                    @else
+                                        TV Series - [ Episode 1 ADD ]
+                                    @endif
                                 @endif
                             </p>
                             
