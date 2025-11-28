@@ -32,10 +32,17 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
         <!-- Poster -->
         <div class="lg:col-span-1">
-            <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w500') }}" 
-                 alt="{{ $title }}" 
-                 class="w-full rounded-xl shadow-2xl"
-                 onerror="this.src='https://via.placeholder.com/500x750?text=No+Image'">
+            @if(isset($isCustom) && $isCustom)
+                <img src="{{ $posterPath ? (str_starts_with($posterPath, 'http') ? $posterPath : asset('storage/' . $posterPath)) : 'https://via.placeholder.com/500x750?text=No+Image' }}" 
+                     alt="{{ $title }}" 
+                     class="w-full rounded-xl shadow-2xl"
+                     onerror="this.src='https://via.placeholder.com/500x750?text=No+Image'">
+            @else
+                <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w500') }}" 
+                     alt="{{ $title }}" 
+                     class="w-full rounded-xl shadow-2xl"
+                     onerror="this.src='https://via.placeholder.com/500x750?text=No+Image'">
+            @endif
         </div>
         
         <!-- Details Header -->
@@ -137,6 +144,42 @@
             @endif
         </div>
     </div>
+
+    <!-- Watch/Download Section for Custom Movies -->
+    @if(isset($isCustom) && $isCustom && isset($content) && ($content->watch_link || $content->download_link))
+    <div class="bg-white border border-gray-200 p-6 mb-8 dark:!bg-bg-card dark:!border-border-secondary rounded-lg">
+        <h2 class="text-xl font-bold text-gray-900 mb-4 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">Watch & Download</h2>
+        <div class="space-y-3">
+            @if($content->watch_link)
+            <div class="flex items-center justify-between p-4 bg-gray-50 dark:!bg-bg-card-hover rounded-lg hover:bg-gray-100 dark:!hover:bg-bg-card transition-colors">
+                <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full border-2 border-red-500 flex items-center justify-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                    </span>
+                    <span class="text-gray-900 dark:!text-white font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Watch Online</span>
+                </div>
+                <a href="{{ $content->watch_link }}" target="_blank" class="px-4 py-2 bg-accent hover:bg-accent-light text-white font-semibold rounded-lg transition-colors" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                    Watch Now
+                </a>
+            </div>
+            @endif
+            
+            @if($content->download_link)
+            <div class="flex items-center justify-between p-4 bg-gray-50 dark:!bg-bg-card-hover rounded-lg hover:bg-gray-100 dark:!hover:bg-bg-card transition-colors">
+                <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full border-2 border-green-500 flex items-center justify-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                    </span>
+                    <span class="text-gray-900 dark:!text-white font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Download</span>
+                </div>
+                <a href="{{ $content->download_link }}" target="_blank" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                    Download
+                </a>
+            </div>
+            @endif
+        </div>
+    </div>
+    @endif
 
     <!-- Cast Section -->
     @if(!empty($cast))

@@ -12,7 +12,7 @@ use App\Http\Controllers\Admin\EpisodeServerController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/movies', [MovieController::class, 'index'])->name('movies.index');
-Route::get('/movies/{id}', [MovieController::class, 'show'])->name('movies.show');
+Route::get('/movies/{slug}', [MovieController::class, 'show'])->name('movies.show');
 
 Route::get('/tv-shows', [TvShowController::class, 'index'])->name('tv-shows.index');
 Route::get('/tv-shows/{slug}', [TvShowController::class, 'show'])->name('tv-shows.show');

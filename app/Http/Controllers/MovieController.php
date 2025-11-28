@@ -47,16 +47,86 @@ class MovieController extends Controller
         ]);
     }
 
-    public function show($id)
+    public function show($slug)
     {
-        $movie = $this->tmdb->getMovieDetails($id);
+        // First, try to find custom content by slug
+        $content = Content::whereIn('type', ['movie', 'documentary', 'short_film'])
+            ->where(function($query) use ($slug) {
+                $query->where('slug', $slug)
+                      ->orWhere(function($q) use ($slug) {
+                          // Backward compatibility: check if it's an old custom_ format or numeric ID
+                          if (str_starts_with($slug, 'custom_')) {
+                              $contentId = str_replace('custom_', '', $slug);
+                              $q->where('id', $contentId);
+                          } elseif (is_numeric($slug)) {
+                              $q->where('id', $slug);
+                          }
+                      });
+            })
+            ->first();
 
-        if (!$movie) {
-            abort(404);
+        if ($content) {
+            // Get recommended movies for custom content
+            $recommendedMovies = $this->tmdb->getPopularMovies(1);
+            
+            // Prepare movie data from custom content
+            $movieData = [
+                'title' => $content->title,
+                'original_title' => $content->title,
+                'vote_average' => $content->rating ?? 0,
+                'release_date' => $content->release_date ? $content->release_date->format('Y-m-d') : null,
+                'runtime' => $content->duration ?? null,
+                'overview' => $content->description ?? '',
+                'poster_path' => $content->poster_path,
+                'backdrop_path' => $content->backdrop_path,
+                'genres' => $content->genres ? array_map(function($genre) {
+                    return ['name' => is_array($genre) ? ($genre['name'] ?? $genre) : $genre];
+                }, is_array($content->genres) ? $content->genres : []) : [],
+                'credits' => [
+                    'cast' => $content->cast ? array_map(function($castMember) {
+                        if (is_array($castMember)) {
+                            return [
+                                'name' => $castMember['name'] ?? $castMember,
+                                'character' => $castMember['character'] ?? '',
+                            ];
+                        }
+                        return ['name' => $castMember, 'character' => ''];
+                    }, is_array($content->cast) ? $content->cast : []) : [],
+                ],
+                'production_countries' => $content->country ? [['name' => $content->country]] : [],
+                'spoken_languages' => $content->language ? [['name' => $content->language]] : [],
+                'videos' => ['results' => []],
+                'recommendations' => ['results' => $recommendedMovies['results'] ?? []],
+            ];
+
+            // Add director to crew
+            if ($content->director) {
+                $movieData['credits']['crew'][] = [
+                    'name' => $content->director,
+                    'job' => 'Director',
+                ];
+            }
+
+            return view('movies.show', [
+                'movie' => $movieData,
+                'content' => $content,
+                'isCustom' => true,
+            ]);
         }
 
-        return view('movies.show', [
-            'movie' => $movie,
-        ]);
+        // If not found as custom content, try as TMDB ID (numeric)
+        if (is_numeric($slug)) {
+            $movie = $this->tmdb->getMovieDetails($slug);
+
+            if ($movie) {
+                return view('movies.show', [
+                    'movie' => $movie,
+                    'isCustom' => false,
+                ]);
+            }
+        }
+
+        // Not found
+        abort(404);
     }
 }
