@@ -11,7 +11,7 @@
     @if(!empty($movies))
     <div class="mb-12">
         <h3 class="text-xl md:text-2xl font-semibold text-text-primary mb-6 pl-4">Movies</h3>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5 lg:gap-6">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             @foreach($movies as $movie)
             <a href="{{ route('movies.show', $movie['id']) }}" 
                class="group relative bg-bg-card rounded-xl overflow-hidden border border-border-secondary hover:border-accent/50 transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-accent/20 cursor-pointer">
@@ -65,7 +65,7 @@
     @if(!empty($tvShows))
     <div class="mb-12">
         <h3 class="text-xl md:text-2xl font-semibold text-text-primary mb-6 pl-4">TV Shows</h3>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5 lg:gap-6">
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             @foreach($tvShows as $tvShow)
             <a href="{{ route('tv-shows.show', $tvShow['id']) }}" 
                class="group relative bg-bg-card rounded-xl overflow-hidden border border-border-secondary hover:border-accent/50 transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-accent/20 cursor-pointer">

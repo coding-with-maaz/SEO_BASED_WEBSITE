@@ -3,314 +3,164 @@
 @section('title', 'Home - Nazaarabox')
 
 @section('content')
-@php
-    $heroBackdrop = !empty($popularMovies) && isset($popularMovies[0]['backdrop_path']) 
-        ? $popularMovies[0]['backdrop_path'] 
-        : '/kGzFbGhp99zva6oZODW5atUtnqi.jpg';
-@endphp
-
-<!-- Hero Section -->
-<div class="relative min-h-[500px] md:min-h-[600px] flex items-center justify-center bg-cover bg-center bg-no-repeat mb-12" 
-     style="background-image: linear-gradient(180deg, rgba(13, 13, 13, 0.5) 0%, rgba(13, 13, 13, 0.9) 100%), url('https://image.tmdb.org/t/p/w1920_and_h800_multi_faces{{ $heroBackdrop }}');">
-    <div class="relative z-10 text-center px-4 w-full max-w-4xl mx-auto">
-        <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 drop-shadow-2xl">
-            Welcome to Nazaarabox
-        </h1>
-        <p class="text-lg md:text-xl text-text-secondary mb-8 max-w-2xl mx-auto">
-            Discover your favorite movies and TV shows. Search from millions of titles.
-        </p>
-        <form action="{{ route('search') }}" method="GET" class="flex flex-col md:flex-row gap-3 max-w-2xl mx-auto bg-bg-card/80 backdrop-blur-lg p-4 rounded-full border border-border-primary">
-            <input type="text" name="q" 
-                   class="flex-1 px-6 py-3 md:py-4 rounded-full bg-bg-card border border-border-primary text-text-primary placeholder-text-muted focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all text-base md:text-lg" 
-                   placeholder="Search for movies, TV shows..." 
-                   value="{{ request('q') }}" 
-                   required>
-            <button type="submit" class="px-8 py-3 md:py-4 bg-gradient-primary text-white font-semibold rounded-full transition-all hover:scale-105 hover:shadow-accent-lg whitespace-nowrap text-base md:text-lg">
-                Search
-            </button>
-        </form>
-    </div>
-</div>
-
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-    @if(!empty($popularMovies))
-    <div class="mb-12">
-        <h2 class="text-2xl md:text-3xl font-bold text-text-primary mb-6 pl-4 border-l-4 border-accent">
-            Popular Movies
-        </h2>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5 lg:gap-6">
-            @foreach(array_slice($popularMovies, 0, 12) as $movie)
-            <a href="{{ route('movies.show', $movie['id']) }}" 
-               class="group relative bg-bg-card rounded-xl overflow-hidden border border-border-secondary hover:border-accent/50 transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-accent/20 cursor-pointer">
-                <!-- Image Container -->
-                <div class="relative overflow-hidden aspect-[2/3] bg-gradient-to-br from-bg-card to-bg-card-hover">
-                    <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($movie['poster_path'] ?? null) }}" 
-                         alt="{{ $movie['title'] ?? 'Movie' }}" 
-                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-                         onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
-                    
-                    <!-- Gradient Overlay -->
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    
-                    <!-- Rating Badge -->
-                    <div class="absolute top-2 right-2 bg-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 border border-accent/30">
-                        <span class="text-rating text-xs">★</span>
-                        <span class="text-white text-xs font-bold">{{ number_format($movie['vote_average'] ?? 0, 1) }}</span>
-                    </div>
-                    
-                    <!-- Hover Overlay with Info -->
-                    <div class="absolute inset-0 flex items-end opacity-0 group-hover:opacity-100 transition-all duration-500 pb-3 px-3">
-                        <div class="w-full">
-                            <div class="bg-accent/90 backdrop-blur-sm rounded-lg px-3 py-2 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                                <p class="text-white text-xs font-semibold text-center">View Details</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<div class="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Main Content Area (2 columns on large screens) -->
+        <div class="lg:col-span-2">
+            @php
+                $allContent = [];
                 
-                <!-- Card Content -->
-                <div class="p-3 md:p-4 bg-gradient-to-b from-bg-card to-bg-card-hover">
-                    <h3 class="text-sm md:text-base font-bold text-text-primary mb-2 line-clamp-2 group-hover:text-accent transition-colors duration-300 leading-tight">
-                        {{ $movie['title'] ?? 'Unknown' }}
-                    </h3>
-                    <div class="flex items-center justify-between">
-                        <span class="text-text-secondary text-xs md:text-sm font-medium">
-                            {{ \Carbon\Carbon::parse($movie['release_date'] ?? '')->format('Y') ?? 'N/A' }}
-                        </span>
-                        <div class="flex items-center gap-1.5 bg-bg-card-hover rounded-full px-2 py-1">
-                            <span class="text-rating text-xs">★</span>
-                            <span class="font-bold text-text-primary text-xs">{{ number_format($movie['vote_average'] ?? 0, 1) }}</span>
+                // Combine movies and TV shows
+                if (!empty($popularMovies)) {
+                    foreach (array_slice($popularMovies, 0, 20) as $movie) {
+                        $allContent[] = [
+                            'type' => 'movie',
+                            'id' => $movie['id'],
+                            'title' => $movie['title'] ?? 'Unknown',
+                            'date' => $movie['release_date'] ?? null,
+                            'rating' => $movie['vote_average'] ?? 0,
+                            'poster' => $movie['poster_path'] ?? null,
+                            'overview' => $movie['overview'] ?? '',
+                        ];
+                    }
+                }
+                
+                if (!empty($popularTvShows)) {
+                    foreach (array_slice($popularTvShows, 0, 20) as $tvShow) {
+                        $allContent[] = [
+                            'type' => 'tv',
+                            'id' => $tvShow['id'],
+                            'title' => $tvShow['name'] ?? 'Unknown',
+                            'date' => $tvShow['first_air_date'] ?? null,
+                            'rating' => $tvShow['vote_average'] ?? 0,
+                            'poster' => $tvShow['poster_path'] ?? null,
+                            'overview' => $tvShow['overview'] ?? '',
+                        ];
+                    }
+                }
+                
+                // Sort by date (newest first)
+                usort($allContent, function($a, $b) {
+                    $dateA = $a['date'] ?? '1970-01-01';
+                    $dateB = $b['date'] ?? '1970-01-01';
+                    return strcmp($dateB, $dateA);
+                });
+            @endphp
+
+            <!-- 2 Column Grid for Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                @foreach(array_slice($allContent, 0, 20) as $item)
+                <article class="group relative bg-bg-card overflow-hidden border border-border-secondary hover:border-accent/50 transition-all duration-300 hover:shadow-lg cursor-pointer dark-mode:bg-bg-card dark-mode:border-border-secondary">
+                    <a href="{{ $item['type'] === 'movie' ? route('movies.show', $item['id']) : route('tv-shows.show', $item['id']) }}" class="block">
+                        <!-- Full Image -->
+                        <div class="relative overflow-hidden w-full h-80 bg-bg-card-hover">
+                            <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($item['poster'], 'w500') }}" 
+                                 alt="{{ $item['title'] }}" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                                 onerror="this.src='https://via.placeholder.com/500x400?text=No+Image'">
                         </div>
+                        
+                        <!-- Card Content -->
+                        <div class="p-4 bg-bg-card dark-mode:bg-bg-card">
+                            <h2 class="text-lg md:text-xl font-bold text-text-primary mb-2 group-hover:text-accent transition-colors duration-300 dark-mode:text-text-primary">
+                                {{ $item['title'] }}
+                                @if($item['type'] === 'movie')
+                                    <span class="text-base font-normal text-text-secondary dark-mode:text-text-secondary">(Movie)</span>
+                                @else
+                                    <span class="text-base font-normal text-text-secondary dark-mode:text-text-secondary">(TV Show)</span>
+                                @endif
+                            </h2>
+                            
+                            @if(!empty($item['overview']))
+                            <p class="text-text-tertiary text-sm mb-3 line-clamp-2 dark-mode:text-text-tertiary">
+                                {{ $item['overview'] }}
+                            </p>
+                            @endif
+                            
+                            @if($item['date'])
+                            <p class="text-text-secondary text-sm font-medium dark-mode:text-text-secondary">
+                                {{ \Carbon\Carbon::parse($item['date'])->format('F d, Y') }}
+                            </p>
+                            @endif
+                        </div>
+                    </a>
+                </article>
+                @endforeach
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-8 flex justify-center items-center gap-2 flex-wrap">
+                <a href="#" class="px-4 py-2 bg-bg-card hover:bg-bg-card-hover text-text-primary rounded-lg border border-border-primary transition-all dark-mode:bg-bg-card dark-mode:border-border-primary dark-mode:text-text-primary">
+                    Previous
+                </a>
+                <a href="#" class="px-4 py-2 bg-gradient-primary text-white rounded-lg shadow-accent font-semibold">
+                    1
+                </a>
+                <a href="#" class="px-4 py-2 bg-bg-card hover:bg-bg-card-hover text-text-primary rounded-lg border border-border-primary transition-all dark-mode:bg-bg-card dark-mode:border-border-primary dark-mode:text-text-primary">
+                    2
+                </a>
+                <a href="#" class="px-4 py-2 bg-bg-card hover:bg-bg-card-hover text-text-primary rounded-lg border border-border-primary transition-all dark-mode:bg-bg-card dark-mode:border-border-primary dark-mode:text-text-primary">
+                    3
+                </a>
+                <span class="text-text-secondary px-2 dark-mode:text-text-secondary">…</span>
+                <a href="#" class="px-4 py-2 bg-bg-card hover:bg-bg-card-hover text-text-primary rounded-lg border border-border-primary transition-all dark-mode:bg-bg-card dark-mode:border-border-primary dark-mode:text-text-primary">
+                    74
+                </a>
+                <a href="#" class="px-4 py-2 bg-gradient-primary hover:bg-accent-light text-white rounded-lg shadow-accent font-semibold transition-all">
+                    Next →
+                </a>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="lg:col-span-1">
+            <!-- Telegram Promotion Card -->
+            <div class="bg-bg-card rounded-xl border border-border-secondary p-6 mb-6 sticky top-24 dark-mode:bg-bg-card dark-mode:border-border-secondary">
+                <h3 class="text-xl font-bold text-text-primary mb-4 text-center">Join our Telegram Channel & Group</h3>
+                <div class="flex flex-col items-center justify-center space-y-4">
+                    <div class="w-24 h-24 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                        <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c.172 0 .31.139.31.311v1.378c0 .172-.138.311-.31.311h-1.378c-.172 0-.311-.139-.311-.311V8.472c0-.172.139-.311.311-.311h1.378zm-3.378 0c.172 0 .311.139.311.311v1.378c0 .172-.139.311-.311.311H12.81c-.172 0-.311-.139-.311-.311V8.472c0-.172.139-.311.311-.311h1.374zm-3.378 0c.172 0 .311.139.311.311v1.378c0 .172-.139.311-.311.311H9.432c-.172 0-.311-.139-.311-.311V8.472c0-.172.139-.311.311-.311h1.374zm-3.378 0c.172 0 .311.139.311.311v1.378c0 .172-.139.311-.311.311H6.054c-.172 0-.311-.139-.311-.311V8.472c0-.172.139-.311.311-.311h1.374zm12.756 2.322H5.184c-.172 0-.311.139-.311.311v1.378c0 .172.139.311.311.311h13.188c.172 0 .311-.139.311-.311v-1.378c0-.172-.139-.311-.311-.311z"/>
+                        </svg>
                     </div>
+                    <p class="text-text-primary font-semibold text-lg">Telegram</p>
+                    <a href="#" class="w-full px-6 py-3 bg-gradient-primary hover:bg-accent-light text-white font-semibold rounded-lg transition-all hover:scale-105 hover:shadow-accent text-center">
+                        Join Channel
+                    </a>
                 </div>
-            </a>
-            @endforeach
+            </div>
+
+            <!-- Popular Section -->
+            <div class="bg-bg-card rounded-xl border border-border-secondary p-6 dark-mode:bg-bg-card dark-mode:border-border-secondary">
+                <h3 class="text-xl font-bold text-text-primary mb-4 border-b border-border-primary pb-3 dark-mode:text-text-primary dark-mode:border-border-primary">Popular Now</h3>
+                <div class="space-y-4">
+                    @if(!empty($topRatedMovies))
+                        @foreach(array_slice($topRatedMovies, 0, 5) as $movie)
+                        <a href="{{ route('movies.show', $movie['id']) }}" class="flex gap-3 group hover:bg-bg-card-hover p-2 rounded-lg transition-all dark-mode:hover:bg-bg-card-hover">
+                            <div class="flex-shrink-0 w-16 h-24 rounded overflow-hidden bg-bg-card-hover">
+                                <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($movie['poster_path'] ?? null, 'w185') }}" 
+                                     alt="{{ $movie['title'] }}" 
+                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                     onerror="this.src='https://via.placeholder.com/185x278?text=No+Image'">
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="text-sm font-semibold text-text-primary group-hover:text-accent transition-colors line-clamp-2 mb-1 dark-mode:text-text-primary">
+                                    {{ $movie['title'] ?? 'Unknown' }}
+                                </h4>
+                                <p class="text-text-secondary text-xs mb-1 dark-mode:text-text-secondary">
+                                    {{ \Carbon\Carbon::parse($movie['release_date'] ?? '')->format('Y') ?? 'N/A' }}
+                                </p>
+                                <div class="flex items-center gap-1">
+                                    <span class="text-rating text-xs">★</span>
+                                    <span class="text-text-primary text-xs font-semibold">{{ number_format($movie['vote_average'] ?? 0, 1) }}</span>
+                                </div>
+                            </div>
+                        </a>
+                        @endforeach
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
-    @endif
-
-    @if(!empty($topRatedMovies))
-    <div class="mb-12">
-        <h2 class="text-2xl md:text-3xl font-bold text-text-primary mb-6 pl-4 border-l-4 border-accent">
-            Top Rated Movies
-        </h2>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5 lg:gap-6">
-            @foreach(array_slice($topRatedMovies, 0, 12) as $movie)
-            <a href="{{ route('movies.show', $movie['id']) }}" 
-               class="group relative bg-bg-card rounded-xl overflow-hidden border border-border-secondary hover:border-accent/50 transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-accent/20 cursor-pointer">
-                <!-- Image Container -->
-                <div class="relative overflow-hidden aspect-[2/3] bg-gradient-to-br from-bg-card to-bg-card-hover">
-                    <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($movie['poster_path'] ?? null) }}" 
-                         alt="{{ $movie['title'] ?? 'Movie' }}" 
-                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-                         onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
-                    
-                    <!-- Gradient Overlay -->
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    
-                    <!-- Rating Badge -->
-                    <div class="absolute top-2 right-2 bg-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 border border-accent/30">
-                        <span class="text-rating text-xs">★</span>
-                        <span class="text-white text-xs font-bold">{{ number_format($movie['vote_average'] ?? 0, 1) }}</span>
-                    </div>
-                    
-                    <!-- Hover Overlay with Info -->
-                    <div class="absolute inset-0 flex items-end opacity-0 group-hover:opacity-100 transition-all duration-500 pb-3 px-3">
-                        <div class="w-full">
-                            <div class="bg-accent/90 backdrop-blur-sm rounded-lg px-3 py-2 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                                <p class="text-white text-xs font-semibold text-center">View Details</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Card Content -->
-                <div class="p-3 md:p-4 bg-gradient-to-b from-bg-card to-bg-card-hover">
-                    <h3 class="text-sm md:text-base font-bold text-text-primary mb-2 line-clamp-2 group-hover:text-accent transition-colors duration-300 leading-tight">
-                        {{ $movie['title'] ?? 'Unknown' }}
-                    </h3>
-                    <div class="flex items-center justify-between">
-                        <span class="text-text-secondary text-xs md:text-sm font-medium">
-                            {{ \Carbon\Carbon::parse($movie['release_date'] ?? '')->format('Y') ?? 'N/A' }}
-                        </span>
-                        <div class="flex items-center gap-1.5 bg-bg-card-hover rounded-full px-2 py-1">
-                            <span class="text-rating text-xs">★</span>
-                            <span class="font-bold text-text-primary text-xs">{{ number_format($movie['vote_average'] ?? 0, 1) }}</span>
-                        </div>
-                    </div>
-                </div>
-            </a>
-            @endforeach
-        </div>
-    </div>
-    @endif
-
-    @if(!empty($nowPlayingMovies))
-    <div class="mb-12">
-        <h2 class="text-2xl md:text-3xl font-bold text-text-primary mb-6 pl-4 border-l-4 border-accent">
-            Now Playing
-        </h2>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5 lg:gap-6">
-            @foreach(array_slice($nowPlayingMovies, 0, 12) as $movie)
-            <a href="{{ route('movies.show', $movie['id']) }}" 
-               class="group relative bg-bg-card rounded-xl overflow-hidden border border-border-secondary hover:border-accent/50 transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-accent/20 cursor-pointer">
-                <!-- Image Container -->
-                <div class="relative overflow-hidden aspect-[2/3] bg-gradient-to-br from-bg-card to-bg-card-hover">
-                    <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($movie['poster_path'] ?? null) }}" 
-                         alt="{{ $movie['title'] ?? 'Movie' }}" 
-                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-                         onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
-                    
-                    <!-- Gradient Overlay -->
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    
-                    <!-- Rating Badge -->
-                    <div class="absolute top-2 right-2 bg-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 border border-accent/30">
-                        <span class="text-rating text-xs">★</span>
-                        <span class="text-white text-xs font-bold">{{ number_format($movie['vote_average'] ?? 0, 1) }}</span>
-                    </div>
-                    
-                    <!-- Hover Overlay with Info -->
-                    <div class="absolute inset-0 flex items-end opacity-0 group-hover:opacity-100 transition-all duration-500 pb-3 px-3">
-                        <div class="w-full">
-                            <div class="bg-accent/90 backdrop-blur-sm rounded-lg px-3 py-2 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                                <p class="text-white text-xs font-semibold text-center">View Details</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Card Content -->
-                <div class="p-3 md:p-4 bg-gradient-to-b from-bg-card to-bg-card-hover">
-                    <h3 class="text-sm md:text-base font-bold text-text-primary mb-2 line-clamp-2 group-hover:text-accent transition-colors duration-300 leading-tight">
-                        {{ $movie['title'] ?? 'Unknown' }}
-                    </h3>
-                    <div class="flex items-center justify-between">
-                        <span class="text-text-secondary text-xs md:text-sm font-medium">
-                            {{ \Carbon\Carbon::parse($movie['release_date'] ?? '')->format('Y') ?? 'N/A' }}
-                        </span>
-                        <div class="flex items-center gap-1.5 bg-bg-card-hover rounded-full px-2 py-1">
-                            <span class="text-rating text-xs">★</span>
-                            <span class="font-bold text-text-primary text-xs">{{ number_format($movie['vote_average'] ?? 0, 1) }}</span>
-                        </div>
-                    </div>
-                </div>
-            </a>
-            @endforeach
-        </div>
-    </div>
-    @endif
-
-    @if(!empty($popularTvShows))
-    <div class="mb-12">
-        <h2 class="text-2xl md:text-3xl font-bold text-text-primary mb-6 pl-4 border-l-4 border-accent">
-            Popular TV Shows
-        </h2>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5 lg:gap-6">
-            @foreach(array_slice($popularTvShows, 0, 12) as $tvShow)
-            <a href="{{ route('tv-shows.show', $tvShow['id']) }}" 
-               class="group relative bg-bg-card rounded-xl overflow-hidden border border-border-secondary hover:border-accent/50 transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-accent/20 cursor-pointer">
-                <!-- Image Container -->
-                <div class="relative overflow-hidden aspect-[2/3] bg-gradient-to-br from-bg-card to-bg-card-hover">
-                    <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($tvShow['poster_path'] ?? null) }}" 
-                         alt="{{ $tvShow['name'] ?? 'TV Show' }}" 
-                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-                         onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
-                    
-                    <!-- Gradient Overlay -->
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    
-                    <!-- Rating Badge -->
-                    <div class="absolute top-2 right-2 bg-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 border border-accent/30">
-                        <span class="text-rating text-xs">★</span>
-                        <span class="text-white text-xs font-bold">{{ number_format($tvShow['vote_average'] ?? 0, 1) }}</span>
-                    </div>
-                    
-                    <!-- Hover Overlay with Info -->
-                    <div class="absolute inset-0 flex items-end opacity-0 group-hover:opacity-100 transition-all duration-500 pb-3 px-3">
-                        <div class="w-full">
-                            <div class="bg-accent/90 backdrop-blur-sm rounded-lg px-3 py-2 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                                <p class="text-white text-xs font-semibold text-center">View Details</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Card Content -->
-                <div class="p-3 md:p-4 bg-gradient-to-b from-bg-card to-bg-card-hover">
-                    <h3 class="text-sm md:text-base font-bold text-text-primary mb-2 line-clamp-2 group-hover:text-accent transition-colors duration-300 leading-tight">
-                        {{ $tvShow['name'] ?? 'Unknown' }}
-                    </h3>
-                    <div class="flex items-center justify-between">
-                        <span class="text-text-secondary text-xs md:text-sm font-medium">
-                            {{ \Carbon\Carbon::parse($tvShow['first_air_date'] ?? '')->format('Y') ?? 'N/A' }}
-                        </span>
-                        <div class="flex items-center gap-1.5 bg-bg-card-hover rounded-full px-2 py-1">
-                            <span class="text-rating text-xs">★</span>
-                            <span class="font-bold text-text-primary text-xs">{{ number_format($tvShow['vote_average'] ?? 0, 1) }}</span>
-                        </div>
-                    </div>
-                </div>
-            </a>
-            @endforeach
-        </div>
-    </div>
-    @endif
-
-    @if(!empty($topRatedTvShows))
-    <div class="mb-12">
-        <h2 class="text-2xl md:text-3xl font-bold text-text-primary mb-6 pl-4 border-l-4 border-accent">
-            Top Rated TV Shows
-        </h2>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-5 lg:gap-6">
-            @foreach(array_slice($topRatedTvShows, 0, 12) as $tvShow)
-            <a href="{{ route('tv-shows.show', $tvShow['id']) }}" 
-               class="group relative bg-bg-card rounded-xl overflow-hidden border border-border-secondary hover:border-accent/50 transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-accent/20 cursor-pointer">
-                <!-- Image Container -->
-                <div class="relative overflow-hidden aspect-[2/3] bg-gradient-to-br from-bg-card to-bg-card-hover">
-                    <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($tvShow['poster_path'] ?? null) }}" 
-                         alt="{{ $tvShow['name'] ?? 'TV Show' }}" 
-                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-                         onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
-                    
-                    <!-- Gradient Overlay -->
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    
-                    <!-- Rating Badge -->
-                    <div class="absolute top-2 right-2 bg-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 border border-accent/30">
-                        <span class="text-rating text-xs">★</span>
-                        <span class="text-white text-xs font-bold">{{ number_format($tvShow['vote_average'] ?? 0, 1) }}</span>
-                    </div>
-                    
-                    <!-- Hover Overlay with Info -->
-                    <div class="absolute inset-0 flex items-end opacity-0 group-hover:opacity-100 transition-all duration-500 pb-3 px-3">
-                        <div class="w-full">
-                            <div class="bg-accent/90 backdrop-blur-sm rounded-lg px-3 py-2 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
-                                <p class="text-white text-xs font-semibold text-center">View Details</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Card Content -->
-                <div class="p-3 md:p-4 bg-gradient-to-b from-bg-card to-bg-card-hover">
-                    <h3 class="text-sm md:text-base font-bold text-text-primary mb-2 line-clamp-2 group-hover:text-accent transition-colors duration-300 leading-tight">
-                        {{ $tvShow['name'] ?? 'Unknown' }}
-                    </h3>
-                    <div class="flex items-center justify-between">
-                        <span class="text-text-secondary text-xs md:text-sm font-medium">
-                            {{ \Carbon\Carbon::parse($tvShow['first_air_date'] ?? '')->format('Y') ?? 'N/A' }}
-                        </span>
-                        <div class="flex items-center gap-1.5 bg-bg-card-hover rounded-full px-2 py-1">
-                            <span class="text-rating text-xs">★</span>
-                            <span class="font-bold text-text-primary text-xs">{{ number_format($tvShow['vote_average'] ?? 0, 1) }}</span>
-                        </div>
-                    </div>
-                </div>
-            </a>
-            @endforeach
-        </div>
-    </div>
-    @endif
 </div>
 @endsection
