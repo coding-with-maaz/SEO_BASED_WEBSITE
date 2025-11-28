@@ -52,9 +52,13 @@ class TvShowController extends Controller
             $contentId = str_replace('custom_', '', $id);
             $content = Content::with(['episodes.servers'])->findOrFail($contentId);
             
+            // Get recommended movies for custom content
+            $recommendedMovies = $this->tmdb->getPopularMovies(1);
+            
             return view('tv-shows.show', [
                 'content' => $content,
                 'isCustom' => true,
+                'recommendedMovies' => $recommendedMovies['results'] ?? [],
             ]);
         }
 
@@ -70,10 +74,14 @@ class TvShowController extends Controller
             ->with(['episodes.servers'])
             ->first();
 
+        // Get recommended movies (use popular movies as recommendations)
+        $recommendedMovies = $this->tmdb->getPopularMovies(1);
+
         return view('tv-shows.show', [
             'tvShow' => $tvShow,
             'content' => $customContent,
             'isCustom' => false,
+            'recommendedMovies' => $recommendedMovies['results'] ?? [],
         ]);
     }
 }

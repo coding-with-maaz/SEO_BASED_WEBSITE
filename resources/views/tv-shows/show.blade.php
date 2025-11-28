@@ -40,7 +40,7 @@
         $cast = $tvShow['credits']['cast'] ?? [];
         $description = $tvShow['overview'] ?? '';
         $posterPath = $tvShow['poster_path'] ?? null;
-        $episodes = $content->episodes ?? collect([]);
+        $episodes = isset($content) && $content ? $content->episodes : collect([]);
         $currentEpisodes = $tvShow['number_of_episodes'] ?? 0;
     }
     
@@ -55,52 +55,78 @@
     }
 @endphp
 
-<div class="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
-    <!-- Header Section -->
-    <div class="mb-8">
-        <div class="flex flex-col md:flex-row gap-6 items-start">
-            <!-- Poster -->
-            <div class="flex-shrink-0">
-                <div class="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden bg-gray-200 dark:bg-gray-800 border-4 border-white dark:border-gray-700 shadow-lg">
-                    @if(isset($isCustom) && $isCustom)
-                        <img src="{{ $posterPath ? (str_starts_with($posterPath, 'http') ? $posterPath : asset('storage/' . $posterPath)) : 'https://via.placeholder.com/200x200?text=No+Image' }}" 
-                             alt="{{ $title }}" 
-                             class="w-full h-full object-cover"
-                             onerror="this.src='https://via.placeholder.com/200x200?text=No+Image'">
-                    @else
-                        <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w500') }}" 
-                             alt="{{ $title }}" 
-                             class="w-full h-full object-cover"
-                             onerror="this.src='https://via.placeholder.com/200x200?text=No+Image'">
-                    @endif
-                </div>
-            </div>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+        <!-- Poster -->
+        <div class="lg:col-span-1">
+            @if(isset($isCustom) && $isCustom)
+                <img src="{{ $posterPath ? (str_starts_with($posterPath, 'http') ? $posterPath : asset('storage/' . $posterPath)) : 'https://via.placeholder.com/500x750?text=No+Image' }}" 
+                     alt="{{ $title }}" 
+                     class="w-full rounded-xl shadow-2xl"
+                     onerror="this.src='https://via.placeholder.com/500x750?text=No+Image'">
+            @else
+                <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w500') }}" 
+                     alt="{{ $title }}" 
+                     class="w-full rounded-xl shadow-2xl"
+                     onerror="this.src='https://via.placeholder.com/500x750?text=No+Image'">
+            @endif
+        </div>
+        
+        <!-- Details -->
+        <div class="lg:col-span-2">
+            <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:!text-white mb-4" style="font-family: 'Poppins', sans-serif; font-weight: 800;">
+                {{ $title }}
+            </h1>
             
-            <!-- Title and Status -->
-            <div class="flex-1">
-                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 mb-2 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">
-                    {{ $title }}
-                </h1>
-                @if($originalTitle !== $title)
-                <p class="text-lg text-gray-600 mb-3 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
-                    {{ $originalTitle }}
-                </p>
-                @endif
-                <div class="flex items-center gap-4 mb-4">
-                    <div class="flex items-center gap-2">
-                        <span class="text-yellow-500 text-xl">★</span>
-                        <span class="text-lg font-bold text-gray-900 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">Rating {{ number_format($rating, 1) }}</span>
-                    </div>
+            @if($originalTitle !== $title)
+            <p class="text-lg text-gray-600 dark:!text-text-secondary mb-4" style="font-family: 'Poppins', sans-serif; font-weight: 500;">
+                Original Title: {{ $originalTitle }}
+            </p>
+            @endif
+            
+            <div class="flex flex-wrap items-center gap-4 mb-6">
+                <div class="flex items-center gap-2 text-yellow-500">
+                    <span class="text-2xl">★</span>
+                    <span class="text-xl font-bold text-gray-900 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">{{ number_format($rating, 1) }}/10</span>
                 </div>
-                <p class="text-yellow-500 font-semibold text-lg dark:!text-yellow-400" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
-                    Status: {{ $statusDisplay }}
-                </p>
+                <span class="text-gray-600 dark:!text-text-secondary">•</span>
+                <span class="text-yellow-500 font-semibold text-lg dark:!text-yellow-400" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                    {{ $statusDisplay }}
+                </span>
+                @if($releaseDate)
+                <span class="text-gray-600 dark:!text-text-secondary">•</span>
+                <span class="text-gray-600 dark:!text-text-secondary">{{ \Carbon\Carbon::parse($releaseDate)->format('Y') }}</span>
+                @endif
+                @if($duration)
+                <span class="text-gray-600 dark:!text-text-secondary">•</span>
+                <span class="text-gray-600 dark:!text-text-secondary">{{ $duration }} min/ep</span>
+                @endif
             </div>
+
+            @if(!empty($genres))
+            <div class="flex flex-wrap gap-2 mb-6">
+                @if(isset($isCustom) && $isCustom)
+                    @foreach(is_array($genres) ? $genres : [] as $genre)
+                        <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm border border-gray-200 dark:!bg-bg-card dark:!text-text-secondary dark:!border-border-primary" style="font-family: 'Poppins', sans-serif; font-weight: 500;">{{ is_array($genre) ? ($genre['name'] ?? $genre) : $genre }}</span>
+                    @endforeach
+                @else
+                    @foreach($genres as $genre)
+                        <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-sm border border-gray-200 dark:!bg-bg-card dark:!text-text-secondary dark:!border-border-primary" style="font-family: 'Poppins', sans-serif; font-weight: 500;">{{ $genre['name'] }}</span>
+                    @endforeach
+                @endif
+            </div>
+            @endif
+
+            @if($description)
+            <p class="text-gray-600 dark:!text-text-secondary leading-relaxed mb-6 text-base md:text-lg" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                {{ $description }}
+            </p>
+            @endif
         </div>
     </div>
 
     <!-- Details Section -->
-    <div class="bg-white border border-gray-200 p-6 mb-8 dark:!bg-bg-card dark:!border-border-secondary">
+    <div class="bg-white border border-gray-200 p-6 mb-8 dark:!bg-bg-card dark:!border-border-secondary rounded-lg">
         <h2 class="text-xl font-bold text-gray-900 mb-4 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">Details</h2>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             @if($network)
@@ -154,47 +180,57 @@
                 <span class="text-gray-600 dark:!text-text-secondary ml-2" style="font-family: 'Poppins', sans-serif; font-weight: 400;">{{ $director }}</span>
             </div>
             @endif
-            
-            @if(!empty($cast))
-            <div class="md:col-span-2">
-                <span class="font-semibold text-gray-900 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Casts:</span>
-                <span class="text-gray-600 dark:!text-text-secondary ml-2" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
-                    @if(isset($isCustom) && $isCustom)
-                        {{ is_array($cast) ? implode(', ', array_slice($cast, 0, 10)) : $cast }}
-                    @else
-                        {{ implode(', ', array_slice(array_column($cast, 'name'), 0, 10)) }}
-                    @endif
-                </span>
-            </div>
-            @endif
         </div>
-        
-        @if(!empty($genres))
-        <div class="mt-4">
-            <span class="font-semibold text-gray-900 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Genres:</span>
-            <div class="flex flex-wrap gap-2 mt-2">
-                @if(isset($isCustom) && $isCustom)
-                    @foreach(is_array($genres) ? $genres : [] as $genre)
-                        <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs dark:!bg-bg-card-hover dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">{{ is_array($genre) ? ($genre['name'] ?? $genre) : $genre }}</span>
-                    @endforeach
-                @else
-                    @foreach($genres as $genre)
-                        <span class="px-3 py-1 bg-gray-100 text-gray-700 rounded-full text-xs dark:!bg-bg-card-hover dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">{{ $genre['name'] }}</span>
-                    @endforeach
-                @endif
-            </div>
-        </div>
-        @endif
-        
-        @if($description)
-        <div class="mt-4">
-            <p class="text-gray-600 dark:!text-text-secondary leading-relaxed" style="font-family: 'Poppins', sans-serif; font-weight: 400;">{{ $description }}</p>
-        </div>
-        @endif
     </div>
 
+    <!-- Cast Section -->
+    @if(!empty($cast))
+    <div class="mb-8">
+        <h3 class="text-xl font-bold text-gray-900 dark:!text-white mb-4" style="font-family: 'Poppins', sans-serif; font-weight: 700;">Cast</h3>
+        <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+            @if(isset($isCustom) && $isCustom)
+                @php
+                    $castList = is_array($cast) ? $cast : [];
+                @endphp
+                @foreach(array_slice($castList, 0, 10) as $castMember)
+                    <div class="min-w-[100px] text-center flex-shrink-0">
+                        <div class="w-20 h-28 md:w-24 md:h-36 bg-gray-200 dark:bg-gray-800 rounded-lg mb-2 flex items-center justify-center">
+                            <span class="text-gray-400 text-xs">No Photo</span>
+                        </div>
+                        <p class="text-sm font-medium text-gray-900 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">{{ is_array($castMember) ? ($castMember['name'] ?? $castMember) : $castMember }}</p>
+                    </div>
+                @endforeach
+            @else
+                @foreach(array_slice($cast, 0, 10) as $castMember)
+                    <div class="min-w-[100px] text-center flex-shrink-0">
+                        @if(isset($castMember['profile_path']))
+                        <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($castMember['profile_path'], 'w185') }}" 
+                             alt="{{ $castMember['name'] }}" 
+                             class="w-20 h-28 md:w-24 md:h-36 object-cover rounded-lg mb-2 shadow-lg mx-auto"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="w-20 h-28 md:w-24 md:h-36 bg-gray-200 dark:bg-gray-800 rounded-lg mb-2 items-center justify-center hidden">
+                            <span class="text-gray-400 text-xs">No Photo</span>
+                        </div>
+                        @else
+                        <div class="w-20 h-28 md:w-24 md:h-36 bg-gray-200 dark:bg-gray-800 rounded-lg mb-2 flex items-center justify-center mx-auto">
+                            <span class="text-gray-400 text-xs">No Photo</span>
+                        </div>
+                        @endif
+                        <p class="text-sm font-medium text-gray-900 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">{{ $castMember['name'] ?? 'Unknown' }}</p>
+                        @if(isset($castMember['character']))
+                        <p class="text-xs text-gray-600 dark:!text-text-secondary mt-1" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                            {{ $castMember['character'] }}
+                        </p>
+                        @endif
+                    </div>
+                @endforeach
+            @endif
+        </div>
+    </div>
+    @endif
+
     <!-- Episodes Section -->
-    <div class="bg-white border border-gray-200 p-6 dark:!bg-bg-card dark:!border-border-secondary">
+    <div class="bg-white border border-gray-200 p-6 dark:!bg-bg-card dark:!border-border-secondary rounded-lg mb-8">
         <h2 class="text-xl font-bold text-gray-900 mb-4 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">Episodes</h2>
         
         @if($episodes && $episodes->count() > 0)
@@ -308,29 +344,63 @@
         </div>
         @endif
 
-        @if(isset($tvShow['recommendations']['results']) && count($tvShow['recommendations']['results']) > 0)
-        <div class="mt-12">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">Recommended TV Shows</h2>
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-4">
-                @foreach(array_slice($tvShow['recommendations']['results'], 0, 10) as $recommended)
-                <a href="{{ route('tv-shows.show', $recommended['id']) }}" 
-                   class="group relative bg-white overflow-hidden cursor-pointer dark:!bg-bg-card transition-all duration-300">
-                    <div class="relative overflow-hidden w-full aspect-video bg-gray-200 dark:bg-gray-800">
-                        <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($recommended['backdrop_path'] ?? $recommended['poster_path'] ?? null, 'w342') }}" 
-                             alt="{{ $recommended['name'] ?? 'TV Show' }}" 
-                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                             onerror="this.src='https://via.placeholder.com/342x513?text=No+Image'">
+    @endif
+
+    <!-- Recommended Movies Section -->
+    @if(isset($recommendedMovies) && count($recommendedMovies) > 0)
+    <div class="mb-12">
+        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:!text-white mb-6 pl-4 border-l-4 border-accent" style="font-family: 'Poppins', sans-serif; font-weight: 700;">
+            Recommended Movies
+        </h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
+            @foreach(array_slice($recommendedMovies, 0, 10) as $recommended)
+            <a href="{{ route('movies.show', $recommended['id']) }}" 
+               class="group relative bg-white dark:!bg-bg-card rounded-xl overflow-hidden border border-gray-200 dark:!border-border-secondary hover:border-accent/50 transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-accent/20 cursor-pointer">
+                <!-- Image Container -->
+                <div class="relative overflow-hidden aspect-[2/3] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-bg-card dark:to-bg-card-hover">
+                    <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($recommended['poster_path'] ?? null, 'w342') }}" 
+                         alt="{{ $recommended['title'] ?? 'Movie' }}" 
+                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+                         onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
+                    
+                    <!-- Gradient Overlay -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    
+                    <!-- Rating Badge -->
+                    <div class="absolute top-2 right-2 bg-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 border border-accent/30">
+                        <span class="text-yellow-500 text-xs">★</span>
+                        <span class="text-white text-xs font-bold">{{ number_format($recommended['vote_average'] ?? 0, 1) }}</span>
                     </div>
-                    <div class="p-2 bg-white dark:!bg-bg-card">
-                        <h3 class="text-sm font-bold text-gray-900 line-clamp-2 group-hover:text-accent transition-colors dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">
-                            {{ $recommended['name'] ?? 'Unknown' }}
-                        </h3>
+                    
+                    <!-- Hover Overlay with Info -->
+                    <div class="absolute inset-0 flex items-end opacity-0 group-hover:opacity-100 transition-all duration-500 pb-3 px-3">
+                        <div class="w-full">
+                            <div class="bg-accent/90 backdrop-blur-sm rounded-lg px-3 py-2 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-500">
+                                <p class="text-white text-xs font-semibold text-center" style="font-family: 'Poppins', sans-serif; font-weight: 600;">View Details</p>
+                            </div>
+                        </div>
                     </div>
-                </a>
-                @endforeach
-            </div>
+                </div>
+                
+                <!-- Card Content -->
+                <div class="p-3 md:p-4 bg-gradient-to-b from-white to-gray-50 dark:from-bg-card dark:to-bg-card-hover">
+                    <h3 class="text-sm md:text-base font-bold text-gray-900 dark:!text-white mb-2 line-clamp-2 group-hover:text-accent transition-colors duration-300 leading-tight" style="font-family: 'Poppins', sans-serif; font-weight: 700;">
+                        {{ $recommended['title'] ?? 'Unknown' }}
+                    </h3>
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-600 dark:!text-text-secondary text-xs md:text-sm font-medium" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                            {{ \Carbon\Carbon::parse($recommended['release_date'] ?? '')->format('Y') ?? 'N/A' }}
+                        </span>
+                        <div class="flex items-center gap-1.5 bg-gray-100 dark:!bg-bg-card-hover rounded-full px-2 py-1">
+                            <span class="text-yellow-500 text-xs">★</span>
+                            <span class="font-bold text-gray-900 dark:!text-white text-xs" style="font-family: 'Poppins', sans-serif; font-weight: 700;">{{ number_format($recommended['vote_average'] ?? 0, 1) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            @endforeach
         </div>
-        @endif
+    </div>
     @endif
 </div>
 
