@@ -201,13 +201,34 @@
                                             <a href="{{ $server->download_link }}" target="_blank" class="text-yellow-600 hover:text-yellow-700 dark:!text-yellow-400 dark:!hover:text-yellow-300 font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Download</a>
                                             @endif
                                             @if($server->watch_link)
-                                            <a href="{{ $server->watch_link }}" target="_blank" class="text-yellow-600 hover:text-yellow-700 dark:!text-yellow-400 dark:!hover:text-yellow-300 font-semibold ml-3" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Watch</a>
+                                                @php
+                                                    $isTurbovidhls = str_contains($server->watch_link, 'turbovidhls.com');
+                                                @endphp
+                                                @if($isTurbovidhls)
+                                                    <button onclick="openVideoPlayer('{{ $server->watch_link }}', '{{ $server->server_name }}', '{{ $episode->id }}')" class="text-yellow-600 hover:text-yellow-700 dark:!text-yellow-400 dark:!hover:text-yellow-300 font-semibold ml-3" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Watch</button>
+                                                @else
+                                                    <a href="{{ $server->watch_link }}" target="_blank" class="text-yellow-600 hover:text-yellow-700 dark:!text-yellow-400 dark:!hover:text-yellow-300 font-semibold ml-3" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Watch</a>
+                                                @endif
                                             @endif
                                         </td>
                                     </tr>
                                     @endforeach
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Video Player Modal/Embed for TurbovidHLS -->
+                    <div id="videoPlayerModal-{{ $episode->id }}" class="hidden fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
+                        <div class="relative w-full max-w-5xl bg-black rounded-lg overflow-hidden">
+                            <button onclick="closeVideoPlayer('{{ $episode->id }}')" class="absolute top-4 right-4 z-10 bg-black/70 hover:bg-black/90 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                            <div class="relative w-full" style="padding-bottom: 56.25%;">
+                                <iframe id="videoFrame-{{ $episode->id }}" class="absolute top-0 left-0 w-full h-full" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+                            </div>
                         </div>
                     </div>
                     @else
@@ -413,4 +434,60 @@
         display: none;
     }
 </style>
+
+<script>
+    function openVideoPlayer(videoUrl, serverName, episodeId) {
+        const modal = document.getElementById('videoPlayerModal-' + episodeId);
+        const iframe = document.getElementById('videoFrame-' + episodeId);
+        
+        if (modal && iframe) {
+            // Set the iframe source to the video URL
+            iframe.src = videoUrl;
+            // Show the modal
+            modal.classList.remove('hidden');
+            // Prevent body scroll when modal is open
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    function closeVideoPlayer(episodeId) {
+        const modal = document.getElementById('videoPlayerModal-' + episodeId);
+        const iframe = document.getElementById('videoFrame-' + episodeId);
+        
+        if (modal && iframe) {
+            // Hide the modal
+            modal.classList.add('hidden');
+            // Clear the iframe source to stop video playback
+            iframe.src = '';
+            // Restore body scroll
+            document.body.style.overflow = '';
+        }
+    }
+
+    // Close modal when clicking outside the video player
+    document.addEventListener('click', function(event) {
+        if (event.target.classList.contains('bg-black/90')) {
+            const modals = document.querySelectorAll('[id^="videoPlayerModal-"]');
+            modals.forEach(modal => {
+                if (!modal.classList.contains('hidden')) {
+                    const episodeId = modal.id.replace('videoPlayerModal-', '');
+                    closeVideoPlayer(episodeId);
+                }
+            });
+        }
+    });
+
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            const modals = document.querySelectorAll('[id^="videoPlayerModal-"]');
+            modals.forEach(modal => {
+                if (!modal.classList.contains('hidden')) {
+                    const episodeId = modal.id.replace('videoPlayerModal-', '');
+                    closeVideoPlayer(episodeId);
+                }
+            });
+        }
+    });
+</script>
 @endsection
