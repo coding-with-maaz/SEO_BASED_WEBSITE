@@ -125,6 +125,103 @@
         </div>
     </div>
 
+    <!-- Episodes Section -->
+    <div class="bg-white border border-gray-200 p-6 dark:!bg-bg-card dark:!border-border-secondary rounded-lg mb-8">
+        <h2 class="text-xl font-bold text-gray-900 mb-4 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">Episodes</h2>
+        
+        @if($episodes && $episodes->count() > 0)
+        <div class="space-y-4 max-h-[600px] overflow-y-auto">
+            @foreach($episodes as $episode)
+            <div class="flex gap-4 p-4 bg-gray-50 dark:!bg-bg-card-hover rounded-lg hover:bg-gray-100 dark:!hover:bg-bg-card transition-colors">
+                <!-- Episode Thumbnail -->
+                <div class="flex-shrink-0 w-32 h-20 md:w-40 md:h-24 rounded overflow-hidden bg-gray-200 dark:bg-gray-800 relative group">
+                    @if($episode->thumbnail_path)
+                        <img src="{{ str_starts_with($episode->thumbnail_path, 'http') ? $episode->thumbnail_path : asset('storage/' . $episode->thumbnail_path) }}" 
+                             alt="{{ $episode->title }}" 
+                             class="w-full h-full object-cover"
+                             onerror="this.src='https://via.placeholder.com/400x225?text=No+Image'">
+                    @else
+                        <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w300') }}" 
+                             alt="{{ $episode->title }}" 
+                             class="w-full h-full object-cover"
+                             onerror="this.src='https://via.placeholder.com/400x225?text=No+Image'">
+                    @endif
+                    @if($loop->first)
+                    <div class="absolute inset-0 flex items-center justify-center bg-black/30">
+                        <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                    </div>
+                    @endif
+                </div>
+                
+                <!-- Episode Info -->
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-base font-bold text-gray-900 mb-1 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">
+                        {{ $episode->title }}
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:!text-text-secondary mb-3" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                        Eps {{ $episode->episode_number }}@if($episode->air_date) - {{ \Carbon\Carbon::parse($episode->air_date)->format('M d, Y') }}@endif
+                    </p>
+                    
+                    @if($episode->description)
+                    <p class="text-xs text-gray-500 dark:!text-text-tertiary mb-3 line-clamp-2" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                        {{ $episode->description }}
+                    </p>
+                    @endif
+                    
+                    <!-- Servers -->
+                    @if($episode->servers && $episode->servers->count() > 0)
+                    <div class="mt-3">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-xs">
+                                <thead>
+                                    <tr class="border-b border-gray-300 dark:!border-border-primary">
+                                        <th class="text-left py-2 px-3 text-gray-900 dark:!text-white font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Server</th>
+                                        <th class="text-left py-2 px-3 text-gray-900 dark:!text-white font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Quality</th>
+                                        <th class="text-left py-2 px-3 text-gray-900 dark:!text-white font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Links</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($episode->servers->where('is_active', true) as $server)
+                                    <tr class="border-b border-gray-200 dark:!border-border-secondary hover:bg-gray-100 dark:!hover:bg-bg-card">
+                                        <td class="py-2 px-3">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-3 h-3 rounded-full border-2 border-red-500 flex items-center justify-center">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                                                </span>
+                                                <span class="text-gray-900 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 400;">{{ $server->server_name }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-2 px-3 text-gray-600 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                                            {{ $server->quality ?? '-' }}
+                                        </td>
+                                        <td class="py-2 px-3">
+                                            @if($server->download_link)
+                                            <a href="{{ $server->download_link }}" target="_blank" class="text-yellow-600 hover:text-yellow-700 dark:!text-yellow-400 dark:!hover:text-yellow-300 font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Download</a>
+                                            @endif
+                                            @if($server->watch_link)
+                                            <a href="{{ $server->watch_link }}" target="_blank" class="text-yellow-600 hover:text-yellow-700 dark:!text-yellow-400 dark:!hover:text-yellow-300 font-semibold ml-3" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Watch</a>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    @else
+                    <p class="text-xs text-gray-500 dark:!text-text-tertiary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">No servers available</p>
+                    @endif
+                </div>
+            </div>
+            @endforeach
+        </div>
+        @else
+        <p class="text-gray-600 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">No episodes available yet.</p>
+        @endif
+    </div>
+
     <!-- Details Section -->
     <div class="bg-white border border-gray-200 p-6 mb-8 dark:!bg-bg-card dark:!border-border-secondary rounded-lg">
         <h2 class="text-xl font-bold text-gray-900 mb-4 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">Details</h2>
@@ -229,103 +326,6 @@
     </div>
     @endif
 
-    <!-- Episodes Section -->
-    <div class="bg-white border border-gray-200 p-6 dark:!bg-bg-card dark:!border-border-secondary rounded-lg mb-8">
-        <h2 class="text-xl font-bold text-gray-900 mb-4 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">Episodes</h2>
-        
-        @if($episodes && $episodes->count() > 0)
-        <div class="space-y-4 max-h-[600px] overflow-y-auto">
-            @foreach($episodes as $episode)
-            <div class="flex gap-4 p-4 bg-gray-50 dark:!bg-bg-card-hover rounded-lg hover:bg-gray-100 dark:!hover:bg-bg-card transition-colors">
-                <!-- Episode Thumbnail -->
-                <div class="flex-shrink-0 w-32 h-20 md:w-40 md:h-24 rounded overflow-hidden bg-gray-200 dark:bg-gray-800 relative group">
-                    @if($episode->thumbnail_path)
-                        <img src="{{ str_starts_with($episode->thumbnail_path, 'http') ? $episode->thumbnail_path : asset('storage/' . $episode->thumbnail_path) }}" 
-                             alt="{{ $episode->title }}" 
-                             class="w-full h-full object-cover"
-                             onerror="this.src='https://via.placeholder.com/400x225?text=No+Image'">
-                    @else
-                        <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w300') }}" 
-                             alt="{{ $episode->title }}" 
-                             class="w-full h-full object-cover"
-                             onerror="this.src='https://via.placeholder.com/400x225?text=No+Image'">
-                    @endif
-                    @if($loop->first)
-                    <div class="absolute inset-0 flex items-center justify-center bg-black/30">
-                        <svg class="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M8 5v14l11-7z"/>
-                        </svg>
-                    </div>
-                    @endif
-                </div>
-                
-                <!-- Episode Info -->
-                <div class="flex-1 min-w-0">
-                    <h3 class="text-base font-bold text-gray-900 mb-1 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">
-                        {{ $episode->title }}
-                    </h3>
-                    <p class="text-sm text-gray-600 dark:!text-text-secondary mb-3" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
-                        Eps {{ $episode->episode_number }}@if($episode->air_date) - {{ \Carbon\Carbon::parse($episode->air_date)->format('M d, Y') }}@endif
-                    </p>
-                    
-                    @if($episode->description)
-                    <p class="text-xs text-gray-500 dark:!text-text-tertiary mb-3 line-clamp-2" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
-                        {{ $episode->description }}
-                    </p>
-                    @endif
-                    
-                    <!-- Servers -->
-                    @if($episode->servers && $episode->servers->count() > 0)
-                    <div class="mt-3">
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-xs">
-                                <thead>
-                                    <tr class="border-b border-gray-300 dark:!border-border-primary">
-                                        <th class="text-left py-2 px-3 text-gray-900 dark:!text-white font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Server</th>
-                                        <th class="text-left py-2 px-3 text-gray-900 dark:!text-white font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Quality</th>
-                                        <th class="text-left py-2 px-3 text-gray-900 dark:!text-white font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Links</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($episode->servers->where('is_active', true) as $server)
-                                    <tr class="border-b border-gray-200 dark:!border-border-secondary hover:bg-gray-100 dark:!hover:bg-bg-card">
-                                        <td class="py-2 px-3">
-                                            <div class="flex items-center gap-2">
-                                                <span class="w-3 h-3 rounded-full border-2 border-red-500 flex items-center justify-center">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                                                </span>
-                                                <span class="text-gray-900 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 400;">{{ $server->server_name }}</span>
-                                            </div>
-                                        </td>
-                                        <td class="py-2 px-3 text-gray-600 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
-                                            {{ $server->quality ?? '-' }}
-                                        </td>
-                                        <td class="py-2 px-3">
-                                            @if($server->download_link)
-                                            <a href="{{ $server->download_link }}" target="_blank" class="text-yellow-600 hover:text-yellow-700 dark:!text-yellow-400 dark:!hover:text-yellow-300 font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Download</a>
-                                            @endif
-                                            @if($server->watch_link)
-                                            <a href="{{ $server->watch_link }}" target="_blank" class="text-yellow-600 hover:text-yellow-700 dark:!text-yellow-400 dark:!hover:text-yellow-300 font-semibold ml-3" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Watch</a>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    @else
-                    <p class="text-xs text-gray-500 dark:!text-text-tertiary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">No servers available</p>
-                    @endif
-                </div>
-            </div>
-            @endforeach
-        </div>
-        @else
-        <p class="text-gray-600 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">No episodes available yet.</p>
-        @endif
-    </div>
-
     @if(!isset($isCustom) || !$isCustom)
         @if(isset($tvShow['videos']['results']) && count($tvShow['videos']['results']) > 0)
         <div class="mt-8">
@@ -348,16 +348,16 @@
 
     <!-- Recommended Movies Section -->
     @if(isset($recommendedMovies) && count($recommendedMovies) > 0)
-    <div class="mb-12">
+    <div class="mt-12 mb-12">
         <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:!text-white mb-6 pl-4 border-l-4 border-accent" style="font-family: 'Poppins', sans-serif; font-weight: 700;">
             Recommended Movies
         </h2>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
             @foreach(array_slice($recommendedMovies, 0, 10) as $recommended)
             <a href="{{ route('movies.show', $recommended['id']) }}" 
-               class="group relative bg-white dark:!bg-bg-card rounded-xl overflow-hidden border border-gray-200 dark:!border-border-secondary hover:border-accent/50 transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-accent/20 cursor-pointer">
+               class="group relative bg-white dark:!bg-bg-card rounded-xl overflow-hidden border border-gray-200 dark:!border-border-primary hover:border-accent/50 transition-all duration-500 hover:-translate-y-3 hover:shadow-2xl hover:shadow-accent/20 cursor-pointer">
                 <!-- Image Container -->
-                <div class="relative overflow-hidden aspect-[2/3] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-bg-card dark:to-bg-card-hover">
+                <div class="relative overflow-hidden aspect-[2/3] bg-gradient-to-br from-gray-100 to-gray-200 dark:!from-bg-card dark:!to-bg-card-hover">
                     <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($recommended['poster_path'] ?? null, 'w342') }}" 
                          alt="{{ $recommended['title'] ?? 'Movie' }}" 
                          class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
@@ -367,7 +367,7 @@
                     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     
                     <!-- Rating Badge -->
-                    <div class="absolute top-2 right-2 bg-black/80 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 border border-accent/30">
+                    <div class="absolute top-2 right-2 bg-black/80 dark:!bg-black/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 border border-accent/30">
                         <span class="text-yellow-500 text-xs">★</span>
                         <span class="text-white text-xs font-bold">{{ number_format($recommended['vote_average'] ?? 0, 1) }}</span>
                     </div>
@@ -383,7 +383,7 @@
                 </div>
                 
                 <!-- Card Content -->
-                <div class="p-3 md:p-4 bg-gradient-to-b from-white to-gray-50 dark:from-bg-card dark:to-bg-card-hover">
+                <div class="p-3 md:p-4 bg-white dark:!bg-bg-card border-t border-gray-100 dark:!border-border-secondary">
                     <h3 class="text-sm md:text-base font-bold text-gray-900 dark:!text-white mb-2 line-clamp-2 group-hover:text-accent transition-colors duration-300 leading-tight" style="font-family: 'Poppins', sans-serif; font-weight: 700;">
                         {{ $recommended['title'] ?? 'Unknown' }}
                     </h3>
