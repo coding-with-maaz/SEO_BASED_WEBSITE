@@ -112,7 +112,7 @@
                 {{ $movies->count() }}
             </span>
         </div>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-3 md:gap-4">
             @foreach($movies as $movie)
             @php
                 $posterPath = $movie->poster_path ?? null;
@@ -128,36 +128,70 @@
                     }
                 }
                 
+                // Get content type and dubbing language
+                $contentTypes = \App\Models\Content::getContentTypes();
+                $contentTypeKey = $movie->type ?? 'movie';
+                $contentTypeName = $contentTypes[$contentTypeKey] ?? ucfirst(str_replace('_', ' ', $contentTypeKey));
+                $dubbingLanguage = $movie->dubbing_language ?? null;
+                
                 $character = $movie->pivot->character ?? '';
                 $routeName = 'movies.show';
                 $itemId = $movie->slug ?? ('custom_' . $movie->id);
             @endphp
             <article class="group cursor-pointer">
                 <a href="{{ route($routeName, $itemId) }}" class="block">
-                    <div class="relative overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-800 aspect-[2/3] mb-2">
+                    <div class="relative overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-800 aspect-[2/3] mb-2" style="background-color: transparent !important;">
                         @if($posterUrl)
                         <img src="{{ $posterUrl }}" 
                              alt="{{ $movie->title }}" 
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                             style="display: block !important; visibility: visible !important; opacity: 1 !important;"
+                             style="display: block !important; visibility: visible !important; opacity: 1 !important; position: relative; z-index: 1;"
                              onerror="this.src='https://via.placeholder.com/185x278?text=No+Image'">
                         @else
-                        <div class="w-full h-full flex items-center justify-center">
+                        <div class="w-full h-full flex items-center justify-center" style="position: relative; z-index: 1;">
                             <span class="text-gray-400 text-xs">No Image</span>
                         </div>
                         @endif
+                        
+                        <!-- Content Type Badge - Top Left -->
+                        @if(!empty($contentTypeName))
+                        <div class="absolute top-1.5 left-1.5 bg-accent text-white px-2 py-0.5 rounded-full text-[10px] font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600; z-index: 3; backdrop-filter: blur(4px); background-color: rgba(229, 9, 20, 0.9);">
+                            {{ $contentTypeName }}
+                        </div>
+                        @endif
+                        
+                        <!-- Dubbing Language Badge - Top Right -->
+                        @if(!empty($dubbingLanguage))
+                        <div class="absolute top-1.5 right-1.5 bg-blue-600 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600; z-index: 3; backdrop-filter: blur(4px); background-color: rgba(37, 99, 235, 0.9);">
+                            {{ ucfirst($dubbingLanguage) }}
+                        </div>
+                        @endif
+                        
+                        <!-- Title Overlay with Character -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex items-end pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="z-index: 2;">
+                            <div class="w-full p-2 pointer-events-auto">
+                                <h3 class="text-[10px] font-bold text-white mb-0.5 line-clamp-2" style="font-family: 'Poppins', sans-serif; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,0.9);">
+                                    {{ $movie->title }}
+                                </h3>
+                                @if($character)
+                                <p class="text-[9px] text-gray-200 line-clamp-1" style="font-family: 'Poppins', sans-serif; font-weight: 500; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">
+                                    as {{ $character }}
+                                </p>
+                                @endif
+                                @if($movie->release_date)
+                                <p class="text-[9px] text-gray-300 mt-0.5" style="font-family: 'Poppins', sans-serif; font-weight: 400; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">
+                                    {{ $movie->release_date->format('Y') }}
+                                </p>
+                                @endif
+                            </div>
+                        </div>
                     </div>
-                    <h3 class="text-xs sm:text-sm font-semibold text-gray-900 dark:!text-white group-hover:text-accent transition-colors line-clamp-2 mb-1" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                    <h3 class="text-[11px] sm:text-xs font-semibold text-gray-900 dark:!text-white group-hover:text-accent transition-colors line-clamp-2 mb-0.5" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
                         {{ $movie->title }}
                     </h3>
                     @if($character)
-                    <p class="text-xs text-gray-600 dark:!text-text-secondary line-clamp-1" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                    <p class="text-[10px] text-gray-600 dark:!text-text-secondary line-clamp-1" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
                         as {{ $character }}
-                    </p>
-                    @endif
-                    @if($movie->release_date)
-                    <p class="text-xs text-gray-500 dark:!text-text-secondary mt-1" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
-                        {{ $movie->release_date->format('Y') }}
                     </p>
                     @endif
                 </a>
@@ -178,7 +212,7 @@
                 {{ $tvShows->count() }}
             </span>
         </div>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 md:gap-4">
+        <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-3 md:gap-4">
             @foreach($tvShows as $tvShow)
             @php
                 $posterPath = $tvShow->poster_path ?? null;
@@ -194,36 +228,70 @@
                     }
                 }
                 
+                // Get content type and dubbing language
+                $contentTypes = \App\Models\Content::getContentTypes();
+                $contentTypeKey = $tvShow->type ?? 'tv_show';
+                $contentTypeName = $contentTypes[$contentTypeKey] ?? ucfirst(str_replace('_', ' ', $contentTypeKey));
+                $dubbingLanguage = $tvShow->dubbing_language ?? null;
+                
                 $character = $tvShow->pivot->character ?? '';
                 $routeName = 'tv-shows.show';
                 $itemId = $tvShow->slug ?? ('custom_' . $tvShow->id);
             @endphp
             <article class="group cursor-pointer">
                 <a href="{{ route($routeName, $itemId) }}" class="block">
-                    <div class="relative overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-800 aspect-[2/3] mb-2">
+                    <div class="relative overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-800 aspect-[2/3] mb-2" style="background-color: transparent !important;">
                         @if($posterUrl)
                         <img src="{{ $posterUrl }}" 
                              alt="{{ $tvShow->title }}" 
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                             style="display: block !important; visibility: visible !important; opacity: 1 !important;"
+                             style="display: block !important; visibility: visible !important; opacity: 1 !important; position: relative; z-index: 1;"
                              onerror="this.src='https://via.placeholder.com/185x278?text=No+Image'">
                         @else
-                        <div class="w-full h-full flex items-center justify-center">
+                        <div class="w-full h-full flex items-center justify-center" style="position: relative; z-index: 1;">
                             <span class="text-gray-400 text-xs">No Image</span>
                         </div>
                         @endif
+                        
+                        <!-- Content Type Badge - Top Left -->
+                        @if(!empty($contentTypeName))
+                        <div class="absolute top-1.5 left-1.5 bg-accent text-white px-2 py-0.5 rounded-full text-[10px] font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600; z-index: 3; backdrop-filter: blur(4px); background-color: rgba(229, 9, 20, 0.9);">
+                            {{ $contentTypeName }}
+                        </div>
+                        @endif
+                        
+                        <!-- Dubbing Language Badge - Top Right -->
+                        @if(!empty($dubbingLanguage))
+                        <div class="absolute top-1.5 right-1.5 bg-blue-600 text-white px-2 py-0.5 rounded-full text-[10px] font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600; z-index: 3; backdrop-filter: blur(4px); background-color: rgba(37, 99, 235, 0.9);">
+                            {{ ucfirst($dubbingLanguage) }}
+                        </div>
+                        @endif
+                        
+                        <!-- Title Overlay with Character -->
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex items-end pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="z-index: 2;">
+                            <div class="w-full p-2 pointer-events-auto">
+                                <h3 class="text-[10px] font-bold text-white mb-0.5 line-clamp-2" style="font-family: 'Poppins', sans-serif; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,0.9);">
+                                    {{ $tvShow->title }}
+                                </h3>
+                                @if($character)
+                                <p class="text-[9px] text-gray-200 line-clamp-1" style="font-family: 'Poppins', sans-serif; font-weight: 500; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">
+                                    as {{ $character }}
+                                </p>
+                                @endif
+                                @if($tvShow->release_date)
+                                <p class="text-[9px] text-gray-300 mt-0.5" style="font-family: 'Poppins', sans-serif; font-weight: 400; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">
+                                    {{ $tvShow->release_date->format('Y') }}
+                                </p>
+                                @endif
+                            </div>
+                        </div>
                     </div>
-                    <h3 class="text-xs sm:text-sm font-semibold text-gray-900 dark:!text-white group-hover:text-accent transition-colors line-clamp-2 mb-1" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                    <h3 class="text-[11px] sm:text-xs font-semibold text-gray-900 dark:!text-white group-hover:text-accent transition-colors line-clamp-2 mb-0.5" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
                         {{ $tvShow->title }}
                     </h3>
                     @if($character)
-                    <p class="text-xs text-gray-600 dark:!text-text-secondary line-clamp-1" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                    <p class="text-[10px] text-gray-600 dark:!text-text-secondary line-clamp-1" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
                         as {{ $character }}
-                    </p>
-                    @endif
-                    @if($tvShow->release_date)
-                    <p class="text-xs text-gray-500 dark:!text-text-secondary mt-1" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
-                        {{ $tvShow->release_date->format('Y') }}
                     </p>
                     @endif
                 </a>
