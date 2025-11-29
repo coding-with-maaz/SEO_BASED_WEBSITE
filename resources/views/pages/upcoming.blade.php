@@ -104,8 +104,26 @@
                             @endif
                             
                             <!-- Upcoming Badge -->
-                            <div class="absolute top-2 left-2 bg-accent text-white px-3 py-1 rounded-full text-xs font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                            <div class="absolute top-2 left-2 bg-accent text-white px-3 py-1 rounded-full text-xs font-semibold z-10" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
                                 Upcoming
+                            </div>
+                            
+                            <!-- Beautiful Title Overlay - Always Visible -->
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex items-end z-0">
+                                <div class="w-full p-4">
+                                    <h3 class="text-xl font-bold text-white mb-1 line-clamp-2 group-hover:text-accent transition-colors duration-300" style="font-family: 'Poppins', sans-serif; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,0.9);">
+                                        {{ $item['name'] ?? ($item['is_movie'] ? ($item['title'] ?? 'Unknown') : 'Unknown') }}
+                                    </h3>
+                                    @if($item['is_movie'] && !empty($item['release_date']))
+                                    <p class="text-sm text-gray-200" style="font-family: 'Poppins', sans-serif; font-weight: 500; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">
+                                        {{ \Carbon\Carbon::parse($item['release_date'])->format('Y') }}
+                                    </p>
+                                    @elseif(!$item['is_movie'] && !empty($item['first_air_date']))
+                                    <p class="text-sm text-gray-200" style="font-family: 'Poppins', sans-serif; font-weight: 500; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">
+                                        {{ \Carbon\Carbon::parse($item['first_air_date'])->format('Y') }}
+                                    </p>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                         

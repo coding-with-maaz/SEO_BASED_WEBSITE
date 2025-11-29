@@ -85,6 +85,20 @@
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                              onerror="this.src='https://via.placeholder.com/780x439?text=No+Image'">
                     @endif
+                    
+                    <!-- Beautiful Title Overlay - Always Visible -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex items-end">
+                        <div class="w-full p-4">
+                            <h3 class="text-xl font-bold text-white mb-1 line-clamp-2 group-hover:text-accent transition-colors duration-300" style="font-family: 'Poppins', sans-serif; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,0.9);">
+                                {{ $movie['title'] ?? 'Unknown' }}
+                            </h3>
+                            @if(!empty($movie['release_date']))
+                            <p class="text-sm text-gray-200" style="font-family: 'Poppins', sans-serif; font-weight: 500; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">
+                                {{ \Carbon\Carbon::parse($movie['release_date'])->format('Y') }}
+                            </p>
+                            @endif
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Card Content -->
