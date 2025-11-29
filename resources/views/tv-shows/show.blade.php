@@ -62,7 +62,23 @@
         <!-- Poster -->
         <div class="lg:col-span-1">
             @if(isset($isCustom) && $isCustom)
-                <img src="{{ $posterPath ? (str_starts_with($posterPath, 'http') ? $posterPath : asset('storage/' . $posterPath)) : 'https://via.placeholder.com/500x750?text=No+Image' }}" 
+                @php
+                    $posterUrl = null;
+                    if ($posterPath) {
+                        // Check if it's a TMDB path (starts with /) or content_type is tmdb
+                        if (str_starts_with($posterPath, '/') || ($content->content_type ?? 'custom') === 'tmdb') {
+                            // Use TMDB service for TMDB paths
+                            $posterUrl = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w500');
+                        } elseif (str_starts_with($posterPath, 'http')) {
+                            // Full URL
+                            $posterUrl = $posterPath;
+                        } else {
+                            // Local storage
+                            $posterUrl = asset('storage/' . $posterPath);
+                        }
+                    }
+                @endphp
+                <img src="{{ $posterUrl ?? 'https://via.placeholder.com/500x750?text=No+Image' }}" 
                      alt="{{ $title }}" 
                      class="w-full rounded-xl shadow-2xl"
                      onerror="this.src='https://via.placeholder.com/500x750?text=No+Image'">
@@ -343,10 +359,24 @@
                         $castName = is_array($castMember) ? ($castMember['name'] ?? $castMember) : $castMember;
                         $castCharacter = is_array($castMember) ? ($castMember['character'] ?? '') : '';
                         $profilePath = is_array($castMember) && !empty($castMember['profile_path']) ? $castMember['profile_path'] : null;
+                        $profileImageUrl = null;
+                        if ($profilePath) {
+                            // Check if it's a TMDB path (starts with /) or content_type is tmdb
+                            if (str_starts_with($profilePath, '/') || ($content->content_type ?? 'custom') === 'tmdb') {
+                                // Use TMDB service for TMDB paths
+                                $profileImageUrl = app(\App\Services\TmdbService::class)->getImageUrl($profilePath, 'w185');
+                            } elseif (str_starts_with($profilePath, 'http')) {
+                                // Full URL
+                                $profileImageUrl = $profilePath;
+                            } else {
+                                // Local storage
+                                $profileImageUrl = asset('storage/' . $profilePath);
+                            }
+                        }
                     @endphp
                     <div class="min-w-[100px] text-center flex-shrink-0">
-                        @if($profilePath)
-                        <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($profilePath, 'w185') }}" 
+                        @if($profileImageUrl)
+                        <img src="{{ $profileImageUrl }}" 
                              alt="{{ $castName }}" 
                              class="w-20 h-28 md:w-24 md:h-36 object-cover rounded-lg mb-2 shadow-lg mx-auto"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
