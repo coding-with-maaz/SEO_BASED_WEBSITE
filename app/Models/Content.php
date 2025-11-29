@@ -188,7 +188,8 @@ class Content extends Model
         $originalSlug = $slug;
         $count = 1;
 
-        while (static::where('slug', $slug)->where('id', '!=', $this->id ?? 0)->exists()) {
+        // Check for existing slugs including soft-deleted ones (to avoid conflicts)
+        while (static::withTrashed()->where('slug', $slug)->where('id', '!=', $this->id ?? 0)->exists()) {
             $slug = $originalSlug . '-' . $count;
             $count++;
         }
