@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Content;
+use App\Models\Cast;
 use App\Services\TmdbService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -76,7 +77,6 @@ class ContentController extends Controller
             'country' => 'nullable|string|max:255',
             'director' => 'nullable|string|max:255',
             'genres' => 'nullable|array',
-            'cast' => 'nullable|array',
             'language' => 'nullable|string|max:50',
             'dubbing_language' => 'nullable|string|max:50',
             'download_link' => 'nullable|url',
@@ -140,7 +140,6 @@ class ContentController extends Controller
             'country' => 'nullable|string|max:255',
             'director' => 'nullable|string|max:255',
             'genres' => 'nullable|array',
-            'cast' => 'nullable|array',
             'language' => 'nullable|string|max:50',
             'dubbing_language' => 'nullable|string|max:50',
             'download_link' => 'nullable|url',
@@ -279,18 +278,7 @@ class ContentController extends Controller
             $contentData['genres'] = array_column($tmdbData['genres'], 'name');
         }
 
-        // Set cast (first 10)
-        if (isset($tmdbData['credits']['cast']) && is_array($tmdbData['credits']['cast'])) {
-            $cast = [];
-            foreach (array_slice($tmdbData['credits']['cast'], 0, 10) as $actor) {
-                $cast[] = [
-                    'name' => $actor['name'] ?? 'Unknown',
-                    'character' => $actor['character'] ?? 'Unknown',
-                    'profile_path' => $actor['profile_path'] ?? null,
-                ];
-            }
-            $contentData['cast'] = $cast;
-        }
+        // Don't set cast here - we'll handle it separately after content creation using the relationship
 
         // Set director (for movies)
         if ($type === 'movie' && isset($tmdbData['credits']['crew'])) {
@@ -348,15 +336,54 @@ class ContentController extends Controller
 
         if ($existingContent) {
             $existingContent->update($contentData);
-            return redirect()->route('admin.contents.edit', $existingContent)
-                ->with('success', 'Content updated from TMDB successfully.');
+            $content = $existingContent;
+        } else {
+            // Create new content
+            $content = Content::create($contentData);
         }
 
-        // Create new content
-        $content = Content::create($contentData);
+        // Handle cast using the relationship (only for new imports or updates)
+        if (isset($tmdbData['credits']['cast']) && is_array($tmdbData['credits']['cast'])) {
+            $castAttachments = [];
+            foreach (array_slice($tmdbData['credits']['cast'], 0, 10) as $index => $actor) {
+                $actorName = $actor['name'] ?? 'Unknown';
+                $character = $actor['character'] ?? '';
+                $profilePath = $actor['profile_path'] ?? null;
+                
+                // Build full profile URL if profile path exists
+                $fullProfilePath = null;
+                if ($profilePath) {
+                    if (str_starts_with($profilePath, 'http')) {
+                        $fullProfilePath = $profilePath;
+                    } else {
+                        $fullProfilePath = 'https://image.tmdb.org/t/p/w185' . $profilePath;
+                    }
+                }
+                
+                // Check if cast member already exists
+                $cast = Cast::firstOrCreate(
+                    ['name' => $actorName],
+                    ['profile_path' => $fullProfilePath]
+                );
+                
+                // Update profile path if empty and we have one
+                if (empty($cast->profile_path) && $fullProfilePath) {
+                    $cast->update(['profile_path' => $fullProfilePath]);
+                }
+                
+                // Attach cast to content with character and order
+                $castAttachments[$cast->id] = [
+                    'character' => $character,
+                    'order' => $index,
+                ];
+            }
+            
+            // Sync cast attachments (this will remove old ones and add new ones)
+            $content->casts()->sync($castAttachments);
+        }
 
         return redirect()->route('admin.contents.edit', $content)
-            ->with('success', 'Content imported from TMDB successfully. Please add servers and download links.');
+            ->with('success', $existingContent ? 'Content updated from TMDB successfully.' : 'Content imported from TMDB successfully. Please add servers and download links.');
     }
 
     /**
