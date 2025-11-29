@@ -342,10 +342,13 @@ class ContentController extends Controller
             $content = Content::create($contentData);
         }
 
-        // Handle cast using the relationship (only for new imports or updates)
+        // Handle cast using the relationship - automatically add from TMDB
         if (isset($tmdbData['credits']['cast']) && is_array($tmdbData['credits']['cast'])) {
-            $castAttachments = [];
-            foreach (array_slice($tmdbData['credits']['cast'], 0, 10) as $index => $actor) {
+            $tmdbCastAttachments = [];
+            $tmdbCastIds = [];
+            
+            // Process TMDB cast members (up to 20)
+            foreach (array_slice($tmdbData['credits']['cast'], 0, 20) as $index => $actor) {
                 $actorName = $actor['name'] ?? 'Unknown';
                 $character = $actor['character'] ?? '';
                 $profilePath = $actor['profile_path'] ?? null;
@@ -356,7 +359,7 @@ class ContentController extends Controller
                     if (str_starts_with($profilePath, 'http')) {
                         $fullProfilePath = $profilePath;
                     } else {
-                        $fullProfilePath = 'https://image.tmdb.org/t/p/w185' . $profilePath;
+                        $fullProfilePath = $this->tmdb->getImageUrl($profilePath, 'w185');
                     }
                 }
                 
@@ -371,15 +374,38 @@ class ContentController extends Controller
                     $cast->update(['profile_path' => $fullProfilePath]);
                 }
                 
+                // Track TMDB cast IDs
+                $tmdbCastIds[] = $cast->id;
+                
                 // Attach cast to content with character and order
-                $castAttachments[$cast->id] = [
+                // TMDB casts get order 0-19
+                $tmdbCastAttachments[$cast->id] = [
                     'character' => $character,
                     'order' => $index,
                 ];
             }
             
-            // Sync cast attachments (this will remove old ones and add new ones)
-            $content->castMembers()->sync($castAttachments);
+            // Preserve manually added casts (casts not from TMDB)
+            $allCastAttachments = $tmdbCastAttachments;
+            
+            if ($existingContent) {
+                $currentCasts = $content->castMembers()->withPivot('character', 'order')->get();
+                $maxTmdbOrder = count($tmdbCastAttachments) > 0 ? max(array_column($tmdbCastAttachments, 'order')) : -1;
+                $manualOrderOffset = $maxTmdbOrder + 1;
+                
+                foreach ($currentCasts as $currentCast) {
+                    // If this cast is not in the new TMDB list, preserve it as manually added
+                    if (!in_array($currentCast->id, $tmdbCastIds)) {
+                        $allCastAttachments[$currentCast->id] = [
+                            'character' => $currentCast->pivot->character ?? '',
+                            'order' => $currentCast->pivot->order ?? $manualOrderOffset++,
+                        ];
+                    }
+                }
+            }
+            
+            // Sync all casts (TMDB casts + manually added casts)
+            $content->castMembers()->sync($allCastAttachments);
         }
 
         return redirect()->route('admin.contents.edit', $content)
