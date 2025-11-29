@@ -23,6 +23,7 @@ Route::get('/search', [SearchController::class, 'search'])->name('search');
 // Static pages
 Route::get('/dmca', [PageController::class, 'dmca'])->name('dmca');
 Route::get('/completed', [PageController::class, 'completed'])->name('completed');
+Route::get('/upcoming', [PageController::class, 'upcoming'])->name('upcoming');
 
 // Admin routes for custom content management
 Route::prefix('admin')->name('admin.')->group(function () {
