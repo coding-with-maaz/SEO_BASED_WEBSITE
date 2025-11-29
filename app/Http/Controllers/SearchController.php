@@ -19,11 +19,15 @@ class SearchController extends Controller
         $query = $request->get('q');
         $page = $request->get('page', 1);
 
+        // Get top rated movies for sidebar
+        $topRatedMovies = $this->tmdb->getTopRatedMovies(1);
+
         if (!$query) {
             return view('search.index', [
                 'movies' => [],
                 'tvShows' => [],
                 'query' => '',
+                'topRatedMovies' => $topRatedMovies['results'] ?? [],
             ]);
         }
 
@@ -35,6 +39,7 @@ class SearchController extends Controller
             'query' => $query,
             'currentPage' => $results['movies']['page'] ?? 1,
             'totalPages' => $results['movies']['total_pages'] ?? 1,
+            'topRatedMovies' => $topRatedMovies['results'] ?? [],
         ]);
     }
 }

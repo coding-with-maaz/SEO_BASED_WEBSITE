@@ -97,6 +97,35 @@ class EpisodeSeeder extends Seeder
             $this->command->info("Created server with TurbovidHLS watch link!");
         }
 
+        // Add a second server for Episode 1
+        $existingServer2 = EpisodeServer::where('episode_id', $episode->id)
+            ->where('watch_link', 'https://turbovidhls.com/t/692786954e5b5')
+            ->first();
+
+        if ($existingServer2) {
+            $this->command->info("Second server with this watch link already exists. Updating...");
+            $existingServer2->update([
+                'server_name' => 'TurbovidHLS 2',
+                'quality' => 'HD',
+                'watch_link' => 'https://turbovidhls.com/t/692786954e5b5',
+                'is_active' => true,
+                'sort_order' => 2,
+            ]);
+            $this->command->info("Second server updated successfully!");
+        } else {
+            // Create the second server
+            EpisodeServer::create([
+                'episode_id' => $episode->id,
+                'server_name' => 'TurbovidHLS 2',
+                'quality' => 'HD',
+                'watch_link' => 'https://turbovidhls.com/t/692786954e5b5',
+                'is_active' => true,
+                'sort_order' => 2,
+            ]);
+            
+            $this->command->info("Created second server with TurbovidHLS watch link!");
+        }
+
         $this->command->info("✅ Episode 1 seeded successfully!");
         $this->command->info("TV Show URL: /tv-shows/custom_{$content->id}");
         $this->command->info("Manage Episodes: /admin/contents/{$content->id}/episodes");
