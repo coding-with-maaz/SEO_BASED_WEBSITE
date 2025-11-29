@@ -30,18 +30,18 @@
     </div>
 
     <!-- Main Info Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 mb-8 md:mb-12">
+    <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8 mb-8 md:mb-12">
         <!-- Profile Photo -->
         <div class="lg:col-span-1 order-2 lg:order-1">
-            <div class="sticky top-24">
+            <div class="sticky top-24 max-w-xs mx-auto lg:max-w-full">
                 @if($profileUrl)
                 <img src="{{ $profileUrl }}" 
                      alt="{{ $cast->name }}" 
-                     class="w-full max-w-sm mx-auto lg:max-w-full rounded-xl shadow-2xl"
+                     class="w-full max-w-[280px] mx-auto rounded-xl shadow-2xl"
                      style="display: block !important; visibility: visible !important; opacity: 1 !important;"
                      onerror="this.src='https://via.placeholder.com/500x750?text=No+Image'">
                 @else
-                <div class="w-full aspect-[2/3] max-w-sm mx-auto lg:max-w-full bg-gray-200 dark:bg-gray-800 rounded-xl shadow-2xl flex items-center justify-center">
+                <div class="w-full aspect-[2/3] max-w-[280px] mx-auto bg-gray-200 dark:bg-gray-800 rounded-xl shadow-2xl flex items-center justify-center">
                     <span class="text-gray-400 text-lg">No Photo</span>
                 </div>
                 @endif
@@ -49,7 +49,7 @@
         </div>
         
         <!-- Details -->
-        <div class="lg:col-span-2 order-1 lg:order-2">
+        <div class="lg:col-span-4 order-1 lg:order-2">
             <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:!text-white mb-4 md:mb-6" style="font-family: 'Poppins', sans-serif; font-weight: 800; line-height: 1.2;">
                 {{ $cast->name }}
             </h1>
