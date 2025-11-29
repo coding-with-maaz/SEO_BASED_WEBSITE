@@ -149,54 +149,6 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Card Content -->
-                        <div class="p-3 bg-white dark:!bg-bg-card">
-                            <!-- Title - Bold Text -->
-                            <h2 class="text-lg font-bold text-gray-900 mb-1 group-hover:text-accent transition-colors duration-300 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700; line-height: 1.4;">
-                                {{ $item['name'] ?? 'Unknown' }}
-                                @php
-                                    if ($item['is_movie'] ?? false) {
-                                        $typeLabel = 'Movie';
-                                    } else {
-                                        $typeLabel = ucfirst(str_replace('_', ' ', $item['type'] ?? 'TV Show'));
-                                    }
-                                @endphp
-                                <span class="font-normal text-gray-600 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">({{ $typeLabel }})</span>
-                            </h2>
-                            
-                            <!-- Content Details -->
-                            <p class="text-gray-600 text-xs mb-1 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400; line-height: 1.4;">
-                                {{ $typeLabel }}
-                                @if($item['dubbing_language'] ?? null)
-                                    - {{ ucfirst($item['dubbing_language']) }} Dubbed
-                                @endif
-                                @if($item['release_date'] ?? $item['first_air_date'] ?? null)
-                                    @php
-                                        $releaseDate = $item['release_date'] ?? $item['first_air_date'];
-                                        $date = \Carbon\Carbon::parse($releaseDate);
-                                    @endphp
-                                    • {{ $date->format('Y') }}
-                                    @if($item['rating'] ?? null && $item['rating'] > 0)
-                                        • ★ {{ number_format($item['rating'], 1) }}
-                                    @endif
-                                @endif
-                            </p>
-                            
-                            <!-- Release Date -->
-                            @if($item['release_date'] ?? $item['first_air_date'] ?? null)
-                            @php
-                                $releaseDate = $item['release_date'] ?? $item['first_air_date'];
-                                $date = \Carbon\Carbon::parse($releaseDate);
-                            @endphp
-                            <p class="text-gray-500 text-xs dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
-                                Release Date: {{ $date->format('M d, Y') }}
-                                @if($date->isFuture())
-                                    <span class="text-accent font-semibold">({{ $date->diffForHumans() }})</span>
-                                @endif
-                            </p>
-                            @endif
-                        </div>
                     </a>
                 </article>
                 @endforeach

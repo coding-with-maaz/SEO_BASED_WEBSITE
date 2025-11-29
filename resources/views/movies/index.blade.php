@@ -123,35 +123,6 @@
                         </div>
                     </div>
                 </div>
-                
-                <!-- Card Content -->
-                <div class="p-3 bg-white dark:!bg-bg-card">
-                    <!-- Title - Bold Text -->
-                    <h2 class="text-lg font-bold text-gray-900 mb-1 group-hover:text-accent transition-colors duration-300 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700; line-height: 1.4;">
-                        {{ $movie['title'] ?? 'Unknown' }}
-                        <span class="font-normal text-gray-600 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">(Movie)</span>
-                    </h2>
-                    
-                    <!-- Content Details -->
-                    <p class="text-gray-600 text-xs mb-1 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400; line-height: 1.4;">
-                        @if($movie['is_custom'] ?? false)
-                            @php
-                                $typeLabel = ucfirst(str_replace('_', ' ', $movie['type'] ?? 'Movie'));
-                                $dubbing = $movie['dubbing_language'] ? ucfirst($movie['dubbing_language']) . ' Dubbed' : '';
-                            @endphp
-                            {{ $typeLabel }}@if($dubbing) - {{ $dubbing }}@endif
-                        @else
-                            Movie - [ Full Movie ]
-                        @endif
-                    </p>
-                    
-                    <!-- Date - Smaller Lighter Gray Text -->
-                    @if(!empty($movie['release_date']))
-                    <p class="text-gray-500 text-xs dark:!text-text-tertiary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
-                        {{ \Carbon\Carbon::parse($movie['release_date'])->format('F d, Y') }}
-                    </p>
-                    @endif
-                </div>
             </a>
         </article>
             @endforeach

@@ -57,33 +57,6 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Card Content -->
-                    <div class="p-3 bg-white dark:!bg-bg-card">
-                        <!-- Title - Bold Text, Always Visible -->
-                        <h2 class="text-lg font-bold text-gray-900 mb-1 group-hover:text-accent transition-colors duration-300 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700; line-height: 1.4;">
-                            {{ $movie['title'] ?? 'Unknown' }}
-                            <span class="font-normal text-gray-600 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">(Movie)</span>
-                        </h2>
-                        
-                        <!-- Content Details -->
-                        <p class="text-gray-600 text-xs mb-1 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400; line-height: 1.4;">
-                            Movie
-                            @if($movie['release_date'] ?? null)
-                                • {{ \Carbon\Carbon::parse($movie['release_date'])->format('Y') }}
-                            @endif
-                            @if($movie['vote_average'] ?? null)
-                                • ★ {{ number_format($movie['vote_average'], 1) }}
-                            @endif
-                        </p>
-                        
-                        <!-- Date -->
-                        @if($movie['release_date'] ?? null)
-                        <p class="text-gray-500 text-xs dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
-                            {{ \Carbon\Carbon::parse($movie['release_date'])->format('M d, Y') }}
-                        </p>
-                        @endif
-                    </div>
                 </a>
             </article>
             @endforeach
@@ -136,33 +109,6 @@
                                 @endif
                             </div>
                         </div>
-                    </div>
-                    
-                    <!-- Card Content -->
-                    <div class="p-3 bg-white dark:!bg-bg-card">
-                        <!-- Title - Bold Text, Always Visible -->
-                        <h2 class="text-lg font-bold text-gray-900 mb-1 group-hover:text-accent transition-colors duration-300 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700; line-height: 1.4;">
-                            {{ $tvShow['name'] ?? 'Unknown' }}
-                            <span class="font-normal text-gray-600 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">(TV Show)</span>
-                        </h2>
-                        
-                        <!-- Content Details -->
-                        <p class="text-gray-600 text-xs mb-1 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400; line-height: 1.4;">
-                            TV Show
-                            @if($tvShow['first_air_date'] ?? null)
-                                • {{ \Carbon\Carbon::parse($tvShow['first_air_date'])->format('Y') }}
-                            @endif
-                            @if($tvShow['vote_average'] ?? null)
-                                • ★ {{ number_format($tvShow['vote_average'], 1) }}
-                            @endif
-                        </p>
-                        
-                        <!-- Date -->
-                        @if($tvShow['first_air_date'] ?? null)
-                        <p class="text-gray-500 text-xs dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
-                            {{ \Carbon\Carbon::parse($tvShow['first_air_date'])->format('M d, Y') }}
-                        </p>
-                        @endif
                     </div>
                 </a>
             </article>

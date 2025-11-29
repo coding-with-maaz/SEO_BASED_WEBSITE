@@ -188,43 +188,6 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Card Content -->
-                        <div class="p-3 bg-white dark:!bg-bg-card">
-                            <!-- Title - Bold Text, Always Visible -->
-                            <h2 class="text-lg font-bold text-gray-900 mb-1 group-hover:text-accent transition-colors duration-300 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700; line-height: 1.4;">
-                                {{ $item['title'] }}
-                                @if($item['type'] === 'movie')
-                                    <span class="font-normal text-gray-600 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">(Movie)</span>
-                                @else
-                                    <span class="font-normal text-gray-600 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">(TV Show)</span>
-                                @endif
-                            </h2>
-                            
-                            <!-- Content Details - Like "Hindi Dubbed [ Episode 6 ADD ]" -->
-                            <p class="text-gray-600 text-xs mb-1 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400; line-height: 1.4;">
-                                @if($item['is_custom'] ?? false)
-                                    @php
-                                        $typeLabel = ucfirst(str_replace('_', ' ', $item['content_type_name'] ?? $item['type'] ?? 'Movie'));
-                                        $dubbing = $item['dubbing_language'] ? ucfirst($item['dubbing_language']) . ' Dubbed' : '';
-                                    @endphp
-                                    {{ $typeLabel }}@if($dubbing) - {{ $dubbing }}@endif
-                                @else
-                                    @if($item['type'] === 'movie')
-                                        Movie - [ Full Movie ]
-                                    @else
-                                        TV Series - [ Episode 1 ADD ]
-                                    @endif
-                                @endif
-                            </p>
-                            
-                            <!-- Date - Smaller Lighter Gray Text -->
-                            @if($item['date'])
-                            <p class="text-gray-500 text-xs dark:!text-text-tertiary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
-                                {{ \Carbon\Carbon::parse($item['date'])->format('F d, Y') }}
-                            </p>
-                            @endif
-                        </div>
                     </a>
                 </article>
                 @endforeach
