@@ -604,7 +604,8 @@
                     <li><a href="{{ route('completed') }}" class="text-gray-900 hover:text-accent transition-colors font-semibold dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Completed</a></li>
                     <li><a href="{{ route('dmca') }}" class="text-gray-900 hover:text-accent transition-colors font-semibold dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">DMCA</a></li>
                 </ul>
-                <form action="{{ route('search') }}" method="GET" class="hidden lg:flex items-center gap-2">
+                {{-- Search form commented out --}}
+                {{-- <form action="{{ route('search') }}" method="GET" class="hidden lg:flex items-center gap-2">
                     <input type="text" name="q" 
                            class="px-4 py-2 w-64 rounded-full bg-gray-100 border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all dark:!bg-bg-card dark:!border-border-primary dark:!text-white dark:!placeholder-text-muted" 
                            placeholder="Search movies or TV shows..." 
@@ -613,7 +614,7 @@
                     <button type="submit" class="px-6 py-2 bg-accent hover:bg-accent-light text-white font-semibold rounded-full transition-all hover:scale-105 hover:shadow-accent" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
                         Search
                     </button>
-                </form>
+                </form> --}}
                 <div class="flex items-center gap-4">
                     <!-- Theme Toggle -->
                     <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 border border-gray-300 transition-all dark:!bg-bg-card dark:!border-border-primary dark:!hover:bg-bg-card-hover" title="Toggle Theme">
