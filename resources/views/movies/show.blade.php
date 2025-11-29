@@ -252,9 +252,12 @@
         <div class="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
             @foreach(array_slice($cast, 0, 10) as $castMember)
             <div class="min-w-[100px] text-center flex-shrink-0">
-                @if(isset($castMember['profile_path']))
-                <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($castMember['profile_path'], 'w185') }}" 
-                     alt="{{ $castMember['name'] }}" 
+                @php
+                    $profilePath = !empty($castMember['profile_path']) ? $castMember['profile_path'] : null;
+                @endphp
+                @if($profilePath)
+                <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($profilePath, 'w185') }}" 
+                     alt="{{ $castMember['name'] ?? 'Unknown' }}" 
                      class="w-20 h-28 md:w-24 md:h-36 object-cover rounded-lg mb-2 shadow-lg mx-auto"
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="w-20 h-28 md:w-24 md:h-36 bg-gray-200 dark:bg-gray-800 rounded-lg mb-2 items-center justify-center hidden mx-auto">

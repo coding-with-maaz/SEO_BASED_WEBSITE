@@ -320,22 +320,45 @@
                     $castList = is_array($cast) ? $cast : [];
                 @endphp
                 @foreach(array_slice($castList, 0, 10) as $castMember)
+                    @php
+                        $castName = is_array($castMember) ? ($castMember['name'] ?? $castMember) : $castMember;
+                        $castCharacter = is_array($castMember) ? ($castMember['character'] ?? '') : '';
+                        $profilePath = is_array($castMember) && !empty($castMember['profile_path']) ? $castMember['profile_path'] : null;
+                    @endphp
                     <div class="min-w-[100px] text-center flex-shrink-0">
-                        <div class="w-20 h-28 md:w-24 md:h-36 bg-gray-200 dark:bg-gray-800 rounded-lg mb-2 flex items-center justify-center">
+                        @if($profilePath)
+                        <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($profilePath, 'w185') }}" 
+                             alt="{{ $castName }}" 
+                             class="w-20 h-28 md:w-24 md:h-36 object-cover rounded-lg mb-2 shadow-lg mx-auto"
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <div class="w-20 h-28 md:w-24 md:h-36 bg-gray-200 dark:bg-gray-800 rounded-lg mb-2 items-center justify-center hidden mx-auto">
                             <span class="text-gray-400 text-xs">No Photo</span>
                         </div>
-                        <p class="text-sm font-medium text-gray-900 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">{{ is_array($castMember) ? ($castMember['name'] ?? $castMember) : $castMember }}</p>
+                        @else
+                        <div class="w-20 h-28 md:w-24 md:h-36 bg-gray-200 dark:bg-gray-800 rounded-lg mb-2 flex items-center justify-center mx-auto">
+                            <span class="text-gray-400 text-xs">No Photo</span>
+                        </div>
+                        @endif
+                        <p class="text-sm font-medium text-gray-900 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">{{ $castName }}</p>
+                        @if($castCharacter)
+                        <p class="text-xs text-gray-600 dark:!text-text-secondary mt-1" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                            {{ $castCharacter }}
+                        </p>
+                        @endif
                     </div>
                 @endforeach
             @else
                 @foreach(array_slice($cast, 0, 10) as $castMember)
+                    @php
+                        $profilePath = !empty($castMember['profile_path']) ? $castMember['profile_path'] : null;
+                    @endphp
                     <div class="min-w-[100px] text-center flex-shrink-0">
-                        @if(isset($castMember['profile_path']))
-                        <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($castMember['profile_path'], 'w185') }}" 
-                             alt="{{ $castMember['name'] }}" 
+                        @if($profilePath)
+                        <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($profilePath, 'w185') }}" 
+                             alt="{{ $castMember['name'] ?? 'Unknown' }}" 
                              class="w-20 h-28 md:w-24 md:h-36 object-cover rounded-lg mb-2 shadow-lg mx-auto"
                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        <div class="w-20 h-28 md:w-24 md:h-36 bg-gray-200 dark:bg-gray-800 rounded-lg mb-2 items-center justify-center hidden">
+                        <div class="w-20 h-28 md:w-24 md:h-36 bg-gray-200 dark:bg-gray-800 rounded-lg mb-2 items-center justify-center hidden mx-auto">
                             <span class="text-gray-400 text-xs">No Photo</span>
                         </div>
                         @else

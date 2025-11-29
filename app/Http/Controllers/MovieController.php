@@ -88,9 +88,10 @@ class MovieController extends Controller
                             return [
                                 'name' => $castMember['name'] ?? $castMember,
                                 'character' => $castMember['character'] ?? '',
+                                'profile_path' => $castMember['profile_path'] ?? null,
                             ];
                         }
-                        return ['name' => $castMember, 'character' => ''];
+                        return ['name' => $castMember, 'character' => '', 'profile_path' => null];
                     }, is_array($content->cast) ? $content->cast : []) : [],
                 ],
                 'production_countries' => $content->country ? [['name' => $content->country]] : [],
