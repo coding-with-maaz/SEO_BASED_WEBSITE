@@ -5,11 +5,18 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Content;
 use App\Models\Cast;
+use App\Services\TmdbService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
 class CastController extends Controller
 {
+    protected $tmdb;
+
+    public function __construct(TmdbService $tmdb)
+    {
+        $this->tmdb = $tmdb;
+    }
     /**
      * Get cast members for a content
      */
@@ -32,22 +39,39 @@ class CastController extends Controller
     }
 
     /**
-     * Search for existing cast members
+     * Search for cast members on TMDB
      */
     public function search(Request $request)
     {
         $query = $request->get('q', '');
         
-        if (empty($query)) {
+        if (empty($query) || strlen($query) < 2) {
             return response()->json(['cast' => []]);
         }
         
-        $casts = Cast::where('name', 'like', '%' . $query . '%')
-            ->orderBy('name')
-            ->limit(10)
-            ->get();
+        // Search TMDB for persons/actors
+        $tmdbResults = $this->tmdb->searchPersons($query, 1);
         
-        return response()->json(['cast' => $casts]);
+        $cast = [];
+        
+        if ($tmdbResults && isset($tmdbResults['results']) && is_array($tmdbResults['results'])) {
+            foreach (array_slice($tmdbResults['results'], 0, 10) as $person) {
+                $profilePath = null;
+                if (!empty($person['profile_path'])) {
+                    $profilePath = $this->tmdb->getImageUrl($person['profile_path'], 'w185');
+                }
+                
+                $cast[] = [
+                    'id' => null, // TMDB person ID (not database cast ID)
+                    'tmdb_id' => $person['id'] ?? null,
+                    'name' => $person['name'] ?? 'Unknown',
+                    'profile_path' => $profilePath,
+                    'known_for_department' => $person['known_for_department'] ?? null,
+                ];
+            }
+        }
+        
+        return response()->json(['cast' => $cast]);
     }
 
     /**

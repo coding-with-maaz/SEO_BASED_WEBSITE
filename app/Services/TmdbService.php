@@ -144,6 +144,14 @@ class TmdbService
     }
 
     /**
+     * Search for people/actors on TMDB
+     */
+    public function searchPersons($query, $page = 1)
+    {
+        return $this->request('/search/person', ['query' => $query, 'page' => $page]);
+    }
+
+    /**
      * Get image URL
      * 
      * Available sizes:

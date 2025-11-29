@@ -480,14 +480,14 @@
                     </label>
                     <div class="relative">
                         <input type="text" id="search-cast-name" name="search_name" 
-                               placeholder="Type to search for existing cast member..."
+                               placeholder="Search for cast member on TMDB..."
                                oninput="searchCastMembers(this.value)"
                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent dark:!bg-bg-card-hover dark:!border-border-primary dark:!text-white">
                         <div id="cast-search-results" class="hidden absolute z-10 w-full mt-1 bg-white dark:!bg-bg-card border border-gray-300 dark:!border-border-primary rounded-lg shadow-lg max-h-60 overflow-y-auto">
                             <!-- Search results will appear here -->
                         </div>
                     </div>
-                    <p class="text-xs text-gray-500 dark:!text-text-secondary mt-1">Or enter new cast member details below</p>
+                    <p class="text-xs text-gray-500 dark:!text-text-secondary mt-1">Search TMDB for cast members or enter details manually below</p>
                 </div>
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
@@ -649,7 +649,7 @@ function renderCast() {
     `).join('');
 }
 
-// Search cast members
+// Search cast members from TMDB
 function searchCastMembers(query) {
     const resultsContainer = document.getElementById('cast-search-results');
     
@@ -657,6 +657,10 @@ function searchCastMembers(query) {
         resultsContainer.classList.add('hidden');
         return;
     }
+    
+    // Show loading state
+    resultsContainer.innerHTML = '<div class="p-3 text-gray-500 dark:!text-text-secondary text-sm">Searching TMDB...</div>';
+    resultsContainer.classList.remove('hidden');
     
     fetch(`/admin/contents/${contentId}/cast/search?q=${encodeURIComponent(query)}`, {
         headers: {
@@ -666,39 +670,54 @@ function searchCastMembers(query) {
     .then(response => response.json())
     .then(data => {
         if (data.cast && data.cast.length > 0) {
-            resultsContainer.innerHTML = data.cast.map(cast => `
+            resultsContainer.innerHTML = data.cast.map((person, index) => {
+                const name = (person.name || 'Unknown').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                const profilePath = (person.profile_path || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                const knownFor = (person.known_for_department || '').replace(/'/g, "\\'");
+                const tmdbId = person.tmdb_id || null;
+                
+                return `
                 <div class="p-3 hover:bg-gray-100 dark:!hover:bg-bg-card-hover cursor-pointer border-b border-gray-200 dark:!border-border-secondary last:border-b-0"
-                     onclick="selectExistingCast(${cast.id}, '${cast.name.replace(/'/g, "\\'")}', '${(cast.profile_path || '').replace(/'/g, "\\'")}')">
+                     onclick="selectTmdbCast(${tmdbId || 'null'}, '${name}', '${profilePath}', '${knownFor}')">
                     <div class="flex items-center gap-3">
-                        ${cast.profile_path ? 
-                            `<img src="${cast.profile_path}" alt="${cast.name}" class="w-12 h-16 object-cover rounded" onerror="this.style.display='none'">` :
+                        ${profilePath ? 
+                            `<img src="${profilePath}" alt="${name}" class="w-12 h-16 object-cover rounded" onerror="this.style.display='none'">` :
                             `<div class="w-12 h-16 bg-gray-200 dark:!bg-gray-800 rounded flex items-center justify-center">
                                 <span class="text-gray-400 text-xs">No Photo</span>
                             </div>`
                         }
-                        <div>
-                            <p class="font-semibold text-gray-900 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">${cast.name}</p>
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-900 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">${name}</p>
+                            ${knownFor ? `<p class="text-xs text-gray-500 dark:!text-text-secondary mt-1">${knownFor}</p>` : ''}
+                            <p class="text-xs text-blue-600 dark:!text-blue-400 mt-1">From TMDB</p>
                         </div>
                     </div>
                 </div>
-            `).join('');
+            `;
+            }).join('');
             resultsContainer.classList.remove('hidden');
         } else {
-            resultsContainer.innerHTML = '<div class="p-3 text-gray-500 dark:!text-text-secondary text-sm">No cast members found. You can create a new one below.</div>';
+            resultsContainer.innerHTML = '<div class="p-3 text-gray-500 dark:!text-text-secondary text-sm">No cast members found on TMDB. You can create a new one manually below.</div>';
             resultsContainer.classList.remove('hidden');
         }
     })
     .catch(error => {
         console.error('Error searching cast:', error);
-        resultsContainer.classList.add('hidden');
+        resultsContainer.innerHTML = '<div class="p-3 text-red-500 dark:!text-red-400 text-sm">Error searching TMDB. Please try again.</div>';
+        resultsContainer.classList.remove('hidden');
     });
 }
 
-// Select existing cast from search results
-function selectExistingCast(castId, name, profilePath) {
-    document.getElementById('add-cast-id').value = castId;
+// Select TMDB cast member from search results
+function selectTmdbCast(tmdbId, name, profilePath, knownFor) {
+    // Clear any existing cast_id (for database cast)
+    document.getElementById('add-cast-id').value = '';
+    
+    // Fill in the form fields
     document.getElementById('add-cast-name').value = name;
     document.getElementById('add-cast-profile').value = profilePath || '';
+    
+    // Hide search results
     document.getElementById('cast-search-results').classList.add('hidden');
     document.getElementById('search-cast-name').value = '';
 }
