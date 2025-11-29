@@ -9,6 +9,40 @@ use Illuminate\Http\Request;
 class CastController extends Controller
 {
     /**
+     * Display a listing of cast members.
+     */
+    public function index(Request $request)
+    {
+        $page = (int)$request->get('page', 1);
+        $perPage = 24; // Items per page
+        
+        // Get all casts with content count
+        $query = Cast::withCount('contents');
+        
+        // Search filter
+        if ($request->has('search') && $request->search) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+        
+        // Get total count for pagination
+        $totalCasts = $query->count();
+        $totalPages = max(1, ceil($totalCasts / $perPage));
+        
+        // Paginate casts
+        $casts = $query->orderBy('name', 'asc')
+            ->skip(($page - 1) * $perPage)
+            ->take($perPage)
+            ->get();
+
+        return view('cast.index', [
+            'casts' => $casts,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'search' => $request->search ?? '',
+        ]);
+    }
+
+    /**
      * Display the cast member detail page.
      */
     public function show($slug)

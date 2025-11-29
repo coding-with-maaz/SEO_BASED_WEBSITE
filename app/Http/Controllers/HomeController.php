@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Content;
+use App\Models\Cast;
 use App\Services\TmdbService;
 use Illuminate\Http\Request;
 
@@ -82,11 +83,20 @@ class HomeController extends Controller
             ->take(5)
             ->get();
 
+        // Get popular cast members (with most content)
+        $popularCasts = Cast::withCount('contents')
+            ->having('contents_count', '>', 0)
+            ->orderBy('contents_count', 'desc')
+            ->orderBy('name', 'asc')
+            ->take(12)
+            ->get();
+
         return view('home', [
             'allContent' => $allContent,
             'currentPage' => $page,
             'totalPages' => max(1, $totalPages),
             'popularContent' => $popularContent,
+            'popularCasts' => $popularCasts,
         ]);
     }
 }

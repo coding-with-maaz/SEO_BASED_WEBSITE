@@ -49,6 +49,9 @@
                 <a href="{{ route('tv-shows.index') }}" class="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-full transition-all duration-300 text-sm" style="font-family: 'Poppins', sans-serif; font-weight: 500;">
                     TV Shows
                 </a>
+                <a href="{{ route('cast.index') }}" class="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-full transition-all duration-300 text-sm" style="font-family: 'Poppins', sans-serif; font-weight: 500;">
+                    Cast
+                </a>
                 <a href="{{ route('movies.index', ['type' => 'top_rated']) }}" class="px-5 py-2.5 bg-gray-700 hover:bg-gray-600 text-white rounded-full transition-all duration-300 text-sm" style="font-family: 'Poppins', sans-serif; font-weight: 500;">
                     Top Rated
                 </a>
@@ -199,6 +202,61 @@
                 </div>
                 @endif
             </div>
+
+            <!-- Popular Cast Section -->
+            @if(isset($popularCasts) && $popularCasts->count() > 0)
+            <div class="mt-8 md:mt-12 mb-8">
+                <div class="flex items-center justify-between mb-4 md:mb-6">
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">
+                        Popular Cast
+                    </h2>
+                    <a href="{{ route('cast.index') }}" class="text-sm text-accent hover:text-accent-light font-semibold transition-colors" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                        View All →
+                    </a>
+                </div>
+                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-12 gap-3 md:gap-4">
+                    @foreach($popularCasts as $cast)
+                    @php
+                        $profileUrl = null;
+                        $profilePath = $cast->profile_path ?? null;
+                        
+                        if ($profilePath) {
+                            if (str_starts_with($profilePath, 'http')) {
+                                $profileUrl = $profilePath;
+                            } elseif (str_starts_with($profilePath, '/')) {
+                                $profileUrl = app(\App\Services\TmdbService::class)->getImageUrl($profilePath, 'w185');
+                            } else {
+                                $profileUrl = $profilePath;
+                            }
+                        }
+                    @endphp
+                    <article class="group cursor-pointer">
+                        <a href="{{ route('cast.show', $cast->slug ?? $cast->id) }}" class="block">
+                            <div class="relative overflow-hidden rounded-lg bg-gray-200 dark:bg-gray-800 aspect-[2/3] mb-2">
+                                @if($profileUrl)
+                                <img src="{{ $profileUrl }}" 
+                                     alt="{{ $cast->name }}" 
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                     style="display: block !important; visibility: visible !important; opacity: 1 !important;"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                <div class="w-full h-full items-center justify-center hidden">
+                                    <span class="text-gray-400 text-xs">No Photo</span>
+                                </div>
+                                @else
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <span class="text-gray-400 text-xs">No Photo</span>
+                                </div>
+                                @endif
+                            </div>
+                            <h3 class="text-xs font-semibold text-gray-900 dark:!text-white group-hover:text-accent transition-colors text-center line-clamp-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                                {{ $cast->name }}
+                            </h3>
+                        </a>
+                    </article>
+                    @endforeach
+                </div>
+            </div>
+            @endif
 
             <!-- Pagination -->
             @if(isset($totalPages) && $totalPages > 1)

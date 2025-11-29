@@ -24,7 +24,8 @@ Route::get('/tv-shows/{slug}', [TvShowController::class, 'show'])->name('tv-show
 
 Route::get('/search', [SearchController::class, 'search'])->name('search');
 
-// Cast detail page
+// Cast pages
+Route::get('/cast', [PublicCastController::class, 'index'])->name('cast.index');
 Route::get('/cast/{slug}', [PublicCastController::class, 'show'])->name('cast.show');
 
 // Static pages
