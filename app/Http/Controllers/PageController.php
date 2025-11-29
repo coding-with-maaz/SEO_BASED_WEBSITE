@@ -21,6 +21,11 @@ class PageController extends Controller
         return view('pages.dmca');
     }
 
+    public function about()
+    {
+        return view('pages.about');
+    }
+
     public function completed(Request $request)
     {
         $page = $request->get('page', 1);

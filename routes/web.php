@@ -22,6 +22,7 @@ Route::get('/search', [SearchController::class, 'search'])->name('search');
 
 // Static pages
 Route::get('/dmca', [PageController::class, 'dmca'])->name('dmca');
+Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/completed', [PageController::class, 'completed'])->name('completed');
 Route::get('/upcoming', [PageController::class, 'upcoming'])->name('upcoming');
 
