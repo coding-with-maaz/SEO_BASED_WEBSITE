@@ -357,7 +357,16 @@ class ContentController extends Controller
         // 1. If cast already exists in database → reuse it (include in content)
         // 2. If cast doesn't exist → create new cast, then include it in content
         // This prevents duplicate cast records and ensures all casts are stored in database
-        if (isset($tmdbData['credits']['cast']) && is_array($tmdbData['credits']['cast'])) {
+        
+        // Log TMDB data structure for debugging
+        \Log::info('TMDB import - Checking for cast data', [
+            'has_credits' => isset($tmdbData['credits']),
+            'has_cast' => isset($tmdbData['credits']['cast']),
+            'cast_count' => isset($tmdbData['credits']['cast']) ? count($tmdbData['credits']['cast']) : 0,
+            'content_id' => $content->id ?? 'not_created_yet',
+        ]);
+        
+        if (isset($tmdbData['credits']['cast']) && is_array($tmdbData['credits']['cast']) && count($tmdbData['credits']['cast']) > 0) {
             $tmdbCastAttachments = [];
             $tmdbCastIds = [];
             
