@@ -125,6 +125,16 @@
                             <label class="block text-sm font-semibold text-gray-700 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Backdrop URL</label>
                             <input type="text" name="backdrop_path" value="{{ old('backdrop_path', $content->backdrop_path) }}" placeholder="https://..."
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent dark:!bg-bg-card-hover dark:!border-border-primary dark:!text-white">
+                            @if($content->backdrop_path)
+                                @php
+                                    $backdropUrl = str_starts_with($content->backdrop_path, 'http') 
+                                        ? $content->backdrop_path 
+                                        : ($content->content_type === 'tmdb' 
+                                            ? app(\App\Services\TmdbService::class)->getImageUrl($content->backdrop_path, 'w780')
+                                            : $content->backdrop_path);
+                                @endphp
+                                <img src="{{ $backdropUrl }}" alt="Backdrop" class="mt-2 w-full max-w-md h-auto rounded">
+                            @endif
                             @error('backdrop_path')
                                 <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
                             @enderror
