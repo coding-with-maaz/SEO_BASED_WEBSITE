@@ -76,6 +76,12 @@ class CastController extends Controller
 
     /**
      * Store a new cast member or link existing one
+     * 
+     * Flow:
+     * 1. If cast already exists in database → reuse it (include in content)
+     * 2. If cast doesn't exist → create new cast, then include it in content
+     * 
+     * This prevents duplicate cast records and ensures all casts are stored in database
      */
     public function store(Request $request, Content $content)
     {
@@ -94,7 +100,8 @@ class CastController extends Controller
             ], 422);
         }
 
-        // Check if cast_id is provided (existing cast from database)
+        // Step 1: Find or create cast member in database
+        // If cast_id is provided, use existing cast
         if ($request->cast_id) {
             $cast = Cast::find($request->cast_id);
             if (!$cast) {
@@ -104,23 +111,25 @@ class CastController extends Controller
                 ], 404);
             }
         } else {
-            // Check if cast with same name already exists in database (prevent duplicates)
-            $cast = Cast::where('name', $request->name)->first();
+            // Check if cast with same name already exists in database
+            $cast = Cast::where('name', trim($request->name))->first();
             
-            // If doesn't exist, create new cast member in database
-            if (!$cast) {
-                $cast = Cast::create([
-                    'name' => trim($request->name),
-                    'profile_path' => $request->profile_path ?? null,
-                ]);
-            } else {
+            if ($cast) {
+                // Cast already exists - reuse it (don't create duplicate)
                 // Update profile_path if provided and current is empty
                 if ($request->profile_path && empty($cast->profile_path)) {
                     $cast->update(['profile_path' => $request->profile_path]);
                 }
+            } else {
+                // Cast doesn't exist - create new cast member in database
+                $cast = Cast::create([
+                    'name' => trim($request->name),
+                    'profile_path' => $request->profile_path ?? null,
+                ]);
             }
         }
 
+        // Step 2: Attach cast to content (include cast in this movie/TV show)
         // Check if cast is already attached to this content (prevent duplicate attachments)
         $existingPivot = $content->castMembers()->where('casts.id', $cast->id)->first();
         
@@ -131,7 +140,7 @@ class CastController extends Controller
             ], 422);
         }
 
-        // Attach cast to content with character and order
+        // Include/attach cast to content with character and order
         $order = $request->order ?? ($content->castMembers()->count());
         $content->castMembers()->attach($cast->id, [
             'character' => $request->character ?? '',

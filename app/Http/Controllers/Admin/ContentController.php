@@ -343,6 +343,10 @@ class ContentController extends Controller
         }
 
         // Handle cast using the relationship - automatically add from TMDB
+        // Flow for each cast:
+        // 1. If cast already exists in database → reuse it (include in content)
+        // 2. If cast doesn't exist → create new cast, then include it in content
+        // This prevents duplicate cast records and ensures all casts are stored in database
         if (isset($tmdbData['credits']['cast']) && is_array($tmdbData['credits']['cast'])) {
             $tmdbCastAttachments = [];
             $tmdbCastIds = [];
@@ -363,22 +367,27 @@ class ContentController extends Controller
                     }
                 }
                 
-                // Check if cast member already exists in database (prevent duplicates)
-                // Use firstOrCreate to find existing cast by name or create new one
-                $cast = Cast::firstOrCreate(
-                    ['name' => trim($actorName)],
-                    ['profile_path' => $fullProfilePath]
-                );
+                // Step 1: Check if cast already exists in database
+                $cast = Cast::where('name', trim($actorName))->first();
                 
-                // Update profile path if empty and we have one
-                if (empty($cast->profile_path) && $fullProfilePath) {
-                    $cast->update(['profile_path' => $fullProfilePath]);
+                if ($cast) {
+                    // Cast already exists - reuse it (don't create duplicate)
+                    // Update profile path if empty and we have one
+                    if (empty($cast->profile_path) && $fullProfilePath) {
+                        $cast->update(['profile_path' => $fullProfilePath]);
+                    }
+                } else {
+                    // Cast doesn't exist - create new cast member in database
+                    $cast = Cast::create([
+                        'name' => trim($actorName),
+                        'profile_path' => $fullProfilePath,
+                    ]);
                 }
                 
                 // Track TMDB cast IDs
                 $tmdbCastIds[] = $cast->id;
                 
-                // Attach cast to content with character and order
+                // Step 2: Include/attach cast to content with character and order
                 // TMDB casts get order 0-19
                 $tmdbCastAttachments[$cast->id] = [
                     'character' => $character,
