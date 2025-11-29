@@ -614,10 +614,11 @@
         body.dark-mode article .aspect-video.bg-gray-200,
         html.dark article .aspect-video.dark\:bg-gray-800,
         body.dark-mode article .aspect-video.dark\:bg-gray-800 {
-            background-color: rgba(31, 41, 55, 0.5) !important;
+            background-color: transparent !important;
+            background: none !important;
         }
         
-        /* Ensure images are always visible in dark mode */
+        /* Ensure images are fully visible and bright in dark mode */
         html.dark article img,
         body.dark-mode article img,
         html.dark .aspect-video img,
@@ -631,8 +632,8 @@
             display: block !important;
             visibility: visible !important;
             opacity: 1 !important;
-            filter: none !important;
-            -webkit-filter: none !important;
+            filter: brightness(1.1) !important;
+            -webkit-filter: brightness(1.1) !important;
             max-width: 100% !important;
             height: auto !important;
         }
@@ -642,15 +643,16 @@
         body.dark-mode article .relative img,
         html.dark article .aspect-video img,
         body.dark-mode article .aspect-video img {
-            position: relative !important;
-            z-index: 0 !important;
+            position: absolute !important;
+            z-index: 1 !important;
         }
         
-        /* Prevent overlay from hiding images - overlay should be semi-transparent */
+        /* Make overlay lighter in dark mode to show more of the image */
         html.dark article .absolute.inset-0.bg-gradient-to-t,
         body.dark-mode article .absolute.inset-0.bg-gradient-to-t {
             pointer-events: none !important;
             mix-blend-mode: normal !important;
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0.15) 50%, transparent 70%) !important;
         }
         
         html.dark article .absolute.inset-0 > div,
