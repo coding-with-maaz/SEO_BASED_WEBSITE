@@ -110,8 +110,8 @@
                     <label class="block text-sm font-semibold text-gray-700 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Twitter Card Type</label>
                     <select name="twitter_card" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent dark:!bg-bg-card-hover dark:!border-border-primary dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
                         <option value="">Select type...</option>
-                        <option value="summary" @if(old('twitter_card') == 'summary') selected @endif>Summary</option>
-                        <option value="summary_large_image" @if(old('twitter_card') == 'summary_large_image') selected @endif>Summary Large Image</option>
+                        <option value="summary" {{ old('twitter_card') == 'summary' ? 'selected' : '' }}>Summary</option>
+                        <option value="summary_large_image" {{ old('twitter_card') == 'summary_large_image' ? 'selected' : '' }}>Summary Large Image</option>
                     </select>
                 </div>
                 
@@ -153,7 +153,7 @@
         <!-- Status -->
         <div class="mb-6">
             <label class="flex items-center gap-2">
-                <input type="checkbox" name="is_active" value="1" @if(old('is_active', true)) checked @endif class="w-4 h-4 text-accent border-gray-300 rounded focus:ring-accent">
+                <input type="checkbox" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }} class="w-4 h-4 text-accent border-gray-300 rounded focus:ring-accent">
                 <span class="text-sm font-semibold text-gray-700 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Active</span>
             </label>
         </div>
