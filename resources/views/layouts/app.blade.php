@@ -49,10 +49,35 @@
         <meta property="og:url" content="{{ url()->current() }}">
         @endif
         
+        <!-- Enhanced Open Graph Tags -->
+        @if($seo->og_type)
+        <meta property="og:type" content="{{ $seo->og_type }}">
+        @else
         <meta property="og:type" content="website">
-        <meta property="og:site_name" content="Nazaarabox">
+        @endif
         
-        <!-- Twitter Card Tags -->
+        @if($seo->og_site_name)
+        <meta property="og:site_name" content="{{ $seo->og_site_name }}">
+        @else
+        <meta property="og:site_name" content="Nazaarabox">
+        @endif
+        
+        @if($seo->og_locale)
+        <meta property="og:locale" content="{{ $seo->og_locale }}">
+        @endif
+        
+        @if($seo->og_video_url)
+        <meta property="og:video" content="{{ $seo->og_video_url }}">
+        <meta property="og:video:url" content="{{ $seo->og_video_url }}">
+        @if($seo->og_video_type)
+        <meta property="og:video:type" content="{{ $seo->og_video_type }}">
+        @endif
+        @if($seo->og_video_duration)
+        <meta property="og:video:duration" content="{{ $seo->og_video_duration }}">
+        @endif
+        @endif
+        
+        <!-- Enhanced Twitter Card Tags -->
         @if($seo->twitter_card)
         <meta name="twitter:card" content="{{ $seo->twitter_card }}">
         @endif
@@ -73,6 +98,14 @@
         <meta name="twitter:image" content="{{ $seo->twitter_image }}">
         @endif
         
+        @if($seo->twitter_site)
+        <meta name="twitter:site" content="{{ $seo->twitter_site }}">
+        @endif
+        
+        @if($seo->twitter_creator)
+        <meta name="twitter:creator" content="{{ $seo->twitter_creator }}">
+        @endif
+        
         <!-- Canonical URL -->
         @if($seo->canonical_url)
         <link rel="canonical" href="{{ $seo->canonical_url }}">
@@ -80,10 +113,91 @@
         <link rel="canonical" href="{{ url()->current() }}">
         @endif
         
+        <!-- Additional Meta Tags -->
+        @if($seo->meta_robots)
+        <meta name="robots" content="{{ $seo->meta_robots }}">
+        @endif
+        
+        @if($seo->meta_author)
+        <meta name="author" content="{{ $seo->meta_author }}">
+        @endif
+        
+        @if($seo->meta_language)
+        <meta http-equiv="content-language" content="{{ $seo->meta_language }}">
+        @endif
+        
+        @if($seo->meta_geo_region)
+        <meta name="geo.region" content="{{ $seo->meta_geo_region }}">
+        @endif
+        
+        @if($seo->meta_geo_placename)
+        <meta name="geo.placename" content="{{ $seo->meta_geo_placename }}">
+        @endif
+        
+        @if($seo->meta_geo_position_lat && $seo->meta_geo_position_lon)
+        <meta name="geo.position" content="{{ $seo->meta_geo_position_lat }};{{ $seo->meta_geo_position_lon }}">
+        @endif
+        
+        @if($seo->meta_revisit_after)
+        <meta name="revisit-after" content="{{ $seo->meta_revisit_after }}">
+        @endif
+        
+        <!-- Hreflang Tags -->
+        @if($seo->hreflang_tags && is_array($seo->hreflang_tags))
+            @foreach($seo->hreflang_tags as $lang => $url)
+            <link rel="alternate" hreflang="{{ $lang }}" href="{{ $url }}">
+            @endforeach
+        @endif
+        
+        <!-- Additional Custom Meta Tags -->
+        @if($seo->additional_meta_tags && is_array($seo->additional_meta_tags))
+            @foreach($seo->additional_meta_tags as $tag)
+                @if(isset($tag['name']) && isset($tag['content']))
+                <meta name="{{ $tag['name'] }}" content="{{ $tag['content'] }}">
+                @elseif(isset($tag['property']) && isset($tag['content']))
+                <meta property="{{ $tag['property'] }}" content="{{ $tag['content'] }}">
+                @endif
+            @endforeach
+        @endif
+        
+        <!-- Performance Optimization - Preconnect -->
+        @if($seo->preconnect_domains)
+            @foreach(explode(',', $seo->preconnect_domains) as $domain)
+            <link rel="preconnect" href="{{ trim($domain) }}" crossorigin>
+            @endforeach
+        @endif
+        
+        <!-- Performance Optimization - DNS Prefetch -->
+        @if($seo->dns_prefetch_domains)
+            @foreach(explode(',', $seo->dns_prefetch_domains) as $domain)
+            <link rel="dns-prefetch" href="{{ trim($domain) }}">
+            @endforeach
+        @endif
+        
+        <!-- AMP Link -->
+        @if($seo->enable_amp && $seo->amp_url)
+        <link rel="amphtml" href="{{ $seo->amp_url }}">
+        @endif
+        
         <!-- Schema Markup (JSON-LD) -->
         @if($seo->schema_markup)
+            @if(is_array($seo->schema_markup))
+                @foreach($seo->schema_markup as $schema)
+                <script type="application/ld+json">
+                    {!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+                </script>
+                @endforeach
+            @else
+            <script type="application/ld+json">
+                {!! $seo->schema_markup !!}
+            </script>
+            @endif
+        @endif
+        
+        <!-- Breadcrumb Schema -->
+        @if($seo->breadcrumb_schema)
         <script type="application/ld+json">
-            {!! is_array($seo->schema_markup) ? json_encode($seo->schema_markup, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) : $seo->schema_markup !!}
+            {!! is_array($seo->breadcrumb_schema) ? json_encode($seo->breadcrumb_schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) : $seo->breadcrumb_schema !!}
         </script>
         @endif
     @else
