@@ -46,6 +46,12 @@ php artisan key:generate
 ```env
 TMDB_API_KEY=your_api_key_here
 TMDB_ACCESS_TOKEN=your_access_token_here
+
+# SEO Configuration (optional)
+SEO_SUBMIT_TO_GOOGLE=true
+SEO_SUBMIT_TO_BING=true
+SEO_SUBMIT_TO_YANDEX=false
+SEO_AUTO_SUBMIT_SITEMAP=true
 ```
 
 6. Run migrations:
@@ -115,6 +121,47 @@ routes/
 ## API Caching
 
 The application uses Laravel's cache system to cache TMDB API responses for 1 hour (3600 seconds) to improve performance and reduce API calls.
+
+## SEO Features
+
+### Automatic Sitemap Submission
+The application can automatically submit your sitemap to search engines (Google, Bing, Yandex) when content is updated. Configure in `.env`:
+- `SEO_AUTO_SUBMIT_SITEMAP=true` - Enable automatic submission
+- `SEO_SUBMIT_TO_GOOGLE=true` - Submit to Google
+- `SEO_SUBMIT_TO_BING=true` - Submit to Bing
+- `SEO_SUBMIT_TO_YANDEX=false` - Submit to Yandex
+
+### SEO Tools
+
+**Admin Panel**: Access SEO tools at `/admin/seo-tools`
+
+**Command Line Tools**:
+```bash
+# Submit sitemap to search engines
+php artisan seo:submit-sitemap
+php artisan seo:submit-sitemap --engine=google
+
+# Check SEO score for a URL
+php artisan seo:check https://example.com/page
+
+# Check for broken links
+php artisan seo:check-links --sitemap
+php artisan seo:check-links --url=https://example.com
+php artisan seo:check-links --page=https://example.com/page
+
+# Test rich snippets / structured data
+php artisan seo:test-rich-snippets https://example.com/page
+```
+
+### SEO Features Included:
+- ✅ **Canonical URLs** - Automatically generated for all pages
+- ✅ **Automatic Sitemap Submission** - Submit to Google, Bing, Yandex
+- ✅ **SEO Score Checker** - Analyze SEO score for any URL
+- ✅ **Broken Link Checker** - Find and fix broken links
+- ✅ **Rich Snippets Tester** - Validate structured data (JSON-LD, Microdata, RDFa)
+- ✅ **Schema.org Markup** - Automatic structured data generation
+- ✅ **Open Graph Tags** - Social media sharing optimization
+- ✅ **Twitter Cards** - Twitter sharing optimization
 
 ## Technologies Used
 

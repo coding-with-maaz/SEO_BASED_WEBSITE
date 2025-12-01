@@ -382,6 +382,17 @@ class SitemapService
     public function clearCache(): void
     {
         Cache::forget('sitemap_all_urls');
+        
+        // Auto-submit sitemap to search engines if enabled
+        if (env('SEO_AUTO_SUBMIT_SITEMAP', true)) {
+            try {
+                $submissionService = app(\App\Services\SitemapSubmissionService::class);
+                $submissionService->submitAndSave();
+            } catch (\Exception $e) {
+                // Log error but don't break the flow
+                \Illuminate\Support\Facades\Log::warning('Failed to auto-submit sitemap: ' . $e->getMessage());
+            }
+        }
     }
 }
 

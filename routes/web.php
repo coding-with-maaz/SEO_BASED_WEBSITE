@@ -18,6 +18,8 @@ use App\Http\Controllers\Admin\CommentController as AdminCommentController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\RobotsController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ShareController;
+use App\Http\Controllers\Admin\SeoToolsController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -57,6 +59,10 @@ Route::post('/comments', [CommentController::class, 'store'])->name('comments.st
 Route::get('/comments/{contentId}', [CommentController::class, 'getComments'])->name('comments.get');
 Route::post('/comments/{id}/like', [CommentController::class, 'like'])->name('comments.like');
 Route::post('/comments/{id}/dislike', [CommentController::class, 'dislike'])->name('comments.dislike');
+
+// Share tracking routes
+Route::post('/share/track', [ShareController::class, 'track'])->name('share.track');
+Route::get('/share/stats', [ShareController::class, 'stats'])->name('share.stats');
 
 // Admin routes for custom content management
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -118,4 +124,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('comments/{comment}/pin', [AdminCommentController::class, 'togglePin'])->name('comments.pin');
     Route::post('comments/bulk-action', [AdminCommentController::class, 'bulkAction'])->name('comments.bulk-action');
     Route::delete('comments/{comment}', [AdminCommentController::class, 'destroy'])->name('comments.destroy');
+    
+    // SEO Tools
+    Route::prefix('seo-tools')->name('seo-tools.')->group(function () {
+        Route::get('/', [SeoToolsController::class, 'index'])->name('index');
+        Route::post('submit-sitemap', [SeoToolsController::class, 'submitSitemap'])->name('submit-sitemap');
+        Route::post('check-seo', [SeoToolsController::class, 'checkSeo'])->name('check-seo');
+        Route::post('check-links', [SeoToolsController::class, 'checkBrokenLinks'])->name('check-links');
+        Route::post('test-rich-snippets', [SeoToolsController::class, 'testRichSnippets'])->name('test-rich-snippets');
+        Route::get('submission-history', [SeoToolsController::class, 'submissionHistory'])->name('submission-history');
+    });
 });
