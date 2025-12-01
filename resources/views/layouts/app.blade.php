@@ -21,6 +21,7 @@
             'dmca' => 'dmca',
             'completed' => 'completed',
             'upcoming' => 'upcoming',
+            'how-to-download' => 'how-to-download',
         ];
         
         $detectedPageKey = $pageKeyMap[$routeName] ?? null;
@@ -817,34 +818,29 @@
     </style>
 </head>
 <body>
-    <nav class="sticky top-0 z-50 bg-white backdrop-blur-lg shadow-lg border-b border-gray-200 dark:!bg-bg-primary/95 dark:!border-border-primary">
+    <nav class="sticky top-0 z-[100] bg-white backdrop-blur-lg shadow-lg border-b border-gray-200 dark:!bg-bg-primary/95 dark:!border-border-primary">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 md:h-20">
-                <a href="{{ route('home') }}" class="text-2xl md:text-3xl font-bold text-accent hover:text-accent-light transition-colors dark-mode:text-accent" style="font-family: 'Poppins', sans-serif; font-weight: 800; letter-spacing: -0.03em;">
+                <!-- Logo -->
+                <a href="{{ route('home') }}" class="text-xl sm:text-2xl md:text-3xl font-bold text-accent hover:text-accent-light transition-colors dark-mode:text-accent flex-shrink-0" style="font-family: 'Poppins', sans-serif; font-weight: 800; letter-spacing: -0.03em;">
                     Nazaarabox
                 </a>
-                <ul class="hidden md:flex items-center gap-6 lg:gap-8">
-                    <li><a href="{{ route('home') }}" class="text-gray-900 hover:text-accent transition-colors font-semibold dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Home</a></li>
-                    <li><a href="{{ route('movies.index') }}" class="text-gray-900 hover:text-accent transition-colors font-semibold dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Movies</a></li>
-                    <li><a href="{{ route('tv-shows.index') }}" class="text-gray-900 hover:text-accent transition-colors font-semibold dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">TV Shows</a></li>
-                    <li><a href="{{ route('cast.index') }}" class="text-gray-900 hover:text-accent transition-colors font-semibold dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Cast</a></li>
-                    <li><a href="{{ route('upcoming') }}" class="text-gray-900 hover:text-accent transition-colors font-semibold dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Upcoming</a></li>
-                    <li><a href="{{ route('completed') }}" class="text-gray-900 hover:text-accent transition-colors font-semibold dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Completed</a></li>
-                    <li><a href="{{ route('about') }}" class="text-gray-900 hover:text-accent transition-colors font-semibold dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">About Us</a></li>
-                    <li><a href="{{ route('dmca') }}" class="text-gray-900 hover:text-accent transition-colors font-semibold dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">DMCA</a></li>
+                
+                <!-- Desktop Navigation - Always visible on md and above -->
+                <ul class="hidden md:flex items-center gap-2 lg:gap-4 xl:gap-6 flex-wrap justify-center flex-1 mx-4">
+                    <li><a href="{{ route('home') }}" class="text-gray-900 hover:text-accent transition-colors font-semibold dark:!text-white text-xs lg:text-sm xl:text-base whitespace-nowrap" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Home</a></li>
+                    <li><a href="{{ route('movies.index') }}" class="text-gray-900 hover:text-accent transition-colors font-semibold dark:!text-white text-xs lg:text-sm xl:text-base whitespace-nowrap" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Movies</a></li>
+                    <li><a href="{{ route('tv-shows.index') }}" class="text-gray-900 hover:text-accent transition-colors font-semibold dark:!text-white text-xs lg:text-sm xl:text-base whitespace-nowrap" style="font-family: 'Poppins', sans-serif; font-weight: 600;">TV Shows</a></li>
+                    <li><a href="{{ route('cast.index') }}" class="text-gray-900 hover:text-accent transition-colors font-semibold dark:!text-white text-xs lg:text-sm xl:text-base whitespace-nowrap" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Cast</a></li>
+                    <li><a href="{{ route('upcoming') }}" class="text-gray-900 hover:text-accent transition-colors font-semibold dark:!text-white text-xs lg:text-sm xl:text-base whitespace-nowrap" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Upcoming</a></li>
+                    <li><a href="{{ route('completed') }}" class="text-gray-900 hover:text-accent transition-colors font-semibold dark:!text-white text-xs lg:text-sm xl:text-base whitespace-nowrap" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Completed</a></li>
+                    <li><a href="{{ route('how-to-download') }}" class="text-gray-900 hover:text-accent transition-colors font-semibold dark:!text-white text-xs lg:text-sm xl:text-base whitespace-nowrap" style="font-family: 'Poppins', sans-serif; font-weight: 600;">How to Download</a></li>
+                    <li><a href="{{ route('about') }}" class="text-gray-900 hover:text-accent transition-colors font-semibold dark:!text-white text-xs lg:text-sm xl:text-base whitespace-nowrap" style="font-family: 'Poppins', sans-serif; font-weight: 600;">About Us</a></li>
+                    <li><a href="{{ route('dmca') }}" class="text-gray-900 hover:text-accent transition-colors font-semibold dark:!text-white text-xs lg:text-sm xl:text-base whitespace-nowrap" style="font-family: 'Poppins', sans-serif; font-weight: 600;">DMCA</a></li>
                 </ul>
-                {{-- Search form commented out --}}
-                {{-- <form action="{{ route('search') }}" method="GET" class="hidden lg:flex items-center gap-2">
-                    <input type="text" name="q" 
-                           class="px-4 py-2 w-64 rounded-full bg-gray-100 border border-gray-300 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all dark:!bg-bg-card dark:!border-border-primary dark:!text-white dark:!placeholder-text-muted" 
-                           placeholder="Search movies or TV shows..." 
-                           value="{{ request('q') }}"
-                           style="font-family: 'Poppins', sans-serif; font-weight: 400;">
-                    <button type="submit" class="px-6 py-2 bg-accent hover:bg-accent-light text-white font-semibold rounded-full transition-all hover:scale-105 hover:shadow-accent" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
-                        Search
-                    </button>
-                </form> --}}
-                <div class="flex items-center gap-4">
+                
+                <!-- Right Side Actions -->
+                <div class="flex items-center gap-2 sm:gap-3 md:gap-4 flex-shrink-0">
                     <!-- Theme Toggle -->
                     <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 hover:bg-gray-200 border border-gray-300 transition-all dark:!bg-bg-card dark:!border-border-primary dark:!hover:bg-bg-card-hover" title="Toggle Theme">
                         <svg id="sunIcon" class="w-5 h-5 text-gray-900 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -854,11 +850,119 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
                         </svg>
                     </button>
-                    <button class="md:hidden text-gray-900 hover:text-accent dark:!text-white">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    
+                    <!-- Mobile Menu Toggle Button - Only visible on mobile -->
+                    <button id="mobileMenuToggle" class="md:hidden p-2 rounded-lg text-gray-900 hover:text-accent dark:!text-white hover:bg-gray-100 dark:!hover:bg-bg-card-hover transition-all" aria-label="Toggle menu">
+                        <svg id="menuIcon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                         </svg>
+                        <svg id="closeIcon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
                     </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Mobile Menu Overlay -->
+        <div id="mobileMenuOverlay" class="fixed inset-0 bg-black/50 z-[60] hidden md:hidden transition-opacity duration-300" onclick="closeMobileMenu()"></div>
+        
+        <!-- Mobile Menu - Full Screen on Mobile, Connected to Navbar -->
+        <div id="mobileMenu" class="fixed top-16 md:top-0 md:right-0 left-0 md:left-auto h-[calc(100vh-4rem)] md:h-full w-full md:w-[85vw] md:max-w-md bg-white dark:!bg-bg-primary shadow-2xl z-[70] transform translate-x-full md:translate-x-full transition-transform duration-300 ease-in-out md:hidden overflow-y-auto">
+            <div class="flex flex-col h-full">
+                <!-- Mobile Menu Header -->
+                <div class="flex items-center justify-between p-5 sm:p-6 border-b border-gray-200 dark:!border-border-primary bg-gradient-to-r from-accent/10 to-transparent">
+                    <span class="text-2xl sm:text-3xl font-bold text-accent" style="font-family: 'Poppins', sans-serif; font-weight: 800;">Menu</span>
+                    <button id="mobileMenuClose" onclick="closeMobileMenu()" class="p-3 rounded-lg text-gray-900 hover:bg-gray-100 dark:!text-white dark:!hover:bg-bg-card-hover transition-all" aria-label="Close menu">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Mobile Menu Items -->
+                <nav class="flex-1 p-5 sm:p-6 overflow-y-auto">
+                    <ul class="space-y-3 sm:space-y-4">
+                        <li>
+                            <a href="{{ route('home') }}" onclick="closeMobileMenu()" class="flex items-center px-5 sm:px-6 py-4 sm:py-5 rounded-xl text-gray-900 hover:bg-gray-100 hover:text-accent dark:!text-white dark:!hover:bg-bg-card-hover transition-all font-semibold text-lg sm:text-xl shadow-sm hover:shadow-md" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                                <svg class="w-6 h-6 sm:w-7 sm:h-7 mr-4 sm:mr-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                </svg>
+                                <span>Home</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('movies.index') }}" onclick="closeMobileMenu()" class="flex items-center px-5 sm:px-6 py-4 sm:py-5 rounded-xl text-gray-900 hover:bg-gray-100 hover:text-accent dark:!text-white dark:!hover:bg-bg-card-hover transition-all font-semibold text-lg sm:text-xl shadow-sm hover:shadow-md" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                                <svg class="w-6 h-6 sm:w-7 sm:h-7 mr-4 sm:mr-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path>
+                                </svg>
+                                <span>Movies</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('tv-shows.index') }}" onclick="closeMobileMenu()" class="flex items-center px-5 sm:px-6 py-4 sm:py-5 rounded-xl text-gray-900 hover:bg-gray-100 hover:text-accent dark:!text-white dark:!hover:bg-bg-card-hover transition-all font-semibold text-lg sm:text-xl shadow-sm hover:shadow-md" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                                <svg class="w-6 h-6 sm:w-7 sm:h-7 mr-4 sm:mr-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                </svg>
+                                <span>TV Shows</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('cast.index') }}" onclick="closeMobileMenu()" class="flex items-center px-5 sm:px-6 py-4 sm:py-5 rounded-xl text-gray-900 hover:bg-gray-100 hover:text-accent dark:!text-white dark:!hover:bg-bg-card-hover transition-all font-semibold text-lg sm:text-xl shadow-sm hover:shadow-md" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                                <svg class="w-6 h-6 sm:w-7 sm:h-7 mr-4 sm:mr-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                                <span>Cast</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('upcoming') }}" onclick="closeMobileMenu()" class="flex items-center px-5 sm:px-6 py-4 sm:py-5 rounded-xl text-gray-900 hover:bg-gray-100 hover:text-accent dark:!text-white dark:!hover:bg-bg-card-hover transition-all font-semibold text-lg sm:text-xl shadow-sm hover:shadow-md" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                                <svg class="w-6 h-6 sm:w-7 sm:h-7 mr-4 sm:mr-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>Upcoming</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('completed') }}" onclick="closeMobileMenu()" class="flex items-center px-5 sm:px-6 py-4 sm:py-5 rounded-xl text-gray-900 hover:bg-gray-100 hover:text-accent dark:!text-white dark:!hover:bg-bg-card-hover transition-all font-semibold text-lg sm:text-xl shadow-sm hover:shadow-md" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                                <svg class="w-6 h-6 sm:w-7 sm:h-7 mr-4 sm:mr-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>Completed</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('how-to-download') }}" onclick="closeMobileMenu()" class="flex items-center px-5 sm:px-6 py-4 sm:py-5 rounded-xl text-gray-900 hover:bg-gray-100 hover:text-accent dark:!text-white dark:!hover:bg-bg-card-hover transition-all font-semibold text-lg sm:text-xl shadow-sm hover:shadow-md" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                                <svg class="w-6 h-6 sm:w-7 sm:h-7 mr-4 sm:mr-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                </svg>
+                                <span>How to Download</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('about') }}" onclick="closeMobileMenu()" class="flex items-center px-5 sm:px-6 py-4 sm:py-5 rounded-xl text-gray-900 hover:bg-gray-100 hover:text-accent dark:!text-white dark:!hover:bg-bg-card-hover transition-all font-semibold text-lg sm:text-xl shadow-sm hover:shadow-md" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                                <svg class="w-6 h-6 sm:w-7 sm:h-7 mr-4 sm:mr-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>About Us</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('dmca') }}" onclick="closeMobileMenu()" class="flex items-center px-5 sm:px-6 py-4 sm:py-5 rounded-xl text-gray-900 hover:bg-gray-100 hover:text-accent dark:!text-white dark:!hover:bg-bg-card-hover transition-all font-semibold text-lg sm:text-xl shadow-sm hover:shadow-md" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                                <svg class="w-6 h-6 sm:w-7 sm:h-7 mr-4 sm:mr-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                </svg>
+                                <span>DMCA</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                
+                <!-- Mobile Menu Footer -->
+                <div class="p-5 sm:p-6 border-t border-gray-200 dark:!border-border-primary bg-gray-50 dark:!bg-bg-card-hover">
+                    <div class="text-center text-base sm:text-lg text-gray-600 dark:!text-text-secondary font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 500;">
+                        © {{ date('Y') }} Nazaarabox
+                    </div>
                 </div>
             </div>
         </div>
@@ -929,6 +1033,64 @@
                 moonIcon.classList.add('hidden');
             }
         });
+        
+        // Mobile Menu Functionality
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+        const menuIcon = document.getElementById('menuIcon');
+        const closeIcon = document.getElementById('closeIcon');
+        const bodyElement = document.body;
+        
+        function openMobileMenu() {
+            mobileMenu.classList.remove('translate-x-full');
+            mobileMenuOverlay.classList.remove('hidden');
+            bodyElement.style.overflow = 'hidden'; // Prevent body scroll when menu is open
+            menuIcon.classList.add('hidden');
+            closeIcon.classList.remove('hidden');
+        }
+        
+        function closeMobileMenu() {
+            mobileMenu.classList.add('translate-x-full');
+            mobileMenuOverlay.classList.add('hidden');
+            bodyElement.style.overflow = ''; // Restore body scroll
+            menuIcon.classList.remove('hidden');
+            closeIcon.classList.add('hidden');
+        }
+        
+        // Toggle mobile menu
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', () => {
+                if (mobileMenu.classList.contains('translate-x-full')) {
+                    openMobileMenu();
+                } else {
+                    closeMobileMenu();
+                }
+            });
+        }
+        
+        // Close menu when clicking overlay
+        if (mobileMenuOverlay) {
+            mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+        }
+        
+        // Close menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !mobileMenu.classList.contains('translate-x-full')) {
+                closeMobileMenu();
+            }
+        });
+        
+        // Close menu when window is resized to desktop size
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 768 && !mobileMenu.classList.contains('translate-x-full')) {
+                closeMobileMenu();
+            }
+        });
+        
+        // Make functions globally available for onclick handlers
+        window.openMobileMenu = openMobileMenu;
+        window.closeMobileMenu = closeMobileMenu;
     </script>
 </body>
 </html>

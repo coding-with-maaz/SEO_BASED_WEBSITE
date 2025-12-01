@@ -68,10 +68,6 @@
                                                 $imageUrl = $imagePath;
                                             }
                                         }
-                                        } else {
-                                            // Custom content - use URL/path directly from database
-                                            $imageUrl = $imagePath;
-                                        }
                                     }
                                 @endphp
                                 <img src="{{ $imageUrl ?? 'https://via.placeholder.com/780x439?text=No+Image' }}" 

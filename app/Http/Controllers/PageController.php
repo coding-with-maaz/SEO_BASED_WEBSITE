@@ -125,5 +125,12 @@ class PageController extends Controller
             'seo' => $this->seo->forPage('upcoming'),
         ]);
     }
+
+    public function howToDownload()
+    {
+        return view('pages.how-to-download', [
+            'seo' => $this->seo->forPage('how-to-download'),
+        ]);
+    }
 }
 

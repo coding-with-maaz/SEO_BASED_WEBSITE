@@ -48,6 +48,7 @@ Route::get('/dmca', [PageController::class, 'dmca'])->name('dmca');
 Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/completed', [PageController::class, 'completed'])->name('completed');
 Route::get('/upcoming', [PageController::class, 'upcoming'])->name('upcoming');
+Route::get('/how-to-download', [PageController::class, 'howToDownload'])->name('how-to-download');
 
 // Admin routes for custom content management
 Route::prefix('admin')->name('admin.')->group(function () {
