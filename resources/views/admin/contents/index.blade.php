@@ -103,12 +103,11 @@
                                             if (in_array($contentType, ['tmdb', 'article']) || str_starts_with($content->poster_path, '/')) {
                                                 $posterUrl = app(\App\Services\TmdbService::class)->getImageUrl($content->poster_path, 'w185');
                                             } else {
-                                                $posterUrl = asset('storage/' . $content->poster_path);
+                                                // For custom content, use the path directly (not from storage)
+                                                $posterUrl = $content->poster_path;
                                             }
                                         @endphp
                                         <img src="{{ $posterUrl }}" alt="{{ $content->title }}" class="w-full h-full object-cover">
-                                    @else
-                                        <img src="{{ asset('storage/' . $content->poster_path) }}" alt="{{ $content->title }}" class="w-full h-full object-cover">
                                     @endif
                                 @else
                                     <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">No Image</div>
