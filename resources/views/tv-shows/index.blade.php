@@ -4,6 +4,11 @@
 
 @section('content')
 <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
+    <!-- Breadcrumbs -->
+    <x-breadcrumbs :items="[
+        ['label' => 'TV Shows', 'url' => null]
+    ]" />
+    
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Main Content Area (2 columns on large screens) -->
         <div class="lg:col-span-2">

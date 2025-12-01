@@ -14,8 +14,10 @@ use App\Http\Controllers\Admin\EpisodeServerController;
 use App\Http\Controllers\Admin\ServerController;
 use App\Http\Controllers\Admin\CastController;
 use App\Http\Controllers\Admin\PageSeoController;
+use App\Http\Controllers\Admin\CommentController as AdminCommentController;
 use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\RobotsController;
+use App\Http\Controllers\CommentController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
@@ -49,6 +51,12 @@ Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/completed', [PageController::class, 'completed'])->name('completed');
 Route::get('/upcoming', [PageController::class, 'upcoming'])->name('upcoming');
 Route::get('/how-to-download', [PageController::class, 'howToDownload'])->name('how-to-download');
+
+// Comment routes
+Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
+Route::get('/comments/{contentId}', [CommentController::class, 'getComments'])->name('comments.get');
+Route::post('/comments/{id}/like', [CommentController::class, 'like'])->name('comments.like');
+Route::post('/comments/{id}/dislike', [CommentController::class, 'dislike'])->name('comments.dislike');
 
 // Admin routes for custom content management
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -101,4 +109,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     // Public Pages SEO Management
     Route::resource('page-seo', PageSeoController::class);
     
+    // Comments Management
+    Route::get('comments', [AdminCommentController::class, 'index'])->name('comments.index');
+    Route::get('comments/{comment}', [AdminCommentController::class, 'show'])->name('comments.show');
+    Route::post('comments/{comment}/approve', [AdminCommentController::class, 'approve'])->name('comments.approve');
+    Route::post('comments/{comment}/reject', [AdminCommentController::class, 'reject'])->name('comments.reject');
+    Route::post('comments/{comment}/spam', [AdminCommentController::class, 'markAsSpam'])->name('comments.spam');
+    Route::post('comments/{comment}/pin', [AdminCommentController::class, 'togglePin'])->name('comments.pin');
+    Route::post('comments/bulk-action', [AdminCommentController::class, 'bulkAction'])->name('comments.bulk-action');
+    Route::delete('comments/{comment}', [AdminCommentController::class, 'destroy'])->name('comments.destroy');
 });

@@ -4,11 +4,126 @@
 
 @section('content')
 <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
+    <!-- Breadcrumbs -->
+    <x-breadcrumbs :items="[
+        ['label' => 'Search' . ($query ? ' - ' . $query : ''), 'url' => null]
+    ]" />
+    
+    <!-- Search Form & Filters -->
+    <div class="mb-8">
+        <form method="GET" action="{{ route('search') }}" class="space-y-4">
+            <!-- Search Bar -->
+            <div class="flex gap-2">
+                <input type="text" 
+                       name="q" 
+                       value="{{ $query }}" 
+                       placeholder="Search movies, TV shows..." 
+                       class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent dark:!bg-bg-card-hover dark:!border-border-primary dark:!text-white"
+                       style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                <button type="submit" class="px-6 py-3 bg-accent hover:bg-accent-light text-white rounded-lg transition-colors font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                    Search
+                </button>
+            </div>
+
+            <!-- Advanced Filters -->
+            <div class="bg-white dark:!bg-bg-card border border-gray-200 dark:!border-border-secondary rounded-lg p-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-gray-900 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">
+                        Advanced Filters
+                    </h3>
+                    @if($filters['genre'] || $filters['year'] || $filters['min_rating'] || $filters['type'] || $filters['sort_by'] !== 'relevance' || $filters['content_type'] !== 'all')
+                    <a href="{{ route('search', ['q' => $query]) }}" class="text-sm text-accent hover:underline" style="font-family: 'Poppins', sans-serif; font-weight: 500;">
+                        Clear Filters
+                    </a>
+                    @endif
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+                    <!-- Content Type -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Content</label>
+                        <select name="content_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent dark:!bg-bg-card-hover dark:!border-border-primary dark:!text-white text-sm">
+                            <option value="all" {{ $filters['content_type'] === 'all' ? 'selected' : '' }}>All</option>
+                            <option value="movies" {{ $filters['content_type'] === 'movies' ? 'selected' : '' }}>Movies</option>
+                            <option value="tv_shows" {{ $filters['content_type'] === 'tv_shows' ? 'selected' : '' }}>TV Shows</option>
+                        </select>
+                    </div>
+
+                    <!-- Genre -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Genre</label>
+                        <select name="genre" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent dark:!bg-bg-card-hover dark:!border-border-primary dark:!text-white text-sm">
+                            <option value="">All Genres</option>
+                            @foreach($allGenres as $genreName)
+                                <option value="{{ $genreName }}" {{ $filters['genre'] === $genreName ? 'selected' : '' }}>{{ $genreName }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Year -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Year</label>
+                        <select name="year" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent dark:!bg-bg-card-hover dark:!border-border-primary dark:!text-white text-sm">
+                            <option value="">All Years</option>
+                            @foreach($years as $yearOption)
+                                <option value="{{ $yearOption }}" {{ $filters['year'] == $yearOption ? 'selected' : '' }}>{{ $yearOption }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Rating -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Min Rating</label>
+                        <select name="min_rating" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent dark:!bg-bg-card-hover dark:!border-border-primary dark:!text-white text-sm">
+                            <option value="">Any Rating</option>
+                            <option value="1" {{ $filters['min_rating'] == '1' ? 'selected' : '' }}>1+ ⭐</option>
+                            <option value="2" {{ $filters['min_rating'] == '2' ? 'selected' : '' }}>2+ ⭐</option>
+                            <option value="3" {{ $filters['min_rating'] == '3' ? 'selected' : '' }}>3+ ⭐</option>
+                            <option value="4" {{ $filters['min_rating'] == '4' ? 'selected' : '' }}>4+ ⭐</option>
+                            <option value="5" {{ $filters['min_rating'] == '5' ? 'selected' : '' }}>5+ ⭐</option>
+                            <option value="6" {{ $filters['min_rating'] == '6' ? 'selected' : '' }}>6+ ⭐</option>
+                            <option value="7" {{ $filters['min_rating'] == '7' ? 'selected' : '' }}>7+ ⭐</option>
+                            <option value="8" {{ $filters['min_rating'] == '8' ? 'selected' : '' }}>8+ ⭐</option>
+                            <option value="9" {{ $filters['min_rating'] == '9' ? 'selected' : '' }}>9+ ⭐</option>
+                        </select>
+                    </div>
+
+                    <!-- Type -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Type</label>
+                        <select name="type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent dark:!bg-bg-card-hover dark:!border-border-primary dark:!text-white text-sm">
+                            <option value="">All Types</option>
+                            @foreach(\App\Models\Content::getContentTypes() as $typeKey => $typeLabel)
+                                <option value="{{ $typeKey }}" {{ $filters['type'] === $typeKey ? 'selected' : '' }}>{{ $typeLabel }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Sort -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Sort By</label>
+                        <select name="sort_by" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent dark:!bg-bg-card-hover dark:!border-border-primary dark:!text-white text-sm">
+                            <option value="relevance" {{ $filters['sort_by'] === 'relevance' ? 'selected' : '' }}>Relevance</option>
+                            <option value="newest" {{ $filters['sort_by'] === 'newest' ? 'selected' : '' }}>Newest</option>
+                            <option value="oldest" {{ $filters['sort_by'] === 'oldest' ? 'selected' : '' }}>Oldest</option>
+                            <option value="rating" {{ $filters['sort_by'] === 'rating' ? 'selected' : '' }}>Highest Rating</option>
+                            <option value="views" {{ $filters['sort_by'] === 'views' ? 'selected' : '' }}>Most Views</option>
+                            <option value="title" {{ $filters['sort_by'] === 'title' ? 'selected' : '' }}>Title A-Z</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Main Content Area (2 columns on large screens) -->
         <div class="lg:col-span-2">
     <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:!text-white mb-8 pl-4 border-l-4 border-accent" style="font-family: 'Poppins', sans-serif; font-weight: 700;">
         Search Results{{ $query ? ' for "' . $query . '"' : '' }}
+        @if($filters['genre'] || $filters['year'] || $filters['min_rating'] || $filters['type'])
+            <span class="text-lg text-gray-600 dark:!text-text-secondary font-normal">(Filtered)</span>
+        @endif
     </h2>
 
     @if(!empty($movies))
@@ -18,15 +133,32 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             @foreach($movies as $movie)
             <article class="group relative bg-white overflow-hidden cursor-pointer dark:!bg-bg-card transition-all duration-300">
-                <a href="{{ route('movies.show', $movie['id']) }}" class="block">
+                <a href="{{ route('movies.show', $movie['id'] ?? ('custom_' . ($movie['id'] ?? ''))) }}" class="block">
                     <!-- Full Image - Backdrop Image with 16:9 Aspect Ratio -->
                     <div class="relative overflow-hidden w-full aspect-video bg-gray-200 dark:bg-gray-800">
                         @php
                             $backdropPath = !empty($movie['backdrop_path']) ? $movie['backdrop_path'] : null;
                             $posterPath = !empty($movie['poster_path']) ? $movie['poster_path'] : null;
                             $imagePath = $backdropPath ?? $posterPath;
+                            
+                            // Handle image URL for custom content
+                            $imageUrl = null;
+                            if ($imagePath) {
+                                if (str_starts_with($imagePath, 'http')) {
+                                    $imageUrl = $imagePath;
+                                } elseif (isset($movie['is_custom']) && $movie['is_custom']) {
+                                    $contentType = $movie['content_type'] ?? 'custom';
+                                    if (in_array($contentType, ['tmdb', 'article']) || str_starts_with($imagePath, '/')) {
+                                        $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($imagePath, 'w780');
+                                    } else {
+                                        $imageUrl = asset('storage/' . $imagePath);
+                                    }
+                                } else {
+                                    $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($imagePath, 'w780');
+                                }
+                            }
                         @endphp
-                        <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($imagePath, 'w780') }}" 
+                        <img src="{{ $imageUrl ?? 'https://via.placeholder.com/780x439?text=No+Image' }}" 
                              alt="{{ $movie['title'] ?? 'Movie' }}" 
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                              style="display: block !important; visibility: visible !important; opacity: 1 !important; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"
@@ -71,15 +203,32 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             @foreach($tvShows as $tvShow)
             <article class="group relative bg-white overflow-hidden cursor-pointer dark:!bg-bg-card transition-all duration-300">
-                <a href="{{ route('tv-shows.show', $tvShow['id']) }}" class="block">
+                <a href="{{ route('tv-shows.show', $tvShow['id'] ?? ('custom_' . ($tvShow['id'] ?? ''))) }}" class="block">
                     <!-- Full Image - Backdrop Image with 16:9 Aspect Ratio -->
                     <div class="relative overflow-hidden w-full aspect-video bg-gray-200 dark:bg-gray-800" style="background-color: transparent !important;">
                         @php
                             $backdropPath = !empty($tvShow['backdrop_path']) ? $tvShow['backdrop_path'] : null;
                             $posterPath = !empty($tvShow['poster_path']) ? $tvShow['poster_path'] : null;
                             $imagePath = $backdropPath ?? $posterPath;
+                            
+                            // Handle image URL for custom content
+                            $imageUrl = null;
+                            if ($imagePath) {
+                                if (str_starts_with($imagePath, 'http')) {
+                                    $imageUrl = $imagePath;
+                                } elseif (isset($tvShow['is_custom']) && $tvShow['is_custom']) {
+                                    $contentType = $tvShow['content_type'] ?? 'custom';
+                                    if (in_array($contentType, ['tmdb', 'article']) || str_starts_with($imagePath, '/')) {
+                                        $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($imagePath, 'w780');
+                                    } else {
+                                        $imageUrl = asset('storage/' . $imagePath);
+                                    }
+                                } else {
+                                    $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($imagePath, 'w780');
+                                }
+                            }
                         @endphp
-                        <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($imagePath, 'w780') }}" 
+                        <img src="{{ $imageUrl ?? 'https://via.placeholder.com/780x439?text=No+Image' }}" 
                              alt="{{ $tvShow['name'] ?? 'TV Show' }}" 
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                              style="display: block !important; visibility: visible !important; opacity: 1 !important; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"

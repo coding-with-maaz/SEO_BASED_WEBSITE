@@ -84,6 +84,22 @@ class Content extends Model
     }
 
     /**
+     * Get all comments for this content.
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    /**
+     * Get approved comments for this content.
+     */
+    public function approvedComments(): HasMany
+    {
+        return $this->hasMany(Comment::class)->where('status', 'approved');
+    }
+
+    /**
      * Get available content types
      */
     public static function getContentTypes(): array

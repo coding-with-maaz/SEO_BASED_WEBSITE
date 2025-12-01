@@ -69,6 +69,12 @@
 @endif
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Breadcrumbs -->
+    <x-breadcrumbs :items="[
+        ['label' => 'Movies', 'url' => route('movies.index')],
+        ['label' => $title, 'url' => null]
+    ]" />
+    
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
         <!-- Poster -->
         <div class="lg:col-span-1">
@@ -520,7 +526,8 @@
                 if ($posterPath) {
                     if (str_starts_with($posterPath, 'http')) {
                         $imageUrl = $posterPath;
-                    } elseif ($contentType === 'tmdb') {
+                    } elseif (in_array($contentType, ['tmdb', 'article']) || str_starts_with($posterPath, '/')) {
+                        // TMDB or Article content - use TMDB service
                         $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w342');
                     } else {
                         // Database movie with custom image
@@ -614,4 +621,11 @@
     }
 </script>
 @endif
+
+    <!-- Comments Section -->
+    @if(isset($isCustom) && $isCustom && isset($content))
+        <x-comments :contentId="$content->id" />
+    @elseif(isset($content) && $content)
+        <x-comments :contentId="$content->id" />
+    @endif
 @endsection

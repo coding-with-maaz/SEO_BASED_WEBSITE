@@ -19,15 +19,11 @@
 @endphp
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
-    <!-- Header Section with Back Button -->
-    <div class="mb-6">
-        <a href="{{ route('cast.index') }}" class="inline-flex items-center gap-2 text-gray-600 dark:!text-text-secondary hover:text-accent transition-colors mb-4" style="font-family: 'Poppins', sans-serif; font-weight: 500;">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
-            Back to Cast
-        </a>
-    </div>
+    <!-- Breadcrumbs -->
+    <x-breadcrumbs :items="[
+        ['label' => 'Cast', 'url' => route('cast.index')],
+        ['label' => $cast->name, 'url' => null]
+    ]" />
 
     <!-- Main Info Section -->
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8 mb-8 md:mb-12">

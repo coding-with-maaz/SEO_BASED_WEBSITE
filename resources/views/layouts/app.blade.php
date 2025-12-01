@@ -1092,6 +1092,8 @@
         window.openMobileMenu = openMobileMenu;
         window.closeMobileMenu = closeMobileMenu;
     </script>
+    
+    @stack('scripts')
 </body>
 </html>
 

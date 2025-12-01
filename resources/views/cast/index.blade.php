@@ -3,6 +3,13 @@
 @section('title', 'Cast Members - Nazaarabox')
 
 @section('content')
+<!-- Breadcrumbs -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+    <x-breadcrumbs :items="[
+        ['label' => 'Cast', 'url' => null]
+    ]" />
+</div>
+
 <!-- Hero Section with Search -->
 <section class="relative overflow-hidden mb-12" style="width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); background: linear-gradient(to bottom right, #1a1a1a, #0d0d0d, #000000);">
     <!-- Content -->
