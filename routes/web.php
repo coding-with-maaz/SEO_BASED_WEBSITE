@@ -69,6 +69,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             ->with('error', 'Invalid request. Please use the import form to import content from TMDB.');
     });
     Route::post('contents/tmdb/import', [ContentController::class, 'importFromTmdb'])->name('contents.tmdb.import');
+    Route::post('contents/article', [ContentController::class, 'storeArticleContent'])->name('contents.article.store');
     
         // Content server management routes
         Route::prefix('contents/{content}')->group(function () {

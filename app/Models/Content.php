@@ -16,6 +16,7 @@ class Content extends Model
         'title',
         'slug',
         'description',
+        'article_content',
         'type',
         'content_type',
         'tmdb_id',

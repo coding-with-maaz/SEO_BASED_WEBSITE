@@ -61,8 +61,9 @@ class ContentController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'article_content' => 'nullable|string',
             'type' => 'required|string',
-            'content_type' => 'required|string|in:custom,tmdb',
+            'content_type' => 'required|string|in:custom,tmdb,article',
             'tmdb_id' => 'nullable|string',
             'poster_path' => 'nullable|string',
             'backdrop_path' => 'nullable|string',
@@ -124,8 +125,9 @@ class ContentController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'article_content' => 'nullable|string',
             'type' => 'required|string',
-            'content_type' => 'required|string|in:custom,tmdb',
+            'content_type' => 'required|string|in:custom,tmdb,article',
             'tmdb_id' => 'nullable|string',
             'poster_path' => 'nullable|string',
             'backdrop_path' => 'nullable|string',
@@ -164,6 +166,200 @@ class ContentController extends Controller
 
         return redirect()->route('admin.contents.index')
             ->with('success', 'Content deleted successfully.');
+    }
+
+    /**
+     * Store article content (TMDB content with backdrop and watch/download buttons)
+     */
+    public function storeArticleContent(Request $request)
+    {
+        $validated = $request->validate([
+            'tmdb_id' => 'required|integer',
+            'tmdb_type' => 'required|string|in:movie,tv',
+            'article_content' => 'nullable|string',
+            'watch_link' => 'nullable|url',
+            'download_link' => 'nullable|url',
+            'status' => 'required|string|in:published,draft,upcoming',
+        ]);
+
+        $tmdbId = $validated['tmdb_id'];
+        $type = $validated['tmdb_type'];
+
+        // Get details from TMDB
+        if ($type === 'movie') {
+            $tmdbData = $this->tmdb->getMovieDetails($tmdbId);
+            $contentType = 'movie';
+        } else {
+            $tmdbData = $this->tmdb->getTvShowDetails($tmdbId);
+            $contentType = 'tv_show';
+        }
+
+        if (!$tmdbData) {
+            return redirect()->back()->with('error', 'Failed to fetch details from TMDB.');
+        }
+
+        // Prepare content data for article
+        $contentData = [
+            'title' => $tmdbData['title'] ?? ($tmdbData['name'] ?? 'Unknown'),
+            'content_type' => 'article',
+            'tmdb_id' => (string)$tmdbId,
+            'type' => $contentType,
+            'description' => $tmdbData['overview'] ?? null,
+            'article_content' => $validated['article_content'] ?? null,
+            'poster_path' => $tmdbData['poster_path'] ?? null,
+            'backdrop_path' => $tmdbData['backdrop_path'] ?? null,
+            'rating' => isset($tmdbData['vote_average']) ? round($tmdbData['vote_average'], 1) : 0,
+            'status' => $validated['status'],
+            'watch_link' => $validated['watch_link'] ?? null,
+            'download_link' => $validated['download_link'] ?? null,
+        ];
+
+        // Set release date
+        $releaseDate = null;
+        if (isset($tmdbData['release_date']) && !empty(trim($tmdbData['release_date']))) {
+            $releaseDate = $tmdbData['release_date'];
+        } elseif (isset($tmdbData['first_air_date']) && !empty(trim($tmdbData['first_air_date']))) {
+            $releaseDate = $tmdbData['first_air_date'];
+        }
+        
+        if ($releaseDate) {
+            try {
+                $parsedDate = Carbon::parse($releaseDate);
+                $contentData['release_date'] = $parsedDate->format('Y-m-d');
+            } catch (\Exception $e) {
+                $contentData['release_date'] = null;
+            }
+        } else {
+            $contentData['release_date'] = null;
+        }
+
+        // Set genres
+        if (isset($tmdbData['genres']) && is_array($tmdbData['genres'])) {
+            $contentData['genres'] = array_column($tmdbData['genres'], 'name');
+        }
+
+        // Set director (for movies)
+        if ($type === 'movie' && isset($tmdbData['credits']['crew'])) {
+            $director = collect($tmdbData['credits']['crew'])->firstWhere('job', 'Director');
+            if ($director) {
+                $contentData['director'] = $director['name'];
+            }
+        }
+
+        // Set duration
+        if (isset($tmdbData['runtime'])) {
+            $contentData['duration'] = $tmdbData['runtime'];
+        } elseif (isset($tmdbData['episode_run_time'][0])) {
+            $contentData['duration'] = $tmdbData['episode_run_time'][0];
+        }
+
+        // Set episode count for TV shows
+        if ($type === 'tv' && isset($tmdbData['number_of_episodes'])) {
+            $contentData['episode_count'] = $tmdbData['number_of_episodes'];
+        }
+
+        // Set series status for TV shows
+        if ($type === 'tv' && isset($tmdbData['status'])) {
+            $statusMap = [
+                'Returning Series' => 'ongoing',
+                'Ended' => 'completed',
+                'Canceled' => 'cancelled',
+                'Planned' => 'upcoming',
+            ];
+            $contentData['series_status'] = $statusMap[$tmdbData['status']] ?? 'ongoing';
+        }
+
+        // Set network
+        if (isset($tmdbData['networks'][0]['name'])) {
+            $contentData['network'] = $tmdbData['networks'][0]['name'];
+        }
+
+        // Set original language
+        if (isset($tmdbData['original_language'])) {
+            $contentData['language'] = $tmdbData['original_language'];
+        }
+
+        // Clean up empty strings
+        $nullableFields = ['release_date', 'description', 'article_content', 'poster_path', 'backdrop_path', 'director', 'country', 'network', 'language', 'watch_link', 'download_link'];
+        foreach ($nullableFields as $field) {
+            if (isset($contentData[$field]) && $contentData[$field] === '') {
+                $contentData[$field] = null;
+            }
+        }
+
+        // Set defaults
+        $contentData['sort_order'] = 0;
+        $contentData['is_featured'] = false;
+
+        // Check if content already exists
+        $existingContent = Content::withTrashed()
+            ->where('tmdb_id', $tmdbId)
+            ->where('content_type', 'article')
+            ->first();
+
+        if ($existingContent) {
+            if ($existingContent->trashed()) {
+                $existingContent->restore();
+            }
+            unset($contentData['slug']);
+            $existingContent->update($contentData);
+            $content = $existingContent;
+        } else {
+            unset($contentData['slug']);
+            $content = Content::create($contentData);
+        }
+
+        // Handle cast automatically (same as import)
+        if (isset($tmdbData['credits']['cast']) && is_array($tmdbData['credits']['cast']) && count($tmdbData['credits']['cast']) > 0) {
+            $tmdbCastAttachments = [];
+            $tmdbCastIds = [];
+            
+            foreach (array_slice($tmdbData['credits']['cast'], 0, 20) as $index => $actor) {
+                $actorName = $actor['name'] ?? 'Unknown';
+                $character = $actor['character'] ?? '';
+                $profilePath = $actor['profile_path'] ?? null;
+                
+                $fullProfilePath = null;
+                if ($profilePath) {
+                    if (str_starts_with($profilePath, 'http')) {
+                        $fullProfilePath = $profilePath;
+                    } else {
+                        $fullProfilePath = $this->tmdb->getImageUrl($profilePath, 'w185');
+                    }
+                }
+                
+                $cast = Cast::where('name', trim($actorName))->first();
+                
+                if ($cast) {
+                    if (empty($cast->profile_path) && $fullProfilePath) {
+                        $cast->update(['profile_path' => $fullProfilePath]);
+                    }
+                } else {
+                    $cast = Cast::create([
+                        'name' => trim($actorName),
+                        'profile_path' => $fullProfilePath,
+                    ]);
+                }
+                
+                $tmdbCastIds[] = $cast->id;
+                $tmdbCastAttachments[$cast->id] = [
+                    'character' => $character,
+                    'order' => $index,
+                ];
+            }
+            
+            if (!empty($tmdbCastAttachments)) {
+                try {
+                    $content->castMembers()->sync($tmdbCastAttachments);
+                    $content->refresh();
+                } catch (\Exception $e) {
+                    \Log::error('Error syncing casts for article content ' . $content->id . ': ' . $e->getMessage());
+                }
+            }
+        }
+
+        return redirect()->route('admin.contents.edit', $content)
+            ->with('success', 'Article content created successfully with backdrop image and watch/download buttons.');
     }
 
     /**

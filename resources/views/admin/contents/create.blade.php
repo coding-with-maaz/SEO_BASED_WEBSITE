@@ -33,6 +33,9 @@
             <button onclick="switchTab('custom')" id="tab-custom" class="tab-button px-6 py-3 font-semibold text-gray-600 border-b-2 border-transparent hover:text-accent dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
                 Create Custom Content
             </button>
+            <button onclick="switchTab('article')" id="tab-article" class="tab-button px-6 py-3 font-semibold text-gray-600 border-b-2 border-transparent hover:text-accent dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                Create Article Content
+            </button>
         </nav>
     </div>
 
@@ -74,6 +77,134 @@
             <div id="tmdb-results" class="hidden">
                 <h3 class="text-lg font-semibold text-gray-900 dark:!text-white mb-4" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Search Results</h3>
                 <div id="tmdb-results-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Article Content Tab -->
+    <div id="panel-article" class="tab-panel hidden">
+        <div class="bg-white dark:!bg-bg-card rounded-lg border border-gray-200 dark:!border-border-secondary p-6">
+            <h2 class="text-xl font-bold text-gray-900 dark:!text-white mb-4" style="font-family: 'Poppins', sans-serif; font-weight: 700;">
+                Create Article Content with TMDB
+            </h2>
+            <p class="text-gray-600 dark:!text-text-secondary mb-6" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                Search and select a movie or TV show from TMDB to create an article with backdrop image and watch/download buttons.
+            </p>
+
+            <form id="article-search-form" class="mb-6">
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <label class="block text-sm font-semibold text-gray-700 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Content Type</label>
+                        <select id="article-tmdb-type" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent dark:!bg-bg-card-hover dark:!border-border-primary dark:!text-white">
+                            <option value="movie">Movie</option>
+                            <option value="tv">TV Show</option>
+                        </select>
+                    </div>
+                    <div class="flex-[2]">
+                        <label class="block text-sm font-semibold text-gray-700 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Search TMDB</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="article-tmdb-query" placeholder="Enter movie or TV show name..." 
+                                   class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent dark:!bg-bg-card-hover dark:!border-border-primary dark:!text-white">
+                            <button type="submit" class="px-6 py-2 bg-accent hover:bg-accent-light text-white rounded-lg transition-colors" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Loading indicator -->
+            <div id="article-loading" class="hidden text-center py-8">
+                <p class="text-gray-600 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">Searching TMDB...</p>
+            </div>
+
+            <!-- Search Results -->
+            <div id="article-results" class="hidden mb-6">
+                <h3 class="text-lg font-semibold text-gray-900 dark:!text-white mb-4" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Select Content</h3>
+                <div id="article-results-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            </div>
+
+            <!-- Article Form (shown after selection) -->
+            <div id="article-form-container" class="hidden">
+                <form action="{{ route('admin.contents.article.store') }}" method="POST" id="article-content-form">
+                    @csrf
+                    <input type="hidden" name="tmdb_id" id="article-tmdb-id">
+                    <input type="hidden" name="tmdb_type" id="article-tmdb-type-value">
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <!-- Selected Content Preview -->
+                        <div class="lg:col-span-2">
+                            <div id="article-selected-preview" class="bg-gray-50 dark:!bg-bg-card-hover rounded-lg border border-gray-200 dark:!border-border-secondary p-4 mb-4">
+                                <h3 class="text-lg font-semibold text-gray-900 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Selected Content</h3>
+                                <div id="article-preview-content" class="flex gap-4">
+                                    <!-- Preview will be inserted here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Article Content -->
+                        <div class="lg:col-span-2">
+                            <label class="block text-sm font-semibold text-gray-700 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                                Article Content (HTML allowed)
+                            </label>
+                            <textarea name="article_content" id="article-content-text" rows="10"
+                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent dark:!bg-bg-card-hover dark:!border-border-primary dark:!text-white"
+                                      placeholder="Write your article content here... HTML is allowed."></textarea>
+                            <p class="text-sm text-gray-500 dark:!text-text-secondary mt-1" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                                This content will be displayed in the article. You can use HTML for formatting.
+                            </p>
+                        </div>
+
+                        <!-- Watch Link -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                                Watch Link
+                            </label>
+                            <input type="url" name="watch_link" id="article-watch-link" placeholder="https://..."
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent dark:!bg-bg-card-hover dark:!border-border-primary dark:!text-white">
+                            <p class="text-sm text-gray-500 dark:!text-text-secondary mt-1" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                                URL for the watch button
+                            </p>
+                        </div>
+
+                        <!-- Download Link -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                                Download Link
+                            </label>
+                            <input type="url" name="download_link" id="article-download-link" placeholder="https://..."
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent dark:!bg-bg-card-hover dark:!border-border-primary dark:!text-white">
+                            <p class="text-sm text-gray-500 dark:!text-text-secondary mt-1" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                                URL for the download button
+                            </p>
+                        </div>
+
+                        <!-- Status -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                                Status <span class="text-red-500">*</span>
+                            </label>
+                            <select name="status" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent dark:!bg-bg-card-hover dark:!border-border-primary dark:!text-white">
+                                <option value="published" selected>Published</option>
+                                <option value="draft">Draft</option>
+                                <option value="upcoming">Upcoming</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button type="submit" class="px-6 py-3 bg-accent hover:bg-accent-light text-white rounded-lg transition-colors" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                            Create Article Content
+                        </button>
+                        <button type="button" onclick="resetArticleForm()" class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg transition-colors dark:!bg-bg-card dark:!text-white dark:!hover:bg-bg-card-hover" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                            Reset
+                        </button>
+                        <a href="{{ route('admin.contents.index') }}" class="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg transition-colors dark:!bg-bg-card dark:!text-white dark:!hover:bg-bg-card-hover" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -311,6 +442,128 @@ document.getElementById('tmdb-search-form').addEventListener('submit', async fun
         console.error(error);
     }
 });
+
+// Article Content Tab Functions
+let selectedArticleContent = null;
+
+// Article TMDB Search
+document.getElementById('article-search-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const query = document.getElementById('article-tmdb-query').value.trim();
+    const type = document.getElementById('article-tmdb-type').value;
+    
+    if (!query) {
+        alert('Please enter a search query');
+        return;
+    }
+    
+    const loading = document.getElementById('article-loading');
+    const results = document.getElementById('article-results');
+    const resultsList = document.getElementById('article-results-list');
+    
+    loading.classList.remove('hidden');
+    results.classList.add('hidden');
+    resultsList.innerHTML = '';
+    
+    try {
+        const response = await fetch(`{{ route('admin.contents.tmdb.search') }}?q=${encodeURIComponent(query)}&type=${type}`);
+        const data = await response.json();
+        
+        loading.classList.add('hidden');
+        
+        if (data.results && data.results.length > 0) {
+            resultsList.innerHTML = data.results.map(item => {
+                const posterUrl = item.poster_path 
+                    ? `{{ config('services.tmdb.image_base_url') }}/w185${item.poster_path}`
+                    : 'https://via.placeholder.com/185x278?text=No+Image';
+                const backdropUrl = item.backdrop_path 
+                    ? `{{ config('services.tmdb.image_base_url') }}/w780${item.backdrop_path}`
+                    : 'https://via.placeholder.com/780x439?text=No+Backdrop';
+                const title = item.title || item.name || 'Unknown';
+                const date = item.release_date || item.first_air_date || 'N/A';
+                
+                return `
+                    <div class="bg-gray-50 dark:!bg-bg-card-hover rounded-lg border border-gray-200 dark:!border-border-secondary p-4 cursor-pointer hover:border-accent transition-colors" onclick="selectArticleContent(${item.id}, '${type}', ${JSON.stringify(item).replace(/"/g, '&quot;')})">
+                        <div class="mb-3">
+                            <img src="${posterUrl}" alt="${title}" class="w-full h-auto rounded" onerror="this.src='https://via.placeholder.com/185x278?text=No+Image'">
+                        </div>
+                        <h3 class="font-semibold text-gray-900 dark:!text-white mb-1" style="font-family: 'Poppins', sans-serif; font-weight: 600;">${title}</h3>
+                        <p class="text-sm text-gray-600 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">${date}</p>
+                        <div class="mt-2 text-xs text-accent" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                            Click to select →
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            results.classList.remove('hidden');
+        } else {
+            resultsList.innerHTML = '<p class="text-gray-600 dark:!text-text-secondary" style="font-family: \'Poppins\', sans-serif; font-weight: 400;">No results found.</p>';
+            results.classList.remove('hidden');
+        }
+    } catch (error) {
+        loading.classList.add('hidden');
+        alert('Error searching TMDB. Please try again.');
+        console.error(error);
+    }
+});
+
+// Select Article Content
+function selectArticleContent(tmdbId, type, item) {
+    selectedArticleContent = item;
+    
+    // Set hidden form fields
+    document.getElementById('article-tmdb-id').value = tmdbId;
+    document.getElementById('article-tmdb-type-value').value = type;
+    
+    // Show preview
+    const previewContainer = document.getElementById('article-preview-content');
+    const posterUrl = item.poster_path 
+        ? `{{ config('services.tmdb.image_base_url') }}/w185${item.poster_path}`
+        : 'https://via.placeholder.com/185x278?text=No+Image';
+    const backdropUrl = item.backdrop_path 
+        ? `{{ config('services.tmdb.image_base_url') }}/w1280${item.backdrop_path}`
+        : 'https://via.placeholder.com/1280x720?text=No+Backdrop';
+    const title = item.title || item.name || 'Unknown';
+    const date = item.release_date || item.first_air_date || 'N/A';
+    const overview = item.overview || 'No description available.';
+    
+    previewContainer.innerHTML = `
+        <div class="flex-shrink-0">
+            <img src="${posterUrl}" alt="${title}" class="w-32 h-auto rounded" onerror="this.src='https://via.placeholder.com/128x192?text=No+Image'">
+        </div>
+        <div class="flex-1">
+            <h4 class="text-xl font-bold text-gray-900 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 700;">${title}</h4>
+            <p class="text-sm text-gray-600 dark:!text-text-secondary mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 400;">Release Date: ${date}</p>
+            <p class="text-sm text-gray-700 dark:!text-text-secondary mb-3" style="font-family: 'Poppins', sans-serif; font-weight: 400;">${overview.substring(0, 200)}${overview.length > 200 ? '...' : ''}</p>
+            <div class="mb-3">
+                <p class="text-xs text-gray-500 dark:!text-text-secondary mb-1" style="font-family: 'Poppins', sans-serif; font-weight: 400;">Backdrop Image:</p>
+                <img src="${backdropUrl}" alt="Backdrop" class="w-full h-32 object-cover rounded" onerror="this.src='https://via.placeholder.com/800x450?text=No+Backdrop'">
+            </div>
+        </div>
+    `;
+    
+    // Show form container
+    document.getElementById('article-form-container').classList.remove('hidden');
+    
+    // Scroll to form
+    document.getElementById('article-form-container').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Reset Article Form
+function resetArticleForm() {
+    selectedArticleContent = null;
+    document.getElementById('article-tmdb-query').value = '';
+    document.getElementById('article-tmdb-id').value = '';
+    document.getElementById('article-tmdb-type-value').value = '';
+    document.getElementById('article-content-text').value = '';
+    document.getElementById('article-watch-link').value = '';
+    document.getElementById('article-download-link').value = '';
+    document.getElementById('article-results').classList.add('hidden');
+    document.getElementById('article-form-container').classList.add('hidden');
+    document.getElementById('article-preview-content').innerHTML = '';
+}
 </script>
 @endsection
 

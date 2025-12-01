@@ -105,6 +105,20 @@
                             @enderror
                         </div>
 
+                        @if($content->content_type === 'article')
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Article Content (HTML allowed)</label>
+                            <textarea name="article_content" rows="10"
+                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent dark:!bg-bg-card-hover dark:!border-border-primary dark:!text-white">{{ old('article_content', $content->article_content) }}</textarea>
+                            <p class="text-sm text-gray-500 dark:!text-text-secondary mt-1" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                                This content will be displayed in the article. You can use HTML for formatting.
+                            </p>
+                            @error('article_content')
+                                <p class="text-red-500 text-sm mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+                        @endif
+
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Poster URL</label>
                             <input type="text" name="poster_path" value="{{ old('poster_path', $content->poster_path) }}" placeholder="https://..."
