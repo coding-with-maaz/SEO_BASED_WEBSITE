@@ -1,225 +1,126 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ $seo['locale'] ?? 'en' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
     @php
-        // Get SEO data from view composer
-        $seo = $seoPage ?? null;
+        // ALWAYS prioritize PageSeo from database - ignore controller SEO if PageSeo exists
+        $seoService = app(\App\Services\SeoService::class);
+        
+        // Detect page key from route
+        $routeName = request()->route()?->getName();
+        $pageKeyMap = [
+            'home' => 'home',
+            'movies.index' => 'movies.index',
+            'tv-shows.index' => 'tv-shows.index',
+            'cast.index' => 'cast.index',
+            'search' => 'search',
+            'about' => 'about',
+            'dmca' => 'dmca',
+            'completed' => 'completed',
+            'upcoming' => 'upcoming',
+        ];
+        
+        $detectedPageKey = $pageKeyMap[$routeName] ?? null;
+        
+        // ALWAYS check PageSeo first - this overrides controller SEO
+        if ($detectedPageKey) {
+            // Use the model method to get fresh PageSeo data
+            $pageSeo = \App\Models\PageSeo::getByPageKey($detectedPageKey);
+            
+            if ($pageSeo) {
+                // PageSeo exists and is active - ALWAYS use it (overrides controller SEO)
+                // Pass empty array to ensure PageSeo data takes priority
+                $seo = $seoService->generate([], $detectedPageKey);
+            } else {
+                // No active PageSeo - use controller SEO or auto-detect
+                $seo = $seo ?? $seoService->forCurrentRoute();
+            }
+        } else {
+            // Unknown route - use controller SEO or auto-detect
+            $seo = $seo ?? $seoService->forCurrentRoute();
+        }
     @endphp
     
-    @if($seo && $seo->meta_title)
-        <title>{{ $seo->meta_title }}</title>
-    @else
-        <title>@yield('title', 'Nazaarabox - Movies & TV Shows')</title>
+    <!-- Primary Meta Tags -->
+    <title>{{ $seo['title'] ?? 'Nazaarabox - Movies & TV Shows' }}</title>
+    <meta name="title" content="{{ $seo['title'] ?? 'Nazaarabox - Movies & TV Shows' }}">
+    <meta name="description" content="{{ $seo['description'] ?? 'Watch and download your favorite movies and TV shows. Browse thousands of titles in high quality.' }}">
+    <meta name="keywords" content="{{ $seo['keywords'] ?? 'movies, tv shows, streaming, download, watch online, entertainment' }}">
+    <meta name="author" content="{{ $seo['author'] ?? 'Nazaarabox' }}">
+    <meta name="robots" content="{{ $seo['robots'] ?? 'index, follow' }}">
+    <meta name="language" content="{{ $seo['locale'] ?? 'en' }}">
+    <meta name="revisit-after" content="7 days">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{{ $seo['canonical'] ?? url()->current() }}">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="{{ $seo['type'] ?? 'website' }}">
+    <meta property="og:url" content="{{ $seo['url'] ?? url()->current() }}">
+    <meta property="og:title" content="{{ $seo['og_title'] ?? $seo['title'] ?? 'Nazaarabox - Movies & TV Shows' }}">
+    <meta property="og:description" content="{{ $seo['og_description'] ?? $seo['description'] ?? 'Watch and download your favorite movies and TV shows. Browse thousands of titles in high quality.' }}">
+    <meta property="og:image" content="{{ $seo['og_image'] ?? $seo['image'] ?? asset('favicon.ico') }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="{{ $seo['title'] ?? 'Nazaarabox' }}">
+    <meta property="og:site_name" content="Nazaarabox">
+    <meta property="og:locale" content="{{ $seo['locale'] ?? 'en_US' }}">
+    @if(!empty($seo['published_time']))
+    <meta property="og:published_time" content="{{ $seo['published_time'] }}">
+    @endif
+    @if(!empty($seo['modified_time']))
+    <meta property="og:modified_time" content="{{ $seo['modified_time'] }}">
+    @endif
+    @if($seoService->getFacebookAppId())
+    <meta property="fb:app_id" content="{{ $seoService->getFacebookAppId() }}">
     @endif
     
-    <!-- Meta Tags -->
-    @if($seo)
-        @if($seo->meta_description)
-        <meta name="description" content="{{ $seo->meta_description }}">
-        @endif
-        
-        @if($seo->meta_keywords)
-        <meta name="keywords" content="{{ $seo->meta_keywords }}">
-        @endif
-        
-        <!-- Open Graph Tags -->
-        @if($seo->og_title)
-        <meta property="og:title" content="{{ $seo->og_title }}">
-        @elseif($seo->meta_title)
-        <meta property="og:title" content="{{ $seo->meta_title }}">
-        @endif
-        
-        @if($seo->og_description)
-        <meta property="og:description" content="{{ $seo->og_description }}">
-        @elseif($seo->meta_description)
-        <meta property="og:description" content="{{ $seo->meta_description }}">
-        @endif
-        
-        @if($seo->og_image)
-        <meta property="og:image" content="{{ $seo->og_image }}">
-        @endif
-        
-        @if($seo->og_url)
-        <meta property="og:url" content="{{ $seo->og_url }}">
-        @else
-        <meta property="og:url" content="{{ url()->current() }}">
-        @endif
-        
-        <!-- Enhanced Open Graph Tags -->
-        @if($seo->og_type)
-        <meta property="og:type" content="{{ $seo->og_type }}">
-        @else
-        <meta property="og:type" content="website">
-        @endif
-        
-        @if($seo->og_site_name)
-        <meta property="og:site_name" content="{{ $seo->og_site_name }}">
-        @else
-        <meta property="og:site_name" content="Nazaarabox">
-        @endif
-        
-        @if($seo->og_locale)
-        <meta property="og:locale" content="{{ $seo->og_locale }}">
-        @endif
-        
-        @if($seo->og_video_url)
-        <meta property="og:video" content="{{ $seo->og_video_url }}">
-        <meta property="og:video:url" content="{{ $seo->og_video_url }}">
-        @if($seo->og_video_type)
-        <meta property="og:video:type" content="{{ $seo->og_video_type }}">
-        @endif
-        @if($seo->og_video_duration)
-        <meta property="og:video:duration" content="{{ $seo->og_video_duration }}">
-        @endif
-        @endif
-        
-        <!-- Enhanced Twitter Card Tags -->
-        @if($seo->twitter_card)
-        <meta name="twitter:card" content="{{ $seo->twitter_card }}">
-        @endif
-        
-        @if($seo->twitter_title)
-        <meta name="twitter:title" content="{{ $seo->twitter_title }}">
-        @elseif($seo->meta_title)
-        <meta name="twitter:title" content="{{ $seo->meta_title }}">
-        @endif
-        
-        @if($seo->twitter_description)
-        <meta name="twitter:description" content="{{ $seo->twitter_description }}">
-        @elseif($seo->meta_description)
-        <meta name="twitter:description" content="{{ $seo->meta_description }}">
-        @endif
-        
-        @if($seo->twitter_image)
-        <meta name="twitter:image" content="{{ $seo->twitter_image }}">
-        @endif
-        
-        @if($seo->twitter_site)
-        <meta name="twitter:site" content="{{ $seo->twitter_site }}">
-        @endif
-        
-        @if($seo->twitter_creator)
-        <meta name="twitter:creator" content="{{ $seo->twitter_creator }}">
-        @endif
-        
-        <!-- Canonical URL -->
-        @if($seo->canonical_url)
-        <link rel="canonical" href="{{ $seo->canonical_url }}">
-        @else
-        <link rel="canonical" href="{{ url()->current() }}">
-        @endif
-        
-        <!-- Additional Meta Tags -->
-        @if($seo->meta_robots)
-        <meta name="robots" content="{{ $seo->meta_robots }}">
-        @endif
-        
-        @if($seo->meta_author)
-        <meta name="author" content="{{ $seo->meta_author }}">
-        @endif
-        
-        @if($seo->meta_language)
-        <meta http-equiv="content-language" content="{{ $seo->meta_language }}">
-        @endif
-        
-        @if($seo->meta_geo_region)
-        <meta name="geo.region" content="{{ $seo->meta_geo_region }}">
-        @endif
-        
-        @if($seo->meta_geo_placename)
-        <meta name="geo.placename" content="{{ $seo->meta_geo_placename }}">
-        @endif
-        
-        @if($seo->meta_geo_position_lat && $seo->meta_geo_position_lon)
-        <meta name="geo.position" content="{{ $seo->meta_geo_position_lat }};{{ $seo->meta_geo_position_lon }}">
-        @endif
-        
-        @if($seo->meta_revisit_after)
-        <meta name="revisit-after" content="{{ $seo->meta_revisit_after }}">
-        @endif
-        
-        <!-- Hreflang Tags -->
-        @if($seo->hreflang_tags && is_array($seo->hreflang_tags))
-            @foreach($seo->hreflang_tags as $lang => $url)
-            <link rel="alternate" hreflang="{{ $lang }}" href="{{ $url }}">
-            @endforeach
-        @endif
-        
-        <!-- Additional Custom Meta Tags -->
-        @if($seo->additional_meta_tags && is_array($seo->additional_meta_tags))
-            @foreach($seo->additional_meta_tags as $tag)
-                @if(isset($tag['name']) && isset($tag['content']))
-                <meta name="{{ $tag['name'] }}" content="{{ $tag['content'] }}">
-                @elseif(isset($tag['property']) && isset($tag['content']))
-                <meta property="{{ $tag['property'] }}" content="{{ $tag['content'] }}">
-                @endif
-            @endforeach
-        @endif
-        
-        <!-- Performance Optimization - Preconnect -->
-        @if($seo->preconnect_domains)
-            @foreach(explode(',', $seo->preconnect_domains) as $domain)
-            <link rel="preconnect" href="{{ trim($domain) }}" crossorigin>
-            @endforeach
-        @endif
-        
-        <!-- Performance Optimization - DNS Prefetch -->
-        @if($seo->dns_prefetch_domains)
-            @foreach(explode(',', $seo->dns_prefetch_domains) as $domain)
-            <link rel="dns-prefetch" href="{{ trim($domain) }}">
-            @endforeach
-        @endif
-        
-        <!-- AMP Link -->
-        @if($seo->enable_amp && $seo->amp_url)
-        <link rel="amphtml" href="{{ $seo->amp_url }}">
-        @endif
-        
-        <!-- Schema Markup (JSON-LD) -->
-        @if($seo->schema_markup)
-            @if(is_array($seo->schema_markup))
-                @foreach($seo->schema_markup as $schema)
-                <script type="application/ld+json">
-                    {!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
-                </script>
-                @endforeach
-            @else
-            <script type="application/ld+json">
-                {!! $seo->schema_markup !!}
-            </script>
-            @endif
-        @endif
-        
-        <!-- Breadcrumb Schema -->
-        @if($seo->breadcrumb_schema)
-        <script type="application/ld+json">
-            {!! is_array($seo->breadcrumb_schema) ? json_encode($seo->breadcrumb_schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) : $seo->breadcrumb_schema !!}
-        </script>
-        @endif
-    @else
-        <!-- Default meta tags if no SEO data -->
-        <meta name="description" content="Watch and download your favorite movies and TV shows. Browse thousands of titles in high quality.">
-        <link rel="canonical" href="{{ url()->current() }}">
-    @endif
-    
-    <!-- Dynamic Schema Markup (Auto-generated) -->
-    @if(isset($dynamicSchema) && is_array($dynamicSchema) && count($dynamicSchema) > 0)
-        @foreach($dynamicSchema as $schema)
-        <script type="application/ld+json">
-            {!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
-        </script>
-        @endforeach
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="{{ $seo['twitter_card'] ?? 'summary_large_image' }}">
+    <meta name="twitter:url" content="{{ $seo['url'] ?? url()->current() }}">
+    <meta name="twitter:title" content="{{ $seo['twitter_title'] ?? $seo['title'] ?? 'Nazaarabox - Movies & TV Shows' }}">
+    <meta name="twitter:description" content="{{ $seo['twitter_description'] ?? $seo['description'] ?? 'Watch and download your favorite movies and TV shows. Browse thousands of titles in high quality.' }}">
+    <meta name="twitter:image" content="{{ $seo['twitter_image'] ?? $seo['image'] ?? asset('favicon.ico') }}">
+    <meta name="twitter:image:alt" content="{{ $seo['twitter_title'] ?? $seo['title'] ?? 'Nazaarabox' }}">
+    @if($seoService->getTwitterHandle())
+    <meta name="twitter:site" content="{{ $seoService->getTwitterHandle() }}">
+    <meta name="twitter:creator" content="{{ $seoService->getTwitterHandle() }}">
     @endif
     
     <!-- Additional SEO Enhancements -->
     <meta name="theme-color" content="#E50914">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="format-detection" content="telephone=no">
+    <meta name="application-name" content="Nazaarabox">
+    <meta name="msapplication-TileColor" content="#E50914">
+    <meta name="msapplication-config" content="{{ asset('browserconfig.xml') }}">
+    
+    <!-- Alternate Languages (Hreflang) -->
+    @if(!empty($seo['alternate_locales']))
+        @foreach($seo['alternate_locales'] as $locale => $url)
+        <link rel="alternate" hreflang="{{ $locale }}" href="{{ $url }}">
+        @endforeach
+    @endif
+    <link rel="alternate" hreflang="x-default" href="{{ url()->current() }}">
+    
+    <!-- Preconnect for Performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://image.tmdb.org">
+    <link rel="dns-prefetch" href="https://api.themoviedb.org">
+    
+    <!-- Structured Data (JSON-LD) -->
+    @if(!empty($seo['schema']))
+        @foreach($seo['schema'] as $schema)
+        <script type="application/ld+json">
+        {!! json_encode($schema, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+        </script>
+        @endforeach
+    @endif
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">

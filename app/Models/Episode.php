@@ -85,6 +85,19 @@ class Episode extends Model
                 $episode->slug = $episode->generateUniqueSlug();
             }
         });
+
+        // Clear sitemap cache when episode is saved or deleted
+        static::saved(function ($episode) {
+            if (app()->bound(\App\Services\SitemapService::class)) {
+                app(\App\Services\SitemapService::class)->clearCache();
+            }
+        });
+
+        static::deleted(function ($episode) {
+            if (app()->bound(\App\Services\SitemapService::class)) {
+                app(\App\Services\SitemapService::class)->clearCache();
+            }
+        });
     }
 
     /**

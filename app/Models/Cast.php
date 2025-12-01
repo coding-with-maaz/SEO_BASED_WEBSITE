@@ -42,6 +42,19 @@ class Cast extends Model
                 $cast->slug = $cast->generateUniqueSlug();
             }
         });
+
+        // Clear sitemap cache when cast is saved or deleted
+        static::saved(function ($cast) {
+            if (app()->bound(\App\Services\SitemapService::class)) {
+                app(\App\Services\SitemapService::class)->clearCache();
+            }
+        });
+
+        static::deleted(function ($cast) {
+            if (app()->bound(\App\Services\SitemapService::class)) {
+                app(\App\Services\SitemapService::class)->clearCache();
+            }
+        });
     }
 
     /**

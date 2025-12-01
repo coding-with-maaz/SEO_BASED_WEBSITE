@@ -13,9 +13,23 @@ use App\Http\Controllers\Admin\EpisodeController;
 use App\Http\Controllers\Admin\EpisodeServerController;
 use App\Http\Controllers\Admin\ServerController;
 use App\Http\Controllers\Admin\CastController;
-use App\Http\Controllers\Admin\SeoPageController;
+use App\Http\Controllers\Admin\PageSeoController;
+use App\Http\Controllers\SitemapController;
+use App\Http\Controllers\RobotsController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// SEO routes (must be before other routes for proper matching)
+Route::get('/robots.txt', [RobotsController::class, 'index'])->name('robots');
+
+// Sitemap routes
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+Route::get('/sitemap/index.xml', [SitemapController::class, 'sitemapIndex'])->name('sitemap.sitemap-index');
+Route::get('/sitemap/static.xml', [SitemapController::class, 'static'])->name('sitemap.static');
+Route::get('/sitemap/movies.xml', [SitemapController::class, 'movies'])->name('sitemap.movies');
+Route::get('/sitemap/tv-shows.xml', [SitemapController::class, 'tvShows'])->name('sitemap.tv-shows');
+Route::get('/sitemap/cast.xml', [SitemapController::class, 'cast'])->name('sitemap.cast');
+Route::get('/sitemap/episodes.xml', [SitemapController::class, 'episodes'])->name('sitemap.episodes');
 
 Route::get('/movies', [MovieController::class, 'index'])->name('movies.index');
 Route::get('/movies/{slug}', [MovieController::class, 'show'])->name('movies.show');
@@ -82,6 +96,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                     });
         });
     
-    // SEO Pages Management
-    Route::resource('seo-pages', SeoPageController::class)->except(['show']);
+    // Public Pages SEO Management
+    Route::resource('page-seo', PageSeoController::class);
+    
 });

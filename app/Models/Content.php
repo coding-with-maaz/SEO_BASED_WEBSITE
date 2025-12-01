@@ -177,6 +177,19 @@ class Content extends Model
                 $content->slug = $content->generateUniqueSlug();
             }
         });
+
+        // Clear sitemap cache when content is saved or deleted
+        static::saved(function ($content) {
+            if (app()->bound(\App\Services\SitemapService::class)) {
+                app(\App\Services\SitemapService::class)->clearCache();
+            }
+        });
+
+        static::deleted(function ($content) {
+            if (app()->bound(\App\Services\SitemapService::class)) {
+                app(\App\Services\SitemapService::class)->clearCache();
+            }
+        });
     }
 
     /**

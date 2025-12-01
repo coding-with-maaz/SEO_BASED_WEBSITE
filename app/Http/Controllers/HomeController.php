@@ -5,15 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Content;
 use App\Models\Cast;
 use App\Services\TmdbService;
+use App\Services\SeoService;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
     protected $tmdb;
+    protected $seo;
 
-    public function __construct(TmdbService $tmdb)
+    public function __construct(TmdbService $tmdb, SeoService $seo)
     {
         $this->tmdb = $tmdb;
+        $this->seo = $seo;
     }
 
     public function index(Request $request)
@@ -97,6 +100,7 @@ class HomeController extends Controller
             'totalPages' => max(1, $totalPages),
             'popularContent' => $popularContent,
             'popularCasts' => $popularCasts,
+            'seo' => $this->seo->forHome(),
         ]);
     }
 }

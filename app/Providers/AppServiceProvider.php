@@ -2,8 +2,6 @@
 
 namespace App\Providers;
 
-use App\View\Composers\SeoComposer;
-use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,7 +19,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Share SEO data with all views
-        View::composer('layouts.app', SeoComposer::class);
+        //
     }
 }

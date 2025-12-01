@@ -4,15 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Content;
 use App\Services\TmdbService;
+use App\Services\SeoService;
 use Illuminate\Http\Request;
 
 class SearchController extends Controller
 {
     protected $tmdb;
+    protected $seo;
 
-    public function __construct(TmdbService $tmdb)
+    public function __construct(TmdbService $tmdb, SeoService $seo)
     {
         $this->tmdb = $tmdb;
+        $this->seo = $seo;
     }
 
     public function search(Request $request)
@@ -33,6 +36,7 @@ class SearchController extends Controller
                 'tvShows' => [],
                 'query' => '',
                 'popularContent' => $popularContent,
+                'seo' => $this->seo->forSearch(),
             ]);
         }
 
@@ -45,6 +49,7 @@ class SearchController extends Controller
             'currentPage' => $results['movies']['page'] ?? 1,
             'totalPages' => $results['movies']['total_pages'] ?? 1,
             'popularContent' => $popularContent,
+            'seo' => $this->seo->forSearch($query),
         ]);
     }
 }

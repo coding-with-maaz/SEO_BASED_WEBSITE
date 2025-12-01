@@ -4,10 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Cast;
 use App\Models\Content;
+use App\Services\SeoService;
 use Illuminate\Http\Request;
 
 class CastController extends Controller
 {
+    protected $seo;
+
+    public function __construct(SeoService $seo)
+    {
+        $this->seo = $seo;
+    }
+
     /**
      * Display a listing of cast members.
      */
@@ -39,6 +47,7 @@ class CastController extends Controller
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'search' => $request->search ?? '',
+            'seo' => $this->seo->forCastIndex(),
         ]);
     }
 
@@ -82,6 +91,7 @@ class CastController extends Controller
             'cast' => $cast,
             'movies' => $movies,
             'tvShows' => $tvShows,
+            'seo' => $this->seo->forCast($cast),
         ]);
     }
 }

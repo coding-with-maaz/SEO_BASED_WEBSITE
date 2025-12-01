@@ -4,15 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Content;
 use App\Services\TmdbService;
+use App\Services\SeoService;
 use Illuminate\Http\Request;
 
 class MovieController extends Controller
 {
     protected $tmdb;
+    protected $seo;
 
-    public function __construct(TmdbService $tmdb)
+    public function __construct(TmdbService $tmdb, SeoService $seo)
     {
         $this->tmdb = $tmdb;
+        $this->seo = $seo;
     }
 
     public function index(Request $request)
@@ -51,6 +54,7 @@ class MovieController extends Controller
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'type' => 'custom', // Changed from dynamic type
+            'seo' => $this->seo->forMoviesIndex(),
         ]);
     }
 
@@ -143,6 +147,7 @@ class MovieController extends Controller
                 'movie' => $movieData,
                 'content' => $content,
                 'isCustom' => true,
+                'seo' => $this->seo->forMovie($movieData, $content),
             ]);
         }
 
@@ -178,6 +183,7 @@ class MovieController extends Controller
                 return view('movies.show', [
                     'movie' => $movie,
                     'isCustom' => false,
+                    'seo' => $this->seo->forMovie($movie),
                 ]);
             }
         }

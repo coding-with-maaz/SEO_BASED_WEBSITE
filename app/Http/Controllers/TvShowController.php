@@ -4,15 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Content;
 use App\Services\TmdbService;
+use App\Services\SeoService;
 use Illuminate\Http\Request;
 
 class TvShowController extends Controller
 {
     protected $tmdb;
+    protected $seo;
 
-    public function __construct(TmdbService $tmdb)
+    public function __construct(TmdbService $tmdb, SeoService $seo)
     {
         $this->tmdb = $tmdb;
+        $this->seo = $seo;
     }
 
     public function index(Request $request)
@@ -51,6 +54,7 @@ class TvShowController extends Controller
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'type' => 'custom',
+            'seo' => $this->seo->forTvShowsIndex(),
         ]);
     }
 
@@ -94,10 +98,37 @@ class TvShowController extends Controller
                 ->take(10)
                 ->get();
             
+            // Prepare TV show data for SEO
+            $tvShowData = [
+                'name' => $content->title,
+                'title' => $content->title,
+                'overview' => $content->description ?? '',
+                'description' => $content->description ?? '',
+                'first_air_date' => $content->release_date ? $content->release_date->format('Y-m-d') : null,
+                'last_air_date' => $content->end_date ? $content->end_date->format('Y-m-d') : null,
+                'vote_average' => $content->rating ?? 0,
+                'rating' => $content->rating ?? 0,
+                'poster_path' => $content->poster_path,
+                'backdrop_path' => $content->backdrop_path,
+                'number_of_seasons' => 1,
+                'number_of_episodes' => $episodes->count(),
+                'genres' => $content->genres ? array_map(function($genre) {
+                    return ['name' => is_array($genre) ? ($genre['name'] ?? $genre) : $genre];
+                }, is_array($content->genres) ? $content->genres : []) : [],
+                'credits' => [
+                    'cast' => $content->castMembers->map(function($castMember) {
+                        return [
+                            'name' => $castMember->name,
+                        ];
+                    })->toArray(),
+                ],
+            ];
+            
             return view('tv-shows.show', [
                 'content' => $content,
                 'isCustom' => true,
                 'recommendedMovies' => $recommendedMovies,
+                'seo' => $this->seo->forTvShow($tvShowData, $content),
             ]);
         }
 
@@ -134,6 +165,7 @@ class TvShowController extends Controller
                     'content' => $customContent,
                     'isCustom' => false,
                     'recommendedMovies' => $recommendedMovies,
+                    'seo' => $this->seo->forTvShow($tvShow, $customContent),
                 ]);
             }
         }

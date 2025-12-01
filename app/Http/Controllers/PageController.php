@@ -4,26 +4,33 @@ namespace App\Http\Controllers;
 
 use App\Models\Content;
 use App\Services\TmdbService;
+use App\Services\SeoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
 class PageController extends Controller
 {
     protected $tmdb;
+    protected $seo;
 
-    public function __construct(TmdbService $tmdb)
+    public function __construct(TmdbService $tmdb, SeoService $seo)
     {
         $this->tmdb = $tmdb;
+        $this->seo = $seo;
     }
 
     public function dmca()
     {
-        return view('pages.dmca');
+        return view('pages.dmca', [
+            'seo' => $this->seo->forPage('dmca'),
+        ]);
     }
 
     public function about()
     {
-        return view('pages.about');
+        return view('pages.about', [
+            'seo' => $this->seo->forPage('about'),
+        ]);
     }
 
     public function completed(Request $request)
@@ -65,6 +72,7 @@ class PageController extends Controller
         return view('pages.completed', [
             'customCompleted' => $customCompleted,
             'popularContent' => $popularContent,
+            'seo' => $this->seo->forPage('completed'),
         ]);
     }
 
@@ -114,6 +122,7 @@ class PageController extends Controller
             'popularContent' => $popularContent,
             'currentPage' => $page,
             'totalPages' => $totalPages,
+            'seo' => $this->seo->forPage('upcoming'),
         ]);
     }
 }

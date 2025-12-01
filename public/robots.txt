@@ -1,2 +1,6 @@
 User-agent: *
-Disallow:
+Allow: /
+
+# Sitemaps
+Sitemap: https://nazaarabox.com/sitemap.xml
+Sitemap: https://nazaarabox.com/sitemap/index.xml
