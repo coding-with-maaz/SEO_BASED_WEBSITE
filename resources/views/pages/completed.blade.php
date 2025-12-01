@@ -63,9 +63,16 @@
                                     if (str_starts_with($imagePath, 'http')) {
                                         // Full URL - use directly
                                         $imageUrl = $imagePath;
-                                    } elseif (($item['content_type'] ?? 'custom') === 'tmdb') {
-                                        // TMDB content - use TMDB service
-                                        $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($imagePath, 'w780');
+                                    } else {
+                                        $contentType = $item['content_type'] ?? 'custom';
+                                        if (in_array($contentType, ['tmdb', 'article']) || str_starts_with($imagePath, '/')) {
+                                            // TMDB/Article content - use TMDB service
+                                            $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($imagePath, 'w780');
+                                        } else {
+                                            // Custom content - use URL/path directly from database
+                                            $imageUrl = $imagePath;
+                                        }
+                                    }
                                     } else {
                                         // Custom content - use URL/path directly from database
                                         $imageUrl = $imagePath;
@@ -164,12 +171,15 @@
                                 if (str_starts_with($posterPath, 'http')) {
                                     // Full URL - use directly
                                     $imageUrl = $posterPath;
-                                } elseif (($item->content_type ?? 'custom') === 'tmdb') {
-                                    // TMDB content - use TMDB service
-                                    $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w185');
                                 } else {
-                                    // Custom content - use URL/path directly from database
-                                    $imageUrl = $posterPath;
+                                    $contentType = $item->content_type ?? 'custom';
+                                    if (in_array($contentType, ['tmdb', 'article']) || str_starts_with($posterPath, '/')) {
+                                        // TMDB/Article content - use TMDB service
+                                        $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w185');
+                                    } else {
+                                        // Custom content - use URL/path directly from database
+                                        $imageUrl = $posterPath;
+                                    }
                                 }
                             }
                         @endphp

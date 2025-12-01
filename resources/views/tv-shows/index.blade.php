@@ -22,6 +22,8 @@
                             'slug' => $content->slug,
                             'name' => $content->title,
                             'first_air_date' => $content->release_date ? $content->release_date->format('Y-m-d') : null,
+                            'updated_at' => $content->updated_at ? $content->updated_at->format('Y-m-d H:i:s') : null,
+                            'created_at' => $content->created_at ? $content->created_at->format('Y-m-d H:i:s') : null,
                             'backdrop_path' => $content->backdrop_path,
                             'poster_path' => $content->poster_path,
                             'is_custom' => true,
@@ -33,8 +35,27 @@
                     }
                 }
                 
-                // Sort by date (newest first)
+                // Sort by updated_at first (latest updated on top), then created_at, then release_date
                 usort($allTvShows, function($a, $b) {
+                    // First sort by updated_at (most recent first)
+                    $updatedA = $a['updated_at'] ?? '1970-01-01 00:00:00';
+                    $updatedB = $b['updated_at'] ?? '1970-01-01 00:00:00';
+                    $updatedCompare = strcmp($updatedB, $updatedA);
+                    
+                    if ($updatedCompare !== 0) {
+                        return $updatedCompare;
+                    }
+                    
+                    // If updated_at is same, sort by created_at (most recent first)
+                    $createdA = $a['created_at'] ?? '1970-01-01 00:00:00';
+                    $createdB = $b['created_at'] ?? '1970-01-01 00:00:00';
+                    $createdCompare = strcmp($createdB, $createdA);
+                    
+                    if ($createdCompare !== 0) {
+                        return $createdCompare;
+                    }
+                    
+                    // Finally sort by release_date (newest first)
                     $dateA = $a['first_air_date'] ?? '1970-01-01';
                     $dateB = $b['first_air_date'] ?? '1970-01-01';
                     return strcmp($dateB, $dateA);
@@ -61,12 +82,15 @@
                                         if (str_starts_with($imagePath, 'http')) {
                                             // Full URL - use directly
                                             $imageUrl = $imagePath;
-                                        } elseif (($tvShow['content_type'] ?? 'custom') === 'tmdb') {
-                                            // TMDB content - use TMDB service
-                                            $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($imagePath, 'w780');
                                         } else {
-                                            // Custom content - use URL/path directly from database
-                                            $imageUrl = $imagePath;
+                                            $contentType = $tvShow['content_type'] ?? 'custom';
+                                            if (in_array($contentType, ['tmdb', 'article']) || str_starts_with($imagePath, '/')) {
+                                                // TMDB/Article content - use TMDB service
+                                                $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($imagePath, 'w780');
+                                            } else {
+                                                // Custom content - use URL/path directly from database
+                                                $imageUrl = $imagePath;
+                                            }
                                         }
                                     }
                                 @endphp
@@ -188,7 +212,8 @@
                             $imageUrl = null;
                             
                             if ($posterPath) {
-                                if (($tvShow->content_type ?? 'custom') === 'tmdb') {
+                                $contentType = $tvShow->content_type ?? 'custom';
+                                if (in_array($contentType, ['tmdb', 'article']) || str_starts_with($posterPath, '/')) {
                                     $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w185');
                                 } elseif (str_starts_with($posterPath, 'http') || str_starts_with($posterPath, '//')) {
                                     $imageUrl = $posterPath;

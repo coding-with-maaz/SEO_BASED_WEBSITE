@@ -29,11 +29,13 @@
         })->toArray() : [];
         $description = $content->description;
         $posterPath = $content->poster_path;
+        $backdropPath = $content->backdrop_path;
         $episodes = $content->episodes ?? collect([]);
         $currentEpisodes = $episodes->count();
         $episodeCount = $content->episode_count ?? $currentEpisodes;
     } else {
         $views = 0; // TMDB content doesn't have views
+        $backdropPath = $tvShow['backdrop_path'] ?? null;
         $title = $tvShow['name'] ?? 'Unknown';
         $originalTitle = $tvShow['original_name'] ?? $title;
         $rating = $tvShow['vote_average'] ?? 0;
@@ -74,7 +76,8 @@
                     $posterUrl = null;
                     if ($posterPath) {
                         // Check if it's a TMDB path (starts with /) or content_type is tmdb
-                        if (str_starts_with($posterPath, '/') || ($content->content_type ?? 'custom') === 'tmdb') {
+                        $contentType = $content->content_type ?? 'custom';
+                        if (str_starts_with($posterPath, '/') || in_array($contentType, ['tmdb', 'article'])) {
                             // Use TMDB service for TMDB paths
                             $posterUrl = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w500');
                         } elseif (str_starts_with($posterPath, 'http')) {
@@ -100,9 +103,15 @@
         
         <!-- Details -->
         <div class="lg:col-span-2">
+            @if(!(isset($isCustom) && $isCustom && isset($content) && $content->content_type === 'article' && $backdropPath))
             <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:!text-white mb-4" style="font-family: 'Poppins', sans-serif; font-weight: 800;">
                 {{ $title }}
             </h1>
+            @else
+            <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:!text-white mb-4" style="font-family: 'Poppins', sans-serif; font-weight: 800;">
+                {{ $title }}
+            </h1>
+            @endif
             
             @if($originalTitle !== $title)
             <p class="text-lg text-gray-600 dark:!text-text-secondary mb-4" style="font-family: 'Poppins', sans-serif; font-weight: 500;">
@@ -158,8 +167,146 @@
                 {{ $description }}
             </p>
             @endif
+            
+            @if(isset($isCustom) && $isCustom && isset($content) && $content->content_type === 'article' && $content->article_content)
+            <div class="mt-6 article-content prose prose-lg max-w-none dark:prose-invert" style="font-family: 'Poppins', sans-serif;">
+                {!! $content->article_content !!}
+            </div>
+            @endif
         </div>
     </div>
+
+    <!-- Watch/Download Section for Article Content -->
+    @if(isset($isCustom) && $isCustom && isset($content) && $content->content_type === 'article')
+    @php
+        // Get normalized active servers
+        $servers = $content->getActiveServers();
+        
+        // If no servers but watch_link exists, create a default server
+        if (empty($servers) && $content->watch_link) {
+            $servers = [[
+                'id' => 'default',
+                'name' => 'Server 1',
+                'url' => $content->watch_link,
+                'quality' => 'HD',
+                'active' => true,
+                'sort_order' => 0
+            ]];
+        }
+        
+        // Get all download links (from servers and content level)
+        $downloadLinks = $content->getAllDownloadLinks();
+    @endphp
+    
+    @if(!empty($servers) || $content->watch_link || !empty($downloadLinks))
+    <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:!from-bg-card dark:!to-bg-card-hover border border-gray-200 dark:!border-border-secondary rounded-xl p-8 mb-8 shadow-lg">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:!text-white mb-3" style="font-family: 'Poppins', sans-serif; font-weight: 800;">
+                Ready to Watch?
+            </h2>
+            <p class="text-gray-600 dark:!text-text-secondary text-lg" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                Click the button below to start streaming
+            </p>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-2xl mx-auto">
+            <!-- Watch Now Button -->
+            @if(!empty($servers) || $content->watch_link)
+                @php
+                    $watchUrl = !empty($servers) ? ($servers[0]['url'] ?? $content->watch_link) : $content->watch_link;
+                @endphp
+                <a href="{{ $watchUrl }}" 
+                   target="_blank"
+                   class="group relative w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-accent to-red-700 hover:from-red-700 hover:to-accent text-white font-bold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3 overflow-hidden"
+                   style="font-family: 'Poppins', sans-serif; font-weight: 700; min-width: 200px;">
+                    <!-- Animated Background -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12 group-hover:translate-x-full"></div>
+                    
+                    <!-- Play Icon -->
+                    <svg class="w-6 h-6 relative z-10" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    
+                    <!-- Button Text -->
+                    <span class="relative z-10 text-lg">Watch Now</span>
+                    
+                    <!-- Shine Effect -->
+                    <div class="absolute inset-0 -top-2 -bottom-2 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                </a>
+            @endif
+            
+            <!-- Download Button -->
+            @if(!empty($downloadLinks))
+                @php
+                    $primaryDownload = $downloadLinks[0] ?? null;
+                @endphp
+                @if($primaryDownload)
+                <a href="{{ $primaryDownload['url'] }}" 
+                   target="_blank"
+                   class="group relative w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-700 hover:from-emerald-700 hover:to-green-600 text-white font-bold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3 overflow-hidden"
+                   style="font-family: 'Poppins', sans-serif; font-weight: 700; min-width: 200px;">
+                    <!-- Animated Background -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12 group-hover:translate-x-full"></div>
+                    
+                    <!-- Download Icon -->
+                    <svg class="w-6 h-6 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    
+                    <!-- Button Text -->
+                    <span class="relative z-10 text-lg">Download</span>
+                    
+                    <!-- Shine Effect -->
+                    <div class="absolute inset-0 -top-2 -bottom-2 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                </a>
+                @endif
+            @endif
+        </div>
+        
+        <!-- Additional Download Options -->
+        @if(!empty($downloadLinks) && count($downloadLinks) > 1)
+        <div class="mt-8 pt-6 border-t border-gray-300 dark:!border-border-primary">
+            <h3 class="text-lg font-semibold text-gray-900 dark:!text-white mb-4 text-center" style="font-family: 'Poppins', sans-serif; font-weight: 600;">More Download Options</h3>
+            <div class="flex flex-wrap gap-3 justify-center">
+                @foreach(array_slice($downloadLinks, 1) as $download)
+                <a href="{{ $download['url'] }}" 
+                   target="_blank"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:!bg-bg-card border-2 border-gray-300 dark:!border-border-primary hover:border-accent text-gray-700 dark:!text-white hover:text-accent font-semibold rounded-lg transition-all duration-300 hover:shadow-md transform hover:scale-105"
+                   style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    {{ $download['name'] }}
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+        
+        <!-- Server Selection (if multiple servers) -->
+        @if(count($servers) > 1)
+        <div class="mt-6 pt-6 border-t border-gray-300 dark:!border-border-primary">
+            <h3 class="text-lg font-semibold text-gray-900 dark:!text-white mb-4 text-center" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Available Servers</h3>
+            <div class="flex flex-wrap gap-3 justify-center">
+                @foreach($servers as $index => $server)
+                    @if(!empty($server['url']))
+                    <a href="{{ $server['url'] }}" 
+                       target="_blank"
+                       class="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:!bg-bg-card border-2 border-gray-300 dark:!border-border-primary hover:border-accent text-gray-700 dark:!text-white hover:text-accent font-semibold rounded-lg transition-all duration-300 hover:shadow-md transform hover:scale-105"
+                       style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                        {{ $server['name'] ?? 'Server ' . ($index + 1) }}@if(!empty($server['quality'])) - {{ $server['quality'] }}@endif
+                    </a>
+                    @endif
+                @endforeach
+            </div>
+        </div>
+        @endif
+    </div>
+    @endif
+    @endif
 
     <!-- Episodes Section -->
     <div class="bg-white border border-gray-200 p-6 dark:!bg-bg-card dark:!border-border-secondary rounded-lg mb-8">
@@ -453,9 +600,11 @@
                 if ($posterPath) {
                     if (str_starts_with($posterPath, 'http')) {
                         $imageUrl = $posterPath;
-                    } elseif ($recommended->content_type === 'tmdb') {
-                        $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w342');
                     } else {
+                        $contentType = $recommended->content_type ?? 'custom';
+                        if (in_array($contentType, ['tmdb', 'article']) || str_starts_with($posterPath, '/')) {
+                            $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w342');
+                        } else {
                         $imageUrl = $posterPath;
                     }
                 }

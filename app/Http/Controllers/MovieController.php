@@ -24,11 +24,13 @@ class MovieController extends Controller
         $perPage = 20; // Items per page
 
         // Get only custom movie content from database
+        // Priority: Latest updated first, then latest created, then release date, then sort order
         $customMovies = Content::published()
             ->whereIn('type', ['movie', 'documentary', 'short_film'])
-            ->orderBy('sort_order', 'asc')
-            ->orderBy('release_date', 'desc')
-            ->orderBy('created_at', 'desc');
+            ->orderBy('updated_at', 'desc') // Latest updated first
+            ->orderBy('created_at', 'desc') // Then latest created
+            ->orderBy('release_date', 'desc') // Then by release date
+            ->orderBy('sort_order', 'asc'); // Finally by sort order
 
         // Get total count for pagination
         $totalMovies = $customMovies->count();

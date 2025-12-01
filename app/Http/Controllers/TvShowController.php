@@ -24,11 +24,13 @@ class TvShowController extends Controller
         $perPage = 20; // Items per page
 
         // Get only custom TV show content from database
+        // Priority: Latest updated first, then latest created, then release date, then sort order
         $customTvShows = Content::published()
             ->whereIn('type', ['tv_show', 'web_series', 'anime', 'reality_show', 'talk_show'])
             ->orderBy('updated_at', 'desc') // Latest updated first
             ->orderBy('created_at', 'desc') // Then latest created
-            ->orderBy('sort_order', 'asc');
+            ->orderBy('release_date', 'desc') // Then by release date
+            ->orderBy('sort_order', 'asc'); // Finally by sort order
 
         // Get total count for pagination
         $totalTvShows = $customTvShows->count();

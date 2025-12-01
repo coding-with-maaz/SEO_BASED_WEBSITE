@@ -125,9 +125,10 @@
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent dark:!bg-bg-card-hover dark:!border-border-primary dark:!text-white">
                             @if($content->poster_path)
                                 @php
+                                    $contentType = $content->content_type ?? 'custom';
                                     $posterUrl = str_starts_with($content->poster_path, 'http') 
                                         ? $content->poster_path 
-                                        : ($content->content_type === 'tmdb' 
+                                        : (in_array($contentType, ['tmdb', 'article']) || str_starts_with($content->poster_path, '/')
                                             ? app(\App\Services\TmdbService::class)->getImageUrl($content->poster_path, 'w342')
                                             : asset('storage/' . $content->poster_path));
                                 @endphp
@@ -144,9 +145,10 @@
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent focus:border-transparent dark:!bg-bg-card-hover dark:!border-border-primary dark:!text-white">
                             @if($content->backdrop_path)
                                 @php
+                                    $contentType = $content->content_type ?? 'custom';
                                     $backdropUrl = str_starts_with($content->backdrop_path, 'http') 
                                         ? $content->backdrop_path 
-                                        : ($content->content_type === 'tmdb' 
+                                        : (in_array($contentType, ['tmdb', 'article']) || str_starts_with($content->backdrop_path, '/')
                                             ? app(\App\Services\TmdbService::class)->getImageUrl($content->backdrop_path, 'w780')
                                             : $content->backdrop_path);
                                 @endphp

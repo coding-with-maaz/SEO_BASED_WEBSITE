@@ -137,12 +137,13 @@
                                 $imagePath = $backdropPath ?? $posterPath;
                                 
                                 if ($imagePath) {
+                                    $contentType = $item['content_type'] ?? 'custom';
                                     // Use same logic as edit page
                                     if (str_starts_with($imagePath, 'http')) {
                                         // Full URL - use directly
                                         $imageUrl = $imagePath;
-                                    } elseif (($item['content_type'] ?? 'custom') === 'tmdb') {
-                                        // TMDB content - use TMDB service
+                                    } elseif (in_array($contentType, ['tmdb', 'article']) || str_starts_with($imagePath, '/')) {
+                                        // TMDB/Article content - use TMDB service
                                         $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($imagePath, 'w780');
                                     } else {
                                         // Custom content - use URL/path directly from database
@@ -336,7 +337,8 @@
                             $imageUrl = null;
                             
                             if ($posterPath) {
-                                if (($item->content_type ?? 'custom') === 'tmdb') {
+                                $contentType = $item->content_type ?? 'custom';
+                                if (in_array($contentType, ['tmdb', 'article']) || str_starts_with($posterPath, '/')) {
                                     $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w185');
                                 } elseif (str_starts_with($posterPath, 'http') || str_starts_with($posterPath, '//')) {
                                     $imageUrl = $posterPath;

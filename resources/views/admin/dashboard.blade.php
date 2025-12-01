@@ -163,7 +163,7 @@
                                     @php
                                         $posterUrl = str_starts_with($content->poster_path, 'http') 
                                             ? $content->poster_path 
-                                            : ($content->content_type === 'tmdb' 
+                                            : (in_array($content->content_type ?? 'custom', ['tmdb', 'article']) || str_starts_with($content->poster_path, '/')
                                                 ? app(\App\Services\TmdbService::class)->getImageUrl($content->poster_path, 'w185')
                                                 : asset('storage/' . $content->poster_path));
                                     @endphp
@@ -178,8 +178,8 @@
                                 </h3>
                                 <p class="text-sm text-gray-600 dark:!text-text-secondary mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
                                     {{ ucfirst(str_replace('_', ' ', $content->type)) }}
-                                    @if($content->content_type === 'tmdb')
-                                        <span class="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs dark:!bg-blue-900/20 dark:!text-blue-400">TMDB</span>
+                                    @if(in_array($content->content_type ?? 'custom', ['tmdb', 'article']))
+                                        <span class="ml-2 px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs dark:!bg-blue-900/20 dark:!text-blue-400">{{ $content->content_type === 'article' ? 'Article' : 'TMDB' }}</span>
                                     @endif
                                 </p>
                                 <div class="flex items-center gap-3 text-xs text-gray-500 dark:!text-text-tertiary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
@@ -292,7 +292,7 @@
                             @php
                                 $posterUrl = str_starts_with($content->poster_path, 'http') 
                                     ? $content->poster_path 
-                                    : ($content->content_type === 'tmdb' 
+                                    : (in_array($content->content_type ?? 'custom', ['tmdb', 'article']) || str_starts_with($content->poster_path, '/')
                                         ? app(\App\Services\TmdbService::class)->getImageUrl($content->poster_path, 'w342')
                                         : asset('storage/' . $content->poster_path));
                             @endphp

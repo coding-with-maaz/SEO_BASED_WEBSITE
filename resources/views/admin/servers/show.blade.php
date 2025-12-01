@@ -45,13 +45,17 @@
         <div class="flex gap-6">
             <div class="w-24 h-36 rounded overflow-hidden bg-gray-100 dark:!bg-bg-card-hover flex-shrink-0">
                 @if($content->poster_path)
-                    @if(str_starts_with($content->poster_path, 'http'))
-                        <img src="{{ $content->poster_path }}" alt="{{ $content->title }}" class="w-full h-full object-cover">
-                    @elseif($content->content_type === 'tmdb')
-                        <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($content->poster_path, 'w185') }}" alt="{{ $content->title }}" class="w-full h-full object-cover">
-                    @else
-                        <img src="{{ asset('storage/' . $content->poster_path) }}" alt="{{ $content->title }}" class="w-full h-full object-cover">
-                    @endif
+                    @php
+                        $contentType = $content->content_type ?? 'custom';
+                        if (str_starts_with($content->poster_path, 'http')) {
+                            $posterUrl = $content->poster_path;
+                        } elseif (in_array($contentType, ['tmdb', 'article']) || str_starts_with($content->poster_path, '/')) {
+                            $posterUrl = app(\App\Services\TmdbService::class)->getImageUrl($content->poster_path, 'w185');
+                        } else {
+                            $posterUrl = asset('storage/' . $content->poster_path);
+                        }
+                    @endphp
+                    <img src="{{ $posterUrl }}" alt="{{ $content->title }}" class="w-full h-full object-cover">
                 @else
                     <div class="w-full h-full flex items-center justify-center text-gray-400 text-xs">No Image</div>
                 @endif

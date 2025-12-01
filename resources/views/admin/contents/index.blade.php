@@ -97,8 +97,16 @@
                                 @if($content->poster_path)
                                     @if(str_starts_with($content->poster_path, 'http'))
                                         <img src="{{ $content->poster_path }}" alt="{{ $content->title }}" class="w-full h-full object-cover">
-                                    @elseif($content->content_type === 'tmdb')
-                                        <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($content->poster_path, 'w185') }}" alt="{{ $content->title }}" class="w-full h-full object-cover">
+                                    @else
+                                        @php
+                                            $contentType = $content->content_type ?? 'custom';
+                                            if (in_array($contentType, ['tmdb', 'article']) || str_starts_with($content->poster_path, '/')) {
+                                                $posterUrl = app(\App\Services\TmdbService::class)->getImageUrl($content->poster_path, 'w185');
+                                            } else {
+                                                $posterUrl = asset('storage/' . $content->poster_path);
+                                            }
+                                        @endphp
+                                        <img src="{{ $posterUrl }}" alt="{{ $content->title }}" class="w-full h-full object-cover">
                                     @else
                                         <img src="{{ asset('storage/' . $content->poster_path) }}" alt="{{ $content->title }}" class="w-full h-full object-cover">
                                     @endif
@@ -112,8 +120,8 @@
                                 {{ $content->title }}
                             </div>
                             <div class="text-xs text-gray-500 dark:!text-text-tertiary mt-1" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
-                                @if($content->content_type === 'tmdb')
-                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded dark:!bg-blue-900/20 dark:!text-blue-400">TMDB</span>
+                                @if(in_array($content->content_type ?? 'custom', ['tmdb', 'article']))
+                                    <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded dark:!bg-blue-900/20 dark:!text-blue-400">{{ $content->content_type === 'article' ? 'Article' : 'TMDB' }}</span>
                                     @if($content->tmdb_id) ID: {{ $content->tmdb_id }} @endif
                                 @else
                                     <span class="px-2 py-1 bg-gray-100 text-gray-800 rounded dark:!bg-gray-800 dark:!text-gray-400">Custom</span>

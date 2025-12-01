@@ -121,10 +121,13 @@
                 if ($posterPath) {
                     if (str_starts_with($posterPath, 'http')) {
                         $posterUrl = $posterPath;
-                    } elseif (str_starts_with($posterPath, '/') || ($movie->content_type ?? 'custom') === 'tmdb') {
-                        $posterUrl = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w185');
                     } else {
-                        $posterUrl = $posterPath;
+                        $contentType = $movie->content_type ?? 'custom';
+                        if (str_starts_with($posterPath, '/') || in_array($contentType, ['tmdb', 'article'])) {
+                            $posterUrl = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w185');
+                        } else {
+                            $posterUrl = $posterPath;
+                        }
                     }
                 }
                 
@@ -213,10 +216,13 @@
                 if ($posterPath) {
                     if (str_starts_with($posterPath, 'http')) {
                         $posterUrl = $posterPath;
-                    } elseif (str_starts_with($posterPath, '/') || ($tvShow->content_type ?? 'custom') === 'tmdb') {
-                        $posterUrl = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w185');
                     } else {
-                        $posterUrl = $posterPath;
+                        $contentType = $tvShow->content_type ?? 'custom';
+                        if (str_starts_with($posterPath, '/') || in_array($contentType, ['tmdb', 'article'])) {
+                            $posterUrl = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w185');
+                        } else {
+                            $posterUrl = $posterPath;
+                        }
                     }
                 }
                 

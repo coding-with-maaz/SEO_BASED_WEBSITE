@@ -94,8 +94,16 @@
                                 @if($movie->poster_path)
                                     @if(str_starts_with($movie->poster_path, 'http'))
                                         <img src="{{ $movie->poster_path }}" alt="{{ $movie->title }}" class="w-full h-full object-cover">
-                                    @elseif($movie->content_type === 'tmdb')
-                                        <img src="{{ app(\App\Services\TmdbService::class)->getImageUrl($movie->poster_path, 'w185') }}" alt="{{ $movie->title }}" class="w-full h-full object-cover">
+                                    @else
+                                        @php
+                                            $contentType = $movie->content_type ?? 'custom';
+                                            if (in_array($contentType, ['tmdb', 'article']) || str_starts_with($movie->poster_path, '/')) {
+                                                $posterUrl = app(\App\Services\TmdbService::class)->getImageUrl($movie->poster_path, 'w185');
+                                            } else {
+                                                $posterUrl = asset('storage/' . $movie->poster_path);
+                                            }
+                                        @endphp
+                                        <img src="{{ $posterUrl }}" alt="{{ $movie->title }}" class="w-full h-full object-cover">
                                     @else
                                         <img src="{{ asset('storage/' . $movie->poster_path) }}" alt="{{ $movie->title }}" class="w-full h-full object-cover">
                                     @endif

@@ -47,7 +47,7 @@
                         @php
                             $posterUrl = str_starts_with($content->poster_path, 'http') 
                                 ? $content->poster_path 
-                                : ($content->content_type === 'tmdb' 
+                                : (in_array($content->content_type ?? 'custom', ['tmdb', 'article']) || str_starts_with($content->poster_path, '/')
                                     ? app(\App\Services\TmdbService::class)->getImageUrl($content->poster_path, 'w500')
                                     : asset('storage/' . $content->poster_path));
                         @endphp
@@ -61,9 +61,9 @@
                             <span class="px-3 py-1 bg-accent text-white rounded-full text-sm font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
                                 {{ ucfirst(str_replace('_', ' ', $content->type)) }}
                             </span>
-                            @if($content->content_type === 'tmdb')
+                            @if(in_array($content->content_type ?? 'custom', ['tmdb', 'article']))
                                 <span class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold dark:!bg-blue-900/20 dark:!text-blue-400" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
-                                    TMDB
+                                    {{ $content->content_type === 'article' ? 'Article' : 'TMDB' }}
                                 </span>
                             @endif
                             @if($content->status === 'published')

@@ -160,7 +160,8 @@
                             $imageUrl = null;
                             
                             if ($posterPath) {
-                                if (str_starts_with($posterPath, '/') || ($item->content_type ?? 'custom') === 'tmdb') {
+                                $contentType = $item->content_type ?? 'custom';
+                                if (str_starts_with($posterPath, '/') || in_array($contentType, ['tmdb', 'article'])) {
                                     $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w185');
                                 } elseif (str_starts_with($posterPath, 'http')) {
                                     $imageUrl = $posterPath;
