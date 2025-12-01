@@ -603,8 +603,8 @@
                     } else {
                         $contentType = $recommended->content_type ?? 'custom';
                         if (in_array($contentType, ['tmdb', 'article']) || str_starts_with($posterPath, '/')) {
-                            $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w342');
-                        } else {
+                        $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w342');
+                    } else {
                         $imageUrl = $posterPath;
                     }
                 }
