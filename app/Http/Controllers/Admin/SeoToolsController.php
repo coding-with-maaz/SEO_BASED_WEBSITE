@@ -59,6 +59,11 @@ class SeoToolsController extends Controller
         ]);
         
         $url = $request->input('url');
+        
+        // Clear cache for this URL to force fresh analysis
+        $cacheKey = 'seo_analysis_' . md5($url);
+        \Illuminate\Support\Facades\Cache::forget($cacheKey);
+        
         $analysis = $service->analyzeUrl($url);
         
         if ($request->expectsJson()) {
@@ -80,14 +85,16 @@ class SeoToolsController extends Controller
             'url' => 'nullable|url',
             'page' => 'nullable|url',
             'sitemap' => 'nullable|boolean',
+            'limit' => 'nullable|integer|min:1|max:100',
         ]);
         
         $url = $request->input('url');
         $page = $request->input('page');
         $sitemap = $request->input('sitemap');
+        $limit = (int) ($request->input('limit') ?? 50); // Default to 50 URLs max
         
         if ($sitemap) {
-            $results = $service->checkSitemapUrls();
+            $results = $service->checkSitemapUrls($limit);
         } elseif ($page) {
             $pageResult = $service->checkPageLinks($page);
             $results = $pageResult['links'] ?? [];
@@ -109,6 +116,7 @@ class SeoToolsController extends Controller
         return view('admin.seo-tools.broken-links', [
             'summary' => $summary,
             'results' => $results,
+            'limit' => $sitemap ? $limit : null,
         ]);
     }
 
@@ -122,6 +130,11 @@ class SeoToolsController extends Controller
         ]);
         
         $url = $request->input('url');
+        
+        // Clear cache for this URL to force fresh analysis
+        $cacheKey = 'rich_snippets_google_' . md5($url);
+        \Illuminate\Support\Facades\Cache::forget($cacheKey);
+        
         $result = $service->testWithGoogle($url);
         
         if ($request->expectsJson()) {

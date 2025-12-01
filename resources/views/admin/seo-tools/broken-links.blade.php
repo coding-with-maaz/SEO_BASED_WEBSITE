@@ -6,6 +6,15 @@
         <h1 class="text-3xl font-bold text-white mb-2">Broken Links Check Results</h1>
     </div>
 
+    @if(isset($limit) && $limit > 0)
+        <div class="bg-yellow-900 border border-yellow-700 rounded-lg p-4 mb-6">
+            <p class="text-yellow-200 text-sm">
+                <strong>Note:</strong> Only the first {{ $limit }} URLs from the sitemap were checked to prevent timeouts. 
+                To check more URLs, increase the limit in the form.
+            </p>
+        </div>
+    @endif
+
     <!-- Summary -->
     <div class="bg-gray-800 rounded-lg p-6 mb-6">
         <h2 class="text-2xl font-semibold text-white mb-4">Summary</h2>

@@ -64,8 +64,20 @@ Route::post('/comments/{id}/dislike', [CommentController::class, 'dislike'])->na
 Route::post('/share/track', [ShareController::class, 'track'])->name('share.track');
 Route::get('/share/stats', [ShareController::class, 'stats'])->name('share.stats');
 
-// Admin routes for custom content management
+// Admin authentication routes
 Route::prefix('admin')->name('admin.')->group(function () {
+    // Public login routes
+    Route::get('login', [\App\Http\Controllers\Auth\LoginController::class, 'showLoginForm'])->name('login');
+    Route::post('login', [\App\Http\Controllers\Auth\LoginController::class, 'login']);
+    
+    // Protected logout route
+    Route::post('logout', [\App\Http\Controllers\Auth\LoginController::class, 'logout'])
+        ->middleware('auth')
+        ->name('logout');
+});
+
+// Admin routes for custom content management (protected)
+Route::prefix('admin')->name('admin.')->middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('contents', ContentController::class);
     

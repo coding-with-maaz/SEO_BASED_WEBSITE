@@ -4,6 +4,32 @@
 
 <?php $__env->startSection('content'); ?>
 <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
+    <!-- Breadcrumbs -->
+    <?php if (isset($component)) { $__componentOriginal360d002b1b676b6f84d43220f22129e2 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal360d002b1b676b6f84d43220f22129e2 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.breadcrumbs','data' => ['items' => [
+        ['label' => 'Movies', 'url' => null]
+    ]]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('breadcrumbs'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['items' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute([
+        ['label' => 'Movies', 'url' => null]
+    ])]); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal360d002b1b676b6f84d43220f22129e2)): ?>
+<?php $attributes = $__attributesOriginal360d002b1b676b6f84d43220f22129e2; ?>
+<?php unset($__attributesOriginal360d002b1b676b6f84d43220f22129e2); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal360d002b1b676b6f84d43220f22129e2)): ?>
+<?php $component = $__componentOriginal360d002b1b676b6f84d43220f22129e2; ?>
+<?php unset($__componentOriginal360d002b1b676b6f84d43220f22129e2); ?>
+<?php endif; ?>
+    
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Main Content Area (2 columns on large screens) -->
         <div class="lg:col-span-2">

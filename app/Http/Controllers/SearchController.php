@@ -106,7 +106,7 @@ class SearchController extends Controller
                           ->orWhereJsonContains('genres', ['name' => $genre])
                           ->orWhere('genres', 'like', '%' . $genre . '%');
                     });
-                }
+        }
 
                 if ($year) {
                     $dbTvShowsQuery->whereYear('release_date', $year);

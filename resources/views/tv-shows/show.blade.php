@@ -109,6 +109,30 @@
         
         <!-- Details -->
         <div class="lg:col-span-2">
+            <!-- Social Share Buttons -->
+            @php
+                $shareTitle = $title ?? 'TV Show';
+                $shareDescription = $description ?? '';
+                $shareImage = null;
+                if ($posterPath) {
+                    $contentType = isset($content) ? ($content->content_type ?? 'custom') : 'custom';
+                    if (str_starts_with($posterPath, '/') || in_array($contentType, ['tmdb', 'article'])) {
+                        $shareImage = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w500');
+                    } elseif (str_starts_with($posterPath, 'http')) {
+                        $shareImage = $posterPath;
+                    } else {
+                        $shareImage = asset('storage/' . $posterPath);
+                    }
+                }
+                $shareImage = $shareImage ?? asset('favicon.ico');
+            @endphp
+            <x-social-share 
+                :url="url()->current()" 
+                :title="$shareTitle" 
+                :description="$shareDescription"
+                :image="$shareImage"
+                type="video.tv_show" 
+            />
             @if(!(isset($isCustom) && $isCustom && isset($content) && $content->content_type === 'article' && $backdropPath))
             <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:!text-white mb-4" style="font-family: 'Poppins', sans-serif; font-weight: 800;">
                 {{ $title }}
@@ -585,7 +609,19 @@
 
     @endif
 
-    <!-- Recommended Movies Section -->
+    <!-- Similar TV Shows -->
+    <x-recommendations :items="$similarTvShows ?? []" title="Similar TV Shows" routeName="tv-shows.show" />
+
+    <!-- You May Also Like -->
+    <x-recommendations :items="$youMayAlsoLike ?? []" title="You May Also Like" routeName="tv-shows.show" />
+
+    <!-- Trending TV Shows -->
+    <x-recommendations :items="$trendingTvShows ?? []" title="Trending TV Shows" routeName="tv-shows.show" />
+
+    <!-- Trending Movies -->
+    <x-recommendations :items="$trendingMovies ?? []" title="Trending Movies" routeName="movies.show" />
+
+    <!-- Recommended Movies Section (Legacy) -->
     @if(isset($recommendedMovies) && $recommendedMovies->count() > 0)
     <div class="mt-12 mb-12">
         <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:!text-white mb-6 pl-4 border-l-4 border-accent" style="font-family: 'Poppins', sans-serif; font-weight: 700;">

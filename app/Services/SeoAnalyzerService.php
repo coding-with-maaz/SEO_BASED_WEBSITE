@@ -24,9 +24,13 @@ class SeoAnalyzerService
         
         return Cache::remember($cacheKey, 3600, function () use ($url) {
             try {
-                // Increase timeout for localhost URLs
-                $timeout = (str_contains($url, '127.0.0.1') || str_contains($url, 'localhost')) ? 30 : 15;
-                $response = Http::timeout($timeout)->get($url);
+                // For localhost URLs, try to get content directly without HTTP request
+                if ($this->isLocalhost($url)) {
+                    return $this->analyzeLocalhostUrl($url);
+                }
+                
+                // For external URLs, use HTTP request
+                $response = Http::timeout(15)->get($url);
                 
                 if (!$response->successful()) {
                     return [
@@ -46,6 +50,89 @@ class SeoAnalyzerService
                 ];
             }
         });
+    }
+
+    /**
+     * Check if URL is localhost
+     */
+    protected function isLocalhost(string $url): bool
+    {
+        return str_contains($url, '127.0.0.1') 
+            || str_contains($url, 'localhost') 
+            || str_contains($url, '::1');
+    }
+
+    /**
+     * Analyze localhost URL by making internal request
+     */
+    protected function analyzeLocalhostUrl(string $url): array
+    {
+        try {
+            // Extract path from URL
+            $parsedUrl = parse_url($url);
+            $path = $parsedUrl['path'] ?? '/';
+            
+            // Prevent recursion - check if we're already in an internal request
+            if (app()->runningInConsole() || request()->header('X-Internal-Request')) {
+                // If in console or already an internal request, use HTTP with longer timeout
+                return $this->analyzeWithHttp($url, 60);
+            }
+            
+            // Create a request to the application
+            $request = \Illuminate\Http\Request::create($path, 'GET');
+            $request->headers->set('Host', $parsedUrl['host'] ?? 'localhost');
+            $request->headers->set('X-Internal-Request', 'true');
+            
+            // Store original request to restore later
+            $originalRequest = request();
+            
+            // Handle the request and get response
+            $response = app()->handle($request);
+            
+            // Restore original request
+            app()->instance('request', $originalRequest);
+            
+            if ($response->getStatusCode() !== 200) {
+                return [
+                    'success' => false,
+                    'error' => "HTTP {$response->getStatusCode()}",
+                    'url' => $url,
+                ];
+            }
+            
+            $html = $response->getContent();
+            return $this->analyzeHtml($html, $url);
+        } catch (\Exception $e) {
+            // Fallback to HTTP request with increased timeout
+            return $this->analyzeWithHttp($url, 60);
+        }
+    }
+
+    /**
+     * Analyze URL using HTTP request
+     */
+    protected function analyzeWithHttp(string $url, int $timeout = 15): array
+    {
+        try {
+            $response = Http::timeout($timeout)->get($url);
+            
+            if (!$response->successful()) {
+                return [
+                    'success' => false,
+                    'error' => "HTTP {$response->status()}",
+                    'url' => $url,
+                ];
+            }
+            
+            $html = $response->body();
+            return $this->analyzeHtml($html, $url);
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+                'url' => $url,
+            ];
+        }
     }
 
     /**

@@ -5,13 +5,24 @@
 @section('content')
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
     <!-- Header -->
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">
-            Admin Dashboard
-        </h1>
-        <p class="text-gray-600 dark:!text-text-secondary mt-1" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
-            Welcome to the admin panel. Here's an overview of your content management system.
-        </p>
+    <div class="mb-8 flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">
+                Admin Dashboard
+            </h1>
+            <p class="text-gray-600 dark:!text-text-secondary mt-1" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                Welcome, {{ auth()->user()->name }}! Here's an overview of your content management system.
+            </p>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="text-sm text-gray-600 dark:!text-text-secondary">{{ auth()->user()->email }}</span>
+            <form method="POST" action="{{ route('admin.logout') }}" class="inline">
+                @csrf
+                <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                    Logout
+                </button>
+            </form>
+        </div>
     </div>
 
     <!-- Statistics Cards -->

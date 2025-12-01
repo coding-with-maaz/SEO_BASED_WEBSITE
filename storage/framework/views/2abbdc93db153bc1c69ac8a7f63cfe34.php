@@ -134,6 +134,43 @@
         
         <!-- Details Header -->
         <div class="lg:col-span-2">
+            <!-- Social Share Buttons -->
+            <?php
+                $shareTitle = $title ?? 'Movie';
+                $shareDescription = $description ?? '';
+                $shareImage = null;
+                if ($posterPath) {
+                    $contentType = isset($content) ? ($content->content_type ?? 'custom') : 'custom';
+                    if (str_starts_with($posterPath, '/') || in_array($contentType, ['tmdb', 'article'])) {
+                        $shareImage = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w500');
+                    } elseif (str_starts_with($posterPath, 'http')) {
+                        $shareImage = $posterPath;
+                    } else {
+                        $shareImage = asset('storage/' . $posterPath);
+                    }
+                }
+                $shareImage = $shareImage ?? asset('favicon.ico');
+            ?>
+            <?php if (isset($component)) { $__componentOriginal17b2004f99a8943478e07573999cea74 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal17b2004f99a8943478e07573999cea74 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.social-share','data' => ['url' => url()->current(),'title' => $shareTitle,'description' => $shareDescription,'image' => $shareImage,'type' => 'video.movie']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('social-share'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['url' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(url()->current()),'title' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($shareTitle),'description' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($shareDescription),'image' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($shareImage),'type' => 'video.movie']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal17b2004f99a8943478e07573999cea74)): ?>
+<?php $attributes = $__attributesOriginal17b2004f99a8943478e07573999cea74; ?>
+<?php unset($__attributesOriginal17b2004f99a8943478e07573999cea74); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal17b2004f99a8943478e07573999cea74)): ?>
+<?php $component = $__componentOriginal17b2004f99a8943478e07573999cea74; ?>
+<?php unset($__componentOriginal17b2004f99a8943478e07573999cea74); ?>
+<?php endif; ?>
             <?php if(!(isset($isCustom) && $isCustom && isset($content) && $content->content_type === 'article' && $backdropPath)): ?>
             <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:!text-white mb-4" style="font-family: 'Poppins', sans-serif; font-weight: 800;">
                 <?php echo e($title); ?>
@@ -537,6 +574,72 @@
         </div>
     </div>
     <?php endif; ?>
+
+    <!-- Similar Movies -->
+    <?php if (isset($component)) { $__componentOriginalb2a462bccb9e71b05d2689e6acbf3e6e = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalb2a462bccb9e71b05d2689e6acbf3e6e = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.recommendations','data' => ['items' => $similarMovies ?? [],'title' => 'Similar Movies','routeName' => 'movies.show']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('recommendations'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['items' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($similarMovies ?? []),'title' => 'Similar Movies','routeName' => 'movies.show']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalb2a462bccb9e71b05d2689e6acbf3e6e)): ?>
+<?php $attributes = $__attributesOriginalb2a462bccb9e71b05d2689e6acbf3e6e; ?>
+<?php unset($__attributesOriginalb2a462bccb9e71b05d2689e6acbf3e6e); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalb2a462bccb9e71b05d2689e6acbf3e6e)): ?>
+<?php $component = $__componentOriginalb2a462bccb9e71b05d2689e6acbf3e6e; ?>
+<?php unset($__componentOriginalb2a462bccb9e71b05d2689e6acbf3e6e); ?>
+<?php endif; ?>
+
+    <!-- You May Also Like -->
+    <?php if (isset($component)) { $__componentOriginalb2a462bccb9e71b05d2689e6acbf3e6e = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalb2a462bccb9e71b05d2689e6acbf3e6e = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.recommendations','data' => ['items' => $youMayAlsoLike ?? [],'title' => 'You May Also Like','routeName' => 'movies.show']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('recommendations'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['items' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($youMayAlsoLike ?? []),'title' => 'You May Also Like','routeName' => 'movies.show']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalb2a462bccb9e71b05d2689e6acbf3e6e)): ?>
+<?php $attributes = $__attributesOriginalb2a462bccb9e71b05d2689e6acbf3e6e; ?>
+<?php unset($__attributesOriginalb2a462bccb9e71b05d2689e6acbf3e6e); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalb2a462bccb9e71b05d2689e6acbf3e6e)): ?>
+<?php $component = $__componentOriginalb2a462bccb9e71b05d2689e6acbf3e6e; ?>
+<?php unset($__componentOriginalb2a462bccb9e71b05d2689e6acbf3e6e); ?>
+<?php endif; ?>
+
+    <!-- Trending Movies -->
+    <?php if (isset($component)) { $__componentOriginalb2a462bccb9e71b05d2689e6acbf3e6e = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalb2a462bccb9e71b05d2689e6acbf3e6e = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.recommendations','data' => ['items' => $trendingMovies ?? [],'title' => 'Trending Movies','routeName' => 'movies.show']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('recommendations'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['items' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($trendingMovies ?? []),'title' => 'Trending Movies','routeName' => 'movies.show']); ?>
+<?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginalb2a462bccb9e71b05d2689e6acbf3e6e)): ?>
+<?php $attributes = $__attributesOriginalb2a462bccb9e71b05d2689e6acbf3e6e; ?>
+<?php unset($__attributesOriginalb2a462bccb9e71b05d2689e6acbf3e6e); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginalb2a462bccb9e71b05d2689e6acbf3e6e)): ?>
+<?php $component = $__componentOriginalb2a462bccb9e71b05d2689e6acbf3e6e; ?>
+<?php unset($__componentOriginalb2a462bccb9e71b05d2689e6acbf3e6e); ?>
+<?php endif; ?>
 
     <?php if(isset($movie['recommendations']['results']) && count($movie['recommendations']['results']) > 0): ?>
     <div class="mt-12 mb-12">

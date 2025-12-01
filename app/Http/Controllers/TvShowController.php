@@ -5,17 +5,20 @@ namespace App\Http\Controllers;
 use App\Models\Content;
 use App\Services\TmdbService;
 use App\Services\SeoService;
+use App\Services\RecommendationService;
 use Illuminate\Http\Request;
 
 class TvShowController extends Controller
 {
     protected $tmdb;
     protected $seo;
+    protected $recommendations;
 
-    public function __construct(TmdbService $tmdb, SeoService $seo)
+    public function __construct(TmdbService $tmdb, SeoService $seo, RecommendationService $recommendations)
     {
         $this->tmdb = $tmdb;
         $this->seo = $seo;
+        $this->recommendations = $recommendations;
     }
 
     public function index(Request $request)
@@ -78,6 +81,9 @@ class TvShowController extends Controller
             ->first();
 
         if ($content) {
+            // Track view for recommendations
+            $this->recommendations->trackView($content->id);
+            
             // Increment views when TV show is viewed
             $content->increment('views');
             $content->refresh(); // Refresh to get updated views count
@@ -92,13 +98,11 @@ class TvShowController extends Controller
             // Set episodes as a collection attribute
             $content->setRelation('episodes', $episodes);
             
-            // Get recommended movies from database
-            $recommendedMovies = Content::published()
-                ->whereIn('type', ['movie', 'documentary', 'short_film'])
-                ->orderBy('views', 'desc')
-                ->orderBy('release_date', 'desc')
-                ->take(10)
-                ->get();
+            // Get various recommendation types
+            $similarTvShows = $this->recommendations->getSimilarContent($content, 10);
+            $trendingTvShows = $this->recommendations->getTrendingContent('tv_shows', 10);
+            $youMayAlsoLike = $this->recommendations->getYouMayAlsoLike('tv_shows', 10);
+            $trendingMovies = $this->recommendations->getTrendingContent('movies', 10);
             
             // Prepare TV show data for SEO
             $tvShowData = [
@@ -129,7 +133,10 @@ class TvShowController extends Controller
             return view('tv-shows.show', [
                 'content' => $content,
                 'isCustom' => true,
-                'recommendedMovies' => $recommendedMovies,
+                'similarTvShows' => $similarTvShows,
+                'trendingTvShows' => $trendingTvShows,
+                'youMayAlsoLike' => $youMayAlsoLike,
+                'trendingMovies' => $trendingMovies,
                 'seo' => $this->seo->forTvShow($tvShowData, $content),
             ]);
         }
@@ -144,8 +151,12 @@ class TvShowController extends Controller
                     ->whereIn('type', ['tv_show', 'web_series', 'anime', 'reality_show', 'talk_show'])
                     ->first();
                 
-                // Load published episodes only if custom content exists
+                // Track view if content exists
                 if ($customContent) {
+                    $this->recommendations->trackView($customContent->id);
+                    $customContent->increment('views');
+                    
+                    // Load published episodes only if custom content exists
                     $episodes = $customContent->episodes()
                         ->where('is_published', true)
                         ->with('servers')
@@ -154,19 +165,18 @@ class TvShowController extends Controller
                     $customContent->setRelation('episodes', $episodes);
                 }
 
-                // Get recommended movies from database
-                $recommendedMovies = Content::published()
-                    ->whereIn('type', ['movie', 'documentary', 'short_film'])
-                    ->orderBy('views', 'desc')
-                    ->orderBy('release_date', 'desc')
-                    ->take(10)
-                    ->get();
+                // Get recommendations
+                $trendingTvShows = $this->recommendations->getTrendingContent('tv_shows', 10);
+                $youMayAlsoLike = $this->recommendations->getYouMayAlsoLike('tv_shows', 10);
+                $trendingMovies = $this->recommendations->getTrendingContent('movies', 10);
 
                 return view('tv-shows.show', [
                     'tvShow' => $tvShow,
                     'content' => $customContent,
                     'isCustom' => false,
-                    'recommendedMovies' => $recommendedMovies,
+                    'trendingTvShows' => $trendingTvShows,
+                    'youMayAlsoLike' => $youMayAlsoLike,
+                    'trendingMovies' => $trendingMovies,
                     'seo' => $this->seo->forTvShow($tvShow, $customContent),
                 ]);
             }

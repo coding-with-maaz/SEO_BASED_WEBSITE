@@ -110,6 +110,30 @@
         
         <!-- Details Header -->
         <div class="lg:col-span-2">
+            <!-- Social Share Buttons -->
+            @php
+                $shareTitle = $title ?? 'Movie';
+                $shareDescription = $description ?? '';
+                $shareImage = null;
+                if ($posterPath) {
+                    $contentType = isset($content) ? ($content->content_type ?? 'custom') : 'custom';
+                    if (str_starts_with($posterPath, '/') || in_array($contentType, ['tmdb', 'article'])) {
+                        $shareImage = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w500');
+                    } elseif (str_starts_with($posterPath, 'http')) {
+                        $shareImage = $posterPath;
+                    } else {
+                        $shareImage = asset('storage/' . $posterPath);
+                    }
+                }
+                $shareImage = $shareImage ?? asset('favicon.ico');
+            @endphp
+            <x-social-share 
+                :url="url()->current()" 
+                :title="$shareTitle" 
+                :description="$shareDescription"
+                :image="$shareImage"
+                type="video.movie" 
+            />
             @if(!(isset($isCustom) && $isCustom && isset($content) && $content->content_type === 'article' && $backdropPath))
             <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:!text-white mb-4" style="font-family: 'Poppins', sans-serif; font-weight: 800;">
                 {{ $title }}
@@ -504,6 +528,15 @@
         </div>
     </div>
     @endif
+
+    <!-- Similar Movies -->
+    <x-recommendations :items="$similarMovies ?? []" title="Similar Movies" routeName="movies.show" />
+
+    <!-- You May Also Like -->
+    <x-recommendations :items="$youMayAlsoLike ?? []" title="You May Also Like" routeName="movies.show" />
+
+    <!-- Trending Movies -->
+    <x-recommendations :items="$trendingMovies ?? []" title="Trending Movies" routeName="movies.show" />
 
     @if(isset($movie['recommendations']['results']) && count($movie['recommendations']['results']) > 0)
     <div class="mt-12 mb-12">

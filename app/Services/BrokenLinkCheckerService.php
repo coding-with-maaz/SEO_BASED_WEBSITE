@@ -27,9 +27,18 @@ class BrokenLinkCheckerService
         // Normalize URL
         $url = $this->normalizeUrl($url);
         
+        // For localhost URLs, try internal request first
+        if ($this->isLocalhost($url) && !app()->runningInConsole()) {
+            try {
+                return $this->checkLocalhostUrl($url);
+            } catch (\Exception $e) {
+                // Fall through to HTTP request
+            }
+        }
+        
         try {
             // Increase timeout for localhost URLs
-            $timeout = (str_contains($url, '127.0.0.1') || str_contains($url, 'localhost')) ? 30 : $this->timeout;
+            $timeout = $this->isLocalhost($url) ? 30 : $this->timeout;
             
             $response = Http::timeout($timeout)
                 ->withOptions([
@@ -242,15 +251,71 @@ class BrokenLinkCheckerService
     }
 
     /**
-     * Check sitemap URLs
+     * Check sitemap URLs (with batching to prevent timeouts)
      */
-    public function checkSitemapUrls(): array
+    public function checkSitemapUrls(int $limit = 50): array
     {
         $sitemapService = app(\App\Services\SitemapService::class);
         $allUrls = $sitemapService->getAllUrlsFlat();
         
         $urls = array_column($allUrls, 'loc');
+        
+        // Limit the number of URLs to check to prevent timeouts
+        if ($limit > 0 && count($urls) > $limit) {
+            $urls = array_slice($urls, 0, $limit);
+        }
+        
         return $this->checkUrls($urls);
+    }
+
+    /**
+     * Check localhost URL using internal request
+     */
+    protected function checkLocalhostUrl(string $url): array
+    {
+        try {
+            $parsedUrl = parse_url($url);
+            $path = $parsedUrl['path'] ?? '/';
+            
+            // Create internal request
+            $request = \Illuminate\Http\Request::create($path, 'GET');
+            $request->headers->set('Host', $parsedUrl['host'] ?? 'localhost');
+            $request->headers->set('X-Internal-Request', 'true');
+            
+            // Store original request
+            $originalRequest = request();
+            
+            // Handle request
+            $response = app()->handle($request);
+            
+            // Restore original request
+            app()->instance('request', $originalRequest);
+            
+            $statusCode = $response->getStatusCode();
+            $isBroken = $statusCode >= 400;
+            
+            return [
+                'url' => $url,
+                'status_code' => $statusCode,
+                'is_broken' => $isBroken,
+                'is_redirect' => $statusCode >= 300 && $statusCode < 400,
+                'final_url' => $url,
+                'message' => $this->getStatusMessage($statusCode),
+                'checked_at' => now()->toIso8601String(),
+            ];
+        } catch (\Exception $e) {
+            throw $e; // Re-throw to fall back to HTTP
+        }
+    }
+
+    /**
+     * Check if URL is localhost
+     */
+    protected function isLocalhost(string $url): bool
+    {
+        return str_contains($url, '127.0.0.1') 
+            || str_contains($url, 'localhost') 
+            || str_contains($url, '::1');
     }
 
     /**

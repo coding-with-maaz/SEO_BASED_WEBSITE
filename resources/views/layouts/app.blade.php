@@ -1093,6 +1093,44 @@
         window.closeMobileMenu = closeMobileMenu;
     </script>
     
+    <!-- OneSignal Push Notifications -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script src="{{ asset('js/onesignal.js') }}" defer></script>
+    <style>
+        @keyframes slide-up {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes slide-down {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-slide-up {
+            animation: slide-up 0.3s ease-out;
+        }
+        .animate-slide-down {
+            animation: slide-down 0.3s ease-out;
+        }
+    </style>
+    <script>
+      // OneSignal will be initialized by the OneSignalManager class
+      // The manager handles all permission and subscription logic automatically
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      
+    </script>
+    
     @stack('scripts')
 </body>
 </html>

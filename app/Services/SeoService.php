@@ -75,6 +75,15 @@ class SeoService
             'robots' => $robots,
             'locale' => $locale,
             'alternate_locales' => $alternateLocales,
+            // Open Graph specific fields
+            'og_title' => $data['og_title'] ?? $title,
+            'og_description' => $data['og_description'] ?? $description,
+            'og_image' => $data['og_image'] ?? $image,
+            // Twitter Card specific fields
+            'twitter_card' => $data['twitter_card'] ?? 'summary_large_image',
+            'twitter_title' => $data['twitter_title'] ?? $title,
+            'twitter_description' => $data['twitter_description'] ?? $description,
+            'twitter_image' => $data['twitter_image'] ?? $image,
         ];
     }
 

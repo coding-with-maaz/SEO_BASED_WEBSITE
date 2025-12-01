@@ -72,6 +72,11 @@
                     <input type="checkbox" name="sitemap" id="sitemap" value="1" class="rounded">
                     <label for="sitemap" class="text-gray-300 text-sm">Check all sitemap URLs</label>
                 </div>
+                <div class="text-sm text-gray-400">
+                    <label for="limit" class="block mb-1">Max URLs to check (sitemap only):</label>
+                    <input type="number" name="limit" id="limit" value="50" min="1" max="100" 
+                           class="w-full bg-gray-700 text-white px-3 py-1 rounded">
+                </div>
                 <button type="submit" class="w-full bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded">
                     Check Links
                 </button>
