@@ -4,7 +4,7 @@
     $shareUrl = $url ?? url()->current();
     $shareTitle = $title ?? 'Nazaarabox - Movies & TV Shows';
     $shareDescription = $description ?? 'Watch and download your favorite movies and TV shows.';
-    $shareImage = $image ?? asset('favicon.ico');
+    $shareImage = $image ?? asset('icon.png');
     
     // Encode for URL sharing
     $encodedUrl = urlencode($shareUrl);

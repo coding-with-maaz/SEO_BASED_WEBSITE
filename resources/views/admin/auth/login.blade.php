@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - Nazaarabox</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="icon" type="image/png" href="{{ asset('icon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('icon.png') }}">
     <style>
         body {
             background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);

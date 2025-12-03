@@ -63,7 +63,7 @@
     <meta property="og:url" content="{{ $seo['url'] ?? url()->current() }}">
     <meta property="og:title" content="{{ $seo['og_title'] ?? $seo['title'] ?? 'Nazaarabox - Movies & TV Shows' }}">
     <meta property="og:description" content="{{ $seo['og_description'] ?? $seo['description'] ?? 'Watch and download your favorite movies and TV shows. Browse thousands of titles in high quality.' }}">
-    <meta property="og:image" content="{{ $seo['og_image'] ?? $seo['image'] ?? asset('favicon.ico') }}">
+    <meta property="og:image" content="{{ $seo['og_image'] ?? $seo['image'] ?? asset('icon.png') }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="{{ $seo['title'] ?? 'Nazaarabox' }}">
@@ -84,7 +84,7 @@
     <meta name="twitter:url" content="{{ $seo['url'] ?? url()->current() }}">
     <meta name="twitter:title" content="{{ $seo['twitter_title'] ?? $seo['title'] ?? 'Nazaarabox - Movies & TV Shows' }}">
     <meta name="twitter:description" content="{{ $seo['twitter_description'] ?? $seo['description'] ?? 'Watch and download your favorite movies and TV shows. Browse thousands of titles in high quality.' }}">
-    <meta name="twitter:image" content="{{ $seo['twitter_image'] ?? $seo['image'] ?? asset('favicon.ico') }}">
+    <meta name="twitter:image" content="{{ $seo['twitter_image'] ?? $seo['image'] ?? asset('icon.png') }}">
     <meta name="twitter:image:alt" content="{{ $seo['twitter_title'] ?? $seo['title'] ?? 'Nazaarabox' }}">
     @if($seoService->getTwitterHandle())
     <meta name="twitter:site" content="{{ $seoService->getTwitterHandle() }}">
@@ -124,8 +124,9 @@
     @endif
     
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-    <link rel="apple-touch-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="icon" type="image/png" href="{{ asset('icon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('icon.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('icon.png') }}">
     <!-- Google Fonts - Poppins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

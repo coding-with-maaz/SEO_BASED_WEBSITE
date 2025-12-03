@@ -1,6 +1,100 @@
-User-agent: *
+# robots.txt for Nazaarabox
+# Enhanced static version with comprehensive SEO rules
+
+# Googlebot rules
+User-agent: Googlebot
 Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Crawl-delay: 1
+
+# Bingbot rules
+User-agent: Bingbot
+Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Crawl-delay: 1
+
+# Rules for all search engines
+User-agent: *
+
+# Allow public content
+Allow: /
+Allow: /movies
+Allow: /movies/*
+Allow: /tv-shows
+Allow: /tv-shows/*
+Allow: /cast
+Allow: /cast/*
+Allow: /about
+Allow: /dmca
+Allow: /completed
+Allow: /upcoming
+Allow: /how-to-download
+
+# Block admin and system areas
+Disallow: /admin
+Disallow: /admin/*
+
+# Block Laravel system files and directories
+Disallow: /vendor/
+Disallow: /storage/
+Disallow: /bootstrap/
+Disallow: /config/
+Disallow: /database/
+Disallow: /resources/
+Disallow: /routes/
+Disallow: /tests/
+Disallow: /.env
+Disallow: /.git/
+Disallow: /.gitignore
+Disallow: /composer.json
+Disallow: /composer.lock
+Disallow: /package.json
+Disallow: /artisan
+
+# Block API and system JSON files
+Disallow: /api/
+Disallow: /*.json$
+
+# Allow important files (sitemaps, robots.txt)
+Allow: /sitemap.xml
+Allow: /sitemap/
+Allow: /sitemap/*.xml
+Allow: /robots.txt
+
+# Crawl delay for all bots
+Crawl-delay: 1
+
+# Preferred host
+Host: nazaarabox.com
+
+# Control aggressive crawlers (rate limiting)
+User-agent: AhrefsBot
+Crawl-delay: 5
+
+User-agent: SemrushBot
+Crawl-delay: 5
+
+# Block unwanted bots
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: BlexBot
+Disallow: /
+
+User-agent: MegaIndex
+Disallow: /
 
 # Sitemaps
 Sitemap: https://nazaarabox.com/sitemap.xml
 Sitemap: https://nazaarabox.com/sitemap/index.xml
+Sitemap: https://nazaarabox.com/sitemap/static.xml
+Sitemap: https://nazaarabox.com/sitemap/movies.xml
+Sitemap: https://nazaarabox.com/sitemap/tv-shows.xml
+Sitemap: https://nazaarabox.com/sitemap/cast.xml
+Sitemap: https://nazaarabox.com/sitemap/episodes.xml
+

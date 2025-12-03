@@ -124,7 +124,7 @@
                         $shareImage = asset('storage/' . $posterPath);
                     }
                 }
-                $shareImage = $shareImage ?? asset('favicon.ico');
+                $shareImage = $shareImage ?? asset('icon.png');
             @endphp
             <x-social-share 
                 :url="url()->current()" 
@@ -197,14 +197,17 @@
                 {{ $description }}
             </p>
             @endif
-            
-            @if(isset($isCustom) && $isCustom && isset($content) && $content->content_type === 'article' && $content->article_content)
-            <div class="mt-6 article-content prose prose-lg max-w-none dark:prose-invert" style="font-family: 'Poppins', sans-serif;">
-                {!! $content->article_content !!}
-            </div>
-            @endif
         </div>
     </div>
+
+    <!-- Article Content Section (for article content type) -->
+    @if(isset($isCustom) && $isCustom && isset($content) && !empty($content->article_content))
+    <div class="bg-white dark:!bg-bg-card border border-gray-200 dark:!border-border-secondary rounded-xl p-6 md:p-8 lg:p-10 mb-8 shadow-sm">
+        <div class="article-content max-w-4xl mx-auto">
+            {!! $content->article_content !!}
+        </div>
+    </div>
+    @endif
 
     <!-- Watch/Download Section for Article Content -->
     @if(isset($isCustom) && $isCustom && isset($content) && $content->content_type === 'article')
@@ -338,6 +341,90 @@
     @endif
     @endif
 
+    <!-- Watch All Episodes Section (if content has watch_link or servers) -->
+    @if(isset($isCustom) && $isCustom && isset($content))
+    @php
+        // Get normalized active servers for content level (all episodes in one)
+        $contentServers = $content->getActiveServers();
+        
+        // If no servers but watch_link exists, create a default server
+        if (empty($contentServers) && $content->watch_link) {
+            $contentServers = [[
+                'id' => 'default',
+                'name' => 'Server 1',
+                'url' => $content->watch_link,
+                'quality' => 'HD',
+                'active' => true,
+                'sort_order' => 0
+            ]];
+        }
+        
+        // Get the first server as default for player
+        $defaultContentServer = !empty($contentServers) ? reset($contentServers) : null;
+        $currentContentServerUrl = $defaultContentServer['url'] ?? $content->watch_link ?? '';
+        
+        // Get all download links (from servers and content level)
+        $contentDownloadLinks = $content->getAllDownloadLinks();
+    @endphp
+    
+    @if(!empty($contentServers) || $content->watch_link)
+    <div class="bg-white border border-gray-200 p-6 mb-8 dark:!bg-bg-card dark:!border-border-secondary rounded-lg">
+        <h2 class="text-xl font-bold text-gray-900 mb-4 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">Watch All Episodes</h2>
+        
+        <!-- Video Player Container -->
+        <div class="mb-4">
+            <div class="relative w-full bg-black rounded-lg overflow-hidden" style="padding-bottom: 56.25%;">
+                <iframe id="tvShowPlayer" 
+                        src="{{ $currentContentServerUrl }}" 
+                        class="absolute top-0 left-0 w-full h-full border-0" 
+                        allow="autoplay; fullscreen" 
+                        allowfullscreen
+                        frameborder="0">
+                </iframe>
+            </div>
+        </div>
+
+        <!-- Server Selection -->
+        @if(count($contentServers) > 1)
+        <div class="mb-4">
+            <label class="block text-sm font-semibold text-gray-900 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Select Server:</label>
+            <div class="flex flex-wrap gap-2">
+                @foreach($contentServers as $index => $server)
+                    @if(!empty($server['url']))
+                    <button onclick="changeTvShowServer('{{ $server['url'] }}', this)" 
+                            class="tv-server-btn px-4 py-2 rounded-lg transition-colors {{ $index === 0 ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:!bg-bg-card-hover dark:!text-text-secondary dark:!hover:bg-bg-card dark:!hover:text-white' }}"
+                            style="font-family: 'Poppins', sans-serif; font-weight: 500;">
+                        {{ $server['name'] ?? 'Server ' . ($index + 1) }}@if(!empty($server['quality'])) - {{ $server['quality'] }}@endif
+                    </button>
+                    @endif
+                @endforeach
+            </div>
+        </div>
+        @endif
+
+        <!-- Download Links -->
+        @if(!empty($contentDownloadLinks))
+        <div class="mt-4 pt-4 border-t border-gray-200 dark:!border-border-secondary">
+            <h3 class="text-lg font-bold text-gray-900 mb-3 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">Download</h3>
+            <div class="flex flex-wrap gap-3">
+                @foreach($contentDownloadLinks as $download)
+                <a href="{{ $download['url'] }}" 
+                   target="_blank" 
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
+                   style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    {{ $download['name'] }}
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+    </div>
+    @endif
+    @endif
+
     <!-- Episodes Section -->
     <div class="bg-white border border-gray-200 p-6 dark:!bg-bg-card dark:!border-border-secondary rounded-lg mb-8">
         <h2 class="text-xl font-bold text-gray-900 mb-4 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">Episodes</h2>
@@ -385,6 +472,47 @@
                     
                     <!-- Servers -->
                     @if($episode->servers && $episode->servers->count() > 0)
+                    @php
+                        $episodeServers = $episode->servers->where('is_active', true);
+                        $firstEpisodeServer = $episodeServers->first();
+                        $episodePlayerUrl = $firstEpisodeServer ? ($firstEpisodeServer->watch_link ?? null) : null;
+                        $hasMultipleServers = $episodeServers->count() > 1;
+                    @endphp
+                    
+                    <!-- Embedded Player for Episode (if watch link available) -->
+                    @if($episodePlayerUrl)
+                    <div class="mt-3 mb-3">
+                        <div class="relative w-full bg-black rounded-lg overflow-hidden" style="padding-bottom: 56.25%;">
+                            <iframe id="episodePlayer-{{ $episode->id }}" 
+                                    src="{{ $episodePlayerUrl }}" 
+                                    class="absolute top-0 left-0 w-full h-full border-0" 
+                                    allow="autoplay; fullscreen" 
+                                    allowfullscreen
+                                    frameborder="0">
+                            </iframe>
+                        </div>
+                        
+                        <!-- Server Selection for Episode -->
+                        @if($hasMultipleServers)
+                        <div class="mt-3">
+                            <label class="block text-xs font-semibold text-gray-900 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Select Server:</label>
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($episodeServers as $index => $server)
+                                    @if($server->watch_link)
+                                    <button onclick="changeEpisodeServer('{{ $episode->id }}', '{{ $server->watch_link }}', this)" 
+                                            class="episode-server-btn-{{ $episode->id }} px-3 py-1.5 text-xs rounded-lg transition-colors {{ $index === 0 ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:!bg-bg-card-hover dark:!text-text-secondary dark:!hover:bg-bg-card dark:!hover:text-white' }}"
+                                            style="font-family: 'Poppins', sans-serif; font-weight: 500;">
+                                        {{ $server->server_name }}@if($server->quality) - {{ $server->quality }}@endif
+                                    </button>
+                                    @endif
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                    @endif
+                    
+                    <!-- Server Links Table -->
                     <div class="mt-3">
                         <div class="overflow-x-auto">
                             <table class="w-full text-xs">
@@ -396,7 +524,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach($episode->servers->where('is_active', true) as $server)
+                                    @foreach($episodeServers as $server)
                                     <tr class="border-b border-gray-200 dark:!border-border-secondary hover:bg-gray-100 dark:!hover:bg-bg-card">
                                         <td class="py-2 px-3">
                                             <div class="flex items-center gap-2">
@@ -645,9 +773,10 @@
                     } else {
                         $contentType = $recommended->content_type ?? 'custom';
                         if (in_array($contentType, ['tmdb', 'article']) || str_starts_with($posterPath, '/')) {
-                        $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w342');
-                    } else {
-                        $imageUrl = $posterPath;
+                            $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w342');
+                        } else {
+                            $imageUrl = $posterPath;
+                        }
                     }
                 }
             @endphp
@@ -713,6 +842,132 @@
     .scrollbar-hide::-webkit-scrollbar {
         display: none;
     }
+
+    /* Article Content Styling */
+    .article-content {
+        font-family: 'Poppins', sans-serif;
+        line-height: 1.8;
+        color: #374151;
+    }
+
+    .dark .article-content {
+        color: #e5e7eb;
+    }
+
+    .article-content article {
+        width: 100%;
+    }
+
+    .article-content h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #111827;
+        margin-top: 2rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.3;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .dark .article-content h2 {
+        color: #ffffff;
+    }
+
+    .article-content h2:first-child {
+        margin-top: 0;
+    }
+
+    .article-content h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        line-height: 1.4;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .dark .article-content h3 {
+        color: #f3f4f6;
+    }
+
+    .article-content p {
+        font-size: 1.125rem;
+        line-height: 1.8;
+        margin-bottom: 1.5rem;
+        color: #4b5563;
+        font-weight: 400;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .dark .article-content p {
+        color: #d1d5db;
+    }
+
+    .article-content strong {
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .dark .article-content strong {
+        color: #ffffff;
+    }
+
+    .article-content ul,
+    .article-content ol {
+        margin-bottom: 1.5rem;
+        padding-left: 1.5rem;
+        color: #4b5563;
+    }
+
+    .dark .article-content ul,
+    .dark .article-content ol {
+        color: #d1d5db;
+    }
+
+    .article-content li {
+        margin-bottom: 0.75rem;
+        line-height: 1.8;
+        font-size: 1.125rem;
+    }
+
+    .article-content a {
+        color: #dc2626;
+        text-decoration: underline;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+
+    .article-content a:hover {
+        color: #b91c1c;
+    }
+
+    .dark .article-content a {
+        color: #f87171;
+    }
+
+    .dark .article-content a:hover {
+        color: #ef4444;
+    }
+
+    .article-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+        margin: 2rem 0;
+    }
+
+    .article-content blockquote {
+        border-left: 4px solid #dc2626;
+        padding-left: 1.5rem;
+        margin: 2rem 0;
+        font-style: italic;
+        color: #6b7280;
+    }
+
+    .dark .article-content blockquote {
+        border-left-color: #f87171;
+        color: #9ca3af;
+    }
 </style>
 
 <script>
@@ -769,6 +1024,46 @@
             });
         }
     });
+
+    // Change TV Show server (for "Watch All Episodes" player)
+    function changeTvShowServer(videoUrl, buttonElement) {
+        const iframe = document.getElementById('tvShowPlayer');
+        if (iframe) {
+            iframe.src = videoUrl;
+            
+            // Update active button state
+            const allButtons = document.querySelectorAll('.tv-server-btn');
+            allButtons.forEach(btn => {
+                btn.classList.remove('bg-accent', 'text-white');
+                btn.classList.add('bg-gray-200', 'text-gray-700', 'dark:!bg-bg-card-hover', 'dark:!text-text-secondary');
+            });
+            
+            if (buttonElement) {
+                buttonElement.classList.remove('bg-gray-200', 'text-gray-700', 'dark:!bg-bg-card-hover', 'dark:!text-text-secondary');
+                buttonElement.classList.add('bg-accent', 'text-white');
+            }
+        }
+    }
+
+    // Change episode server (for individual episode players)
+    function changeEpisodeServer(episodeId, videoUrl, buttonElement) {
+        const iframe = document.getElementById('episodePlayer-' + episodeId);
+        if (iframe) {
+            iframe.src = videoUrl;
+            
+            // Update active button state for this episode
+            const allButtons = document.querySelectorAll('.episode-server-btn-' + episodeId);
+            allButtons.forEach(btn => {
+                btn.classList.remove('bg-accent', 'text-white');
+                btn.classList.add('bg-gray-200', 'text-gray-700', 'dark:!bg-bg-card-hover', 'dark:!text-text-secondary');
+            });
+            
+            if (buttonElement) {
+                buttonElement.classList.remove('bg-gray-200', 'text-gray-700', 'dark:!bg-bg-card-hover', 'dark:!text-text-secondary');
+                buttonElement.classList.add('bg-accent', 'text-white');
+            }
+        }
+    }
 </script>
 
     <!-- Comments Section -->

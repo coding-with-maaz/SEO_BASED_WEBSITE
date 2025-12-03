@@ -21,9 +21,11 @@ class SitemapController extends Controller
     {
         $urls = $this->sitemapService->getAllUrlsFlat();
         
-        return response()->view('sitemap.index', [
-            'urls' => $urls,
-        ])->header('Content-Type', 'application/xml');
+        $content = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $content .= view('sitemap.index', ['urls' => $urls])->render();
+        
+        return response($content, 200)
+            ->header('Content-Type', 'application/xml');
     }
 
     /**
@@ -33,9 +35,11 @@ class SitemapController extends Controller
     {
         $sitemaps = $this->sitemapService->getSitemapIndex();
         
-        return response()->view('sitemap.index-file', [
-            'sitemaps' => $sitemaps,
-        ])->header('Content-Type', 'application/xml');
+        $content = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $content .= view('sitemap.index-file', ['sitemaps' => $sitemaps])->render();
+        
+        return response($content, 200)
+            ->header('Content-Type', 'application/xml');
     }
 
     /**
@@ -49,9 +53,11 @@ class SitemapController extends Controller
             abort(404);
         }
 
-        return response()->view('sitemap.index', [
-            'urls' => $urls,
-        ])->header('Content-Type', 'application/xml');
+        $content = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $content .= view('sitemap.index', ['urls' => $urls])->render();
+        
+        return response($content, 200)
+            ->header('Content-Type', 'application/xml');
     }
 
     /**

@@ -92,6 +92,11 @@ class ContentController extends Controller
         $validated['content_type'] = $validated['content_type'] ?? 'custom';
         $validated['is_featured'] = $validated['is_featured'] ?? false;
         $validated['sort_order'] = $validated['sort_order'] ?? 0;
+        
+        // Set default rating to 0 if null or empty
+        if (empty($validated['rating']) || $validated['rating'] === null) {
+            $validated['rating'] = 0;
+        }
 
         Content::create($validated);
 
@@ -150,6 +155,11 @@ class ContentController extends Controller
             'sort_order' => 'nullable|integer',
             'is_featured' => 'nullable|boolean',
         ]);
+
+        // Set default rating to 0 if null or empty (for updates)
+        if (array_key_exists('rating', $validated) && (empty($validated['rating']) || $validated['rating'] === null)) {
+            $validated['rating'] = 0;
+        }
 
         $content->update($validated);
 

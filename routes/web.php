@@ -24,7 +24,8 @@ use App\Http\Controllers\Admin\SeoToolsController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // SEO routes (must be before other routes for proper matching)
-Route::get('/robots.txt', [RobotsController::class, 'index'])->name('robots');
+// robots.txt is served as static file from public/robots.txt
+// Route::get('/robots.txt', [RobotsController::class, 'index'])->name('robots');
 
 // Sitemap routes
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');

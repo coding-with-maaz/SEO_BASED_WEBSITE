@@ -125,7 +125,7 @@
                         $shareImage = asset('storage/' . $posterPath);
                     }
                 }
-                $shareImage = $shareImage ?? asset('favicon.ico');
+                $shareImage = $shareImage ?? asset('icon.png');
             @endphp
             <x-social-share 
                 :url="url()->current()" 
@@ -187,12 +187,6 @@
             <p class="text-gray-600 dark:!text-text-secondary leading-relaxed text-base md:text-lg" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
                 {{ $description }}
             </p>
-            @endif
-            
-            @if(isset($isCustom) && $isCustom && isset($content) && $content->content_type === 'article' && $content->article_content)
-            <div class="mt-6 article-content prose prose-lg max-w-none dark:prose-invert" style="font-family: 'Poppins', sans-serif;">
-                {!! $content->article_content !!}
-            </div>
             @endif
         </div>
     </div>
@@ -288,115 +282,7 @@
     @endphp
     
     @if(!empty($servers) || $content->watch_link)
-        @if($content->content_type === 'article')
-            <!-- Article Content - Stylish Buttons -->
-            <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:!from-bg-card dark:!to-bg-card-hover border border-gray-200 dark:!border-border-secondary rounded-xl p-8 mb-8 shadow-lg">
-                <div class="text-center mb-8">
-                    <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:!text-white mb-3" style="font-family: 'Poppins', sans-serif; font-weight: 800;">
-                        Ready to Watch?
-                    </h2>
-                    <p class="text-gray-600 dark:!text-text-secondary text-lg" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
-                        Click the button below to start streaming
-                    </p>
-                </div>
-                
-                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-2xl mx-auto">
-                    <!-- Watch Now Button -->
-                    @if(!empty($servers) || $content->watch_link)
-                        @php
-                            $watchUrl = !empty($servers) ? ($servers[0]['url'] ?? $content->watch_link) : $content->watch_link;
-                        @endphp
-                        <a href="{{ $watchUrl }}" 
-                           target="_blank"
-                           class="group relative w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-accent to-red-700 hover:from-red-700 hover:to-accent text-white font-bold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3 overflow-hidden"
-                           style="font-family: 'Poppins', sans-serif; font-weight: 700; min-width: 200px;">
-                            <!-- Animated Background -->
-                            <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12 group-hover:translate-x-full"></div>
-                            
-                            <!-- Play Icon -->
-                            <svg class="w-6 h-6 relative z-10" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z"/>
-                            </svg>
-                            
-                            <!-- Button Text -->
-                            <span class="relative z-10 text-lg">Watch Now</span>
-                            
-                            <!-- Shine Effect -->
-                            <div class="absolute inset-0 -top-2 -bottom-2 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                        </a>
-                    @endif
-                    
-                    <!-- Download Button -->
-                    @if(!empty($downloadLinks))
-                        @php
-                            $primaryDownload = $downloadLinks[0] ?? null;
-                        @endphp
-                        @if($primaryDownload)
-                        <a href="{{ $primaryDownload['url'] }}" 
-                           target="_blank"
-                           class="group relative w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-700 hover:from-emerald-700 hover:to-green-600 text-white font-bold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3 overflow-hidden"
-                           style="font-family: 'Poppins', sans-serif; font-weight: 700; min-width: 200px;">
-                            <!-- Animated Background -->
-                            <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12 group-hover:translate-x-full"></div>
-                            
-                            <!-- Download Icon -->
-                            <svg class="w-6 h-6 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                            </svg>
-                            
-                            <!-- Button Text -->
-                            <span class="relative z-10 text-lg">Download</span>
-                            
-                            <!-- Shine Effect -->
-                            <div class="absolute inset-0 -top-2 -bottom-2 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                        </a>
-                        @endif
-                    @endif
-                </div>
-                
-                <!-- Additional Download Options -->
-                @if(!empty($downloadLinks) && count($downloadLinks) > 1)
-                <div class="mt-8 pt-6 border-t border-gray-300 dark:!border-border-primary">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:!text-white mb-4 text-center" style="font-family: 'Poppins', sans-serif; font-weight: 600;">More Download Options</h3>
-                    <div class="flex flex-wrap gap-3 justify-center">
-                        @foreach(array_slice($downloadLinks, 1) as $download)
-                        <a href="{{ $download['url'] }}" 
-                           target="_blank"
-                           class="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:!bg-bg-card border-2 border-gray-300 dark:!border-border-primary hover:border-accent text-gray-700 dark:!text-white hover:text-accent font-semibold rounded-lg transition-all duration-300 hover:shadow-md transform hover:scale-105"
-                           style="font-family: 'Poppins', sans-serif; font-weight: 600;">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                            </svg>
-                            {{ $download['name'] }}
-                        </a>
-                        @endforeach
-                    </div>
-                </div>
-                @endif
-                
-                <!-- Server Selection (if multiple servers) -->
-                @if(count($servers) > 1)
-                <div class="mt-6 pt-6 border-t border-gray-300 dark:!border-border-primary">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:!text-white mb-4 text-center" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Available Servers</h3>
-                    <div class="flex flex-wrap gap-3 justify-center">
-                        @foreach($servers as $index => $server)
-                            @if(!empty($server['url']))
-                            <a href="{{ $server['url'] }}" 
-                               target="_blank"
-                               class="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:!bg-bg-card border-2 border-gray-300 dark:!border-border-primary hover:border-accent text-gray-700 dark:!text-white hover:text-accent font-semibold rounded-lg transition-all duration-300 hover:shadow-md transform hover:scale-105"
-                               style="font-family: 'Poppins', sans-serif; font-weight: 600;">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M8 5v14l11-7z"/>
-                                </svg>
-                                {{ $server['name'] ?? 'Server ' . ($index + 1) }}@if(!empty($server['quality'])) - {{ $server['quality'] }}@endif
-                            </a>
-                            @endif
-                        @endforeach
-                    </div>
-                </div>
-                @endif
-            </div>
-        @else
+        @if($content->content_type !== 'article')
             <!-- Regular Content - Video Player -->
             <div class="bg-white border border-gray-200 p-6 mb-8 dark:!bg-bg-card dark:!border-border-secondary rounded-lg">
                 <h2 class="text-xl font-bold text-gray-900 mb-4 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">Watch Movie</h2>
@@ -453,6 +339,147 @@
                 @endif
             </div>
         @endif
+    @endif
+    @endif
+
+    <!-- Article Content Section (for article content type) -->
+    @if(isset($isCustom) && $isCustom && isset($content) && !empty($content->article_content))
+    <div class="bg-white dark:!bg-bg-card border border-gray-200 dark:!border-border-secondary rounded-xl p-6 md:p-8 lg:p-10 mb-8 shadow-sm">
+        <div class="article-content max-w-4xl mx-auto">
+            {!! $content->article_content !!}
+        </div>
+    </div>
+    @endif
+
+    <!-- Watch/Download Section for Article Content (below article) -->
+    @if(isset($isCustom) && $isCustom && isset($content) && $content->content_type === 'article')
+    @php
+        // Get normalized active servers
+        $articleServers = $content->getActiveServers();
+        
+        // If no servers but watch_link exists, create a default server
+        if (empty($articleServers) && $content->watch_link) {
+            $articleServers = [[
+                'id' => 'default',
+                'name' => 'Server 1',
+                'url' => $content->watch_link,
+                'quality' => 'HD',
+                'active' => true,
+                'sort_order' => 0
+            ]];
+        }
+        
+        // Get all download links (from servers and content level)
+        $articleDownloadLinks = $content->getAllDownloadLinks();
+    @endphp
+    
+    @if(!empty($articleServers) || $content->watch_link || !empty($articleDownloadLinks))
+    <div class="bg-gradient-to-br from-gray-50 to-gray-100 dark:!from-bg-card dark:!to-bg-card-hover border border-gray-200 dark:!border-border-secondary rounded-xl p-8 mb-8 shadow-lg">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:!text-white mb-3" style="font-family: 'Poppins', sans-serif; font-weight: 800;">
+                Ready to Watch?
+            </h2>
+            <p class="text-gray-600 dark:!text-text-secondary text-lg" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                Click the button below to start streaming
+            </p>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-2xl mx-auto">
+            <!-- Watch Now Button -->
+            @if(!empty($articleServers) || $content->watch_link)
+                @php
+                    $watchUrl = !empty($articleServers) ? ($articleServers[0]['url'] ?? $content->watch_link) : $content->watch_link;
+                @endphp
+                <a href="{{ $watchUrl }}" 
+                   target="_blank"
+                   class="group relative w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-accent to-red-700 hover:from-red-700 hover:to-accent text-white font-bold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3 overflow-hidden"
+                   style="font-family: 'Poppins', sans-serif; font-weight: 700; min-width: 200px;">
+                    <!-- Animated Background -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12 group-hover:translate-x-full"></div>
+                    
+                    <!-- Play Icon -->
+                    <svg class="w-6 h-6 relative z-10" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    
+                    <!-- Button Text -->
+                    <span class="relative z-10 text-lg">Watch Now</span>
+                    
+                    <!-- Shine Effect -->
+                    <div class="absolute inset-0 -top-2 -bottom-2 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                </a>
+            @endif
+            
+            <!-- Download Button -->
+            @if(!empty($articleDownloadLinks))
+                @php
+                    $primaryDownload = $articleDownloadLinks[0] ?? null;
+                @endphp
+                @if($primaryDownload)
+                <a href="{{ $primaryDownload['url'] }}" 
+                   target="_blank"
+                   class="group relative w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-700 hover:from-emerald-700 hover:to-green-600 text-white font-bold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-3 overflow-hidden"
+                   style="font-family: 'Poppins', sans-serif; font-weight: 700; min-width: 200px;">
+                    <!-- Animated Background -->
+                    <div class="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform -skew-x-12 group-hover:translate-x-full"></div>
+                    
+                    <!-- Download Icon -->
+                    <svg class="w-6 h-6 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    
+                    <!-- Button Text -->
+                    <span class="relative z-10 text-lg">Download</span>
+                    
+                    <!-- Shine Effect -->
+                    <div class="absolute inset-0 -top-2 -bottom-2 bg-gradient-to-r from-transparent via-white/30 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                </a>
+                @endif
+            @endif
+        </div>
+        
+        <!-- Additional Download Options -->
+        @if(!empty($articleDownloadLinks) && count($articleDownloadLinks) > 1)
+        <div class="mt-8 pt-6 border-t border-gray-300 dark:!border-border-primary">
+            <h3 class="text-lg font-semibold text-gray-900 dark:!text-white mb-4 text-center" style="font-family: 'Poppins', sans-serif; font-weight: 600;">More Download Options</h3>
+            <div class="flex flex-wrap gap-3 justify-center">
+                @foreach(array_slice($articleDownloadLinks, 1) as $download)
+                <a href="{{ $download['url'] }}" 
+                   target="_blank"
+                   class="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:!bg-bg-card border-2 border-gray-300 dark:!border-border-primary hover:border-accent text-gray-700 dark:!text-white hover:text-accent font-semibold rounded-lg transition-all duration-300 hover:shadow-md transform hover:scale-105"
+                   style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    {{ $download['name'] }}
+                </a>
+                @endforeach
+            </div>
+        </div>
+        @endif
+        
+        <!-- Server Selection (if multiple servers) -->
+        @if(count($articleServers) > 1)
+        <div class="mt-6 pt-6 border-t border-gray-300 dark:!border-border-primary">
+            <h3 class="text-lg font-semibold text-gray-900 dark:!text-white mb-4 text-center" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Available Servers</h3>
+            <div class="flex flex-wrap gap-3 justify-center">
+                @foreach($articleServers as $index => $server)
+                    @if(!empty($server['url']))
+                    <a href="{{ $server['url'] }}" 
+                       target="_blank"
+                       class="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:!bg-bg-card border-2 border-gray-300 dark:!border-border-primary hover:border-accent text-gray-700 dark:!text-white hover:text-accent font-semibold rounded-lg transition-all duration-300 hover:shadow-md transform hover:scale-105"
+                       style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z"/>
+                        </svg>
+                        {{ $server['name'] ?? 'Server ' . ($index + 1) }}@if(!empty($server['quality'])) - {{ $server['quality'] }}@endif
+                    </a>
+                    @endif
+                @endforeach
+            </div>
+        </div>
+        @endif
+    </div>
     @endif
     @endif
 
@@ -629,6 +656,132 @@
     }
     .scrollbar-hide::-webkit-scrollbar {
         display: none;
+    }
+
+    /* Article Content Styling */
+    .article-content {
+        font-family: 'Poppins', sans-serif;
+        line-height: 1.8;
+        color: #374151;
+    }
+
+    .dark .article-content {
+        color: #e5e7eb;
+    }
+
+    .article-content article {
+        width: 100%;
+    }
+
+    .article-content h2 {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #111827;
+        margin-top: 2rem;
+        margin-bottom: 1.5rem;
+        line-height: 1.3;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .dark .article-content h2 {
+        color: #ffffff;
+    }
+
+    .article-content h2:first-child {
+        margin-top: 0;
+    }
+
+    .article-content h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        line-height: 1.4;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .dark .article-content h3 {
+        color: #f3f4f6;
+    }
+
+    .article-content p {
+        font-size: 1.125rem;
+        line-height: 1.8;
+        margin-bottom: 1.5rem;
+        color: #4b5563;
+        font-weight: 400;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    .dark .article-content p {
+        color: #d1d5db;
+    }
+
+    .article-content strong {
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .dark .article-content strong {
+        color: #ffffff;
+    }
+
+    .article-content ul,
+    .article-content ol {
+        margin-bottom: 1.5rem;
+        padding-left: 1.5rem;
+        color: #4b5563;
+    }
+
+    .dark .article-content ul,
+    .dark .article-content ol {
+        color: #d1d5db;
+    }
+
+    .article-content li {
+        margin-bottom: 0.75rem;
+        line-height: 1.8;
+        font-size: 1.125rem;
+    }
+
+    .article-content a {
+        color: #dc2626;
+        text-decoration: underline;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+
+    .article-content a:hover {
+        color: #b91c1c;
+    }
+
+    .dark .article-content a {
+        color: #f87171;
+    }
+
+    .dark .article-content a:hover {
+        color: #ef4444;
+    }
+
+    .article-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+        margin: 2rem 0;
+    }
+
+    .article-content blockquote {
+        border-left: 4px solid #dc2626;
+        padding-left: 1.5rem;
+        margin: 2rem 0;
+        font-style: italic;
+        color: #6b7280;
+    }
+
+    .dark .article-content blockquote {
+        border-left-color: #f87171;
+        color: #9ca3af;
     }
 </style>
 
