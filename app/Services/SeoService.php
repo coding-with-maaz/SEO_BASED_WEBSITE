@@ -53,7 +53,7 @@ class SeoService
         $canonical = $data['canonical'] ?? $url;
         $robots = $data['robots'] ?? 'index, follow';
         $locale = $data['locale'] ?? 'en_US';
-        $alternateLocales = $data['alternate_locales'] ?? [];
+        $alternateLocales = is_array($data['alternate_locales'] ?? null) ? $data['alternate_locales'] : [];
 
         // Ensure image is absolute URL
         if ($image && !filter_var($image, FILTER_VALIDATE_URL)) {
@@ -119,7 +119,7 @@ class SeoService
             'canonical' => $pageSeo->canonical_url ?? url()->current(),
             'robots' => $pageSeo->meta_robots ?? 'index, follow',
             'schema' => $schema,
-            'alternate_locales' => $pageSeo->hreflang_tags ?? [],
+            'alternate_locales' => is_array($pageSeo->hreflang_tags ?? null) ? $pageSeo->hreflang_tags : [],
         ];
 
         // Only merge override data for fields that are truly missing (for dynamic content)
@@ -147,7 +147,7 @@ class SeoService
         $canonical = $data['canonical'] ?? $url;
         $robots = $data['robots'] ?? 'index, follow';
         $locale = $data['locale'] ?? 'en_US';
-        $alternateLocales = $data['alternate_locales'] ?? [];
+        $alternateLocales = is_array($data['alternate_locales'] ?? null) ? $data['alternate_locales'] : [];
         $schema = $data['schema'] ?? null;
 
         // Ensure image is absolute URL

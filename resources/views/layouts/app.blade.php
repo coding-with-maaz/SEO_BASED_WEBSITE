@@ -101,7 +101,7 @@
     <meta name="msapplication-config" content="{{ asset('browserconfig.xml') }}">
     
     <!-- Alternate Languages (Hreflang) -->
-    @if(!empty($seo['alternate_locales']))
+    @if(!empty($seo['alternate_locales']) && is_array($seo['alternate_locales']))
         @foreach($seo['alternate_locales'] as $locale => $url)
         <link rel="alternate" hreflang="{{ $locale }}" href="{{ $url }}">
         @endforeach
