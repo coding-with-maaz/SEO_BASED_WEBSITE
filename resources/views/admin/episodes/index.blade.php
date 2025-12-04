@@ -195,8 +195,22 @@ function closeServerModal() {
 }
 
 function loadEpisodeServers(episodeId) {
-    fetch(`/admin/contents/{{ $content->id }}/episodes/${episodeId}/servers`)
-        .then(response => response.json())
+    fetch(`/admin/contents/{{ $content->slug }}/episodes/${episodeId}/servers`, {
+        headers: {
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                throw new Error('Response is not JSON');
+            }
+            return response.json();
+        })
         .then(data => {
             const serverList = document.getElementById('serverList');
             if (data.servers && data.servers.length > 0) {
@@ -227,7 +241,7 @@ function loadEpisodeServers(episodeId) {
         })
         .catch(error => {
             console.error('Error loading servers:', error);
-            document.getElementById('serverList').innerHTML = '<p class="text-red-600 text-center py-8">Error loading servers.</p>';
+            document.getElementById('serverList').innerHTML = '<p class="text-red-600 text-center py-8">Error loading servers. Please refresh the page and try again.</p>';
         });
 }
 
@@ -253,7 +267,7 @@ function editServer(serverId, serverData) {
 function deleteServer(serverId) {
     if (!confirm('Are you sure you want to delete this server?')) return;
     
-    fetch(`/admin/contents/{{ $content->id }}/episodes/${currentEpisodeId}/servers/${serverId}`, {
+    fetch(`/admin/contents/{{ $content->slug }}/episodes/${currentEpisodeId}/servers/${serverId}`, {
         method: 'DELETE',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -287,8 +301,8 @@ document.getElementById('addServerForm').addEventListener('submit', function(e) 
     const serverId = this.dataset.serverId;
     
     const url = mode === 'edit' 
-        ? `/admin/contents/{{ $content->id }}/episodes/${currentEpisodeId}/servers/${serverId}`
-        : `/admin/contents/{{ $content->id }}/episodes/${currentEpisodeId}/servers`;
+        ? `/admin/contents/{{ $content->slug }}/episodes/${currentEpisodeId}/servers/${serverId}`
+        : `/admin/contents/{{ $content->slug }}/episodes/${currentEpisodeId}/servers`;
     
     const method = mode === 'edit' ? 'PUT' : 'POST';
     

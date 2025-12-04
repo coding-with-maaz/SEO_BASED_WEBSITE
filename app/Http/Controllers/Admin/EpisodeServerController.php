@@ -15,6 +15,14 @@ class EpisodeServerController extends Controller
      */
     public function index(Content $content, Episode $episode)
     {
+        // Verify episode belongs to content (route binding should handle this, but double-check)
+        if ($episode->content_id !== $content->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Episode does not belong to this content.',
+            ], 404);
+        }
+        
         $servers = $episode->servers()->orderBy('sort_order', 'asc')->get();
         
         return response()->json([
@@ -28,6 +36,14 @@ class EpisodeServerController extends Controller
      */
     public function store(Request $request, Content $content, Episode $episode)
     {
+        // Verify episode belongs to content
+        if ($episode->content_id !== $content->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Episode does not belong to this content.',
+            ], 404);
+        }
+        
         $validated = $request->validate([
             'server_name' => 'required|string|max:255',
             'quality' => 'nullable|string|max:50',
@@ -59,6 +75,22 @@ class EpisodeServerController extends Controller
      */
     public function update(Request $request, Content $content, Episode $episode, EpisodeServer $server)
     {
+        // Verify episode belongs to content
+        if ($episode->content_id !== $content->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Episode does not belong to this content.',
+            ], 404);
+        }
+        
+        // Verify server belongs to episode
+        if ($server->episode_id !== $episode->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Server does not belong to this episode.',
+            ], 404);
+        }
+        
         $validated = $request->validate([
             'server_name' => 'required|string|max:255',
             'quality' => 'nullable|string|max:50',
@@ -89,6 +121,22 @@ class EpisodeServerController extends Controller
      */
     public function destroy(Request $request, Content $content, Episode $episode, EpisodeServer $server)
     {
+        // Verify episode belongs to content
+        if ($episode->content_id !== $content->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Episode does not belong to this content.',
+            ], 404);
+        }
+        
+        // Verify server belongs to episode
+        if ($server->episode_id !== $episode->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Server does not belong to this episode.',
+            ], 404);
+        }
+        
         $server->delete();
 
         if ($request->expectsJson() || $request->ajax()) {
