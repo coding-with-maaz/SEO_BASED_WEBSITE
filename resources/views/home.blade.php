@@ -114,6 +114,27 @@
         html.dark .wave-separator {
             filter: drop-shadow(0 -10px 30px rgba(229, 9, 20, 0.5)) drop-shadow(0 -5px 15px rgba(229, 9, 20, 0.3));
         }
+        
+        /* Article card styling - subtle border highlight */
+        .article-card {
+            border: 2px solid rgba(22, 163, 74, 0.3);
+            box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.1);
+        }
+        
+        .article-card:hover {
+            border-color: rgba(22, 163, 74, 0.6);
+            box-shadow: 0 10px 15px -3px rgba(22, 163, 74, 0.2);
+        }
+        
+        html.dark .article-card {
+            border-color: rgba(22, 163, 74, 0.4);
+            box-shadow: 0 4px 6px -1px rgba(22, 163, 74, 0.2);
+        }
+        
+        html.dark .article-card:hover {
+            border-color: rgba(22, 163, 74, 0.7);
+            box-shadow: 0 10px 15px -3px rgba(22, 163, 74, 0.3);
+        }
     </style>
 </section>
 
@@ -125,8 +146,14 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 @if(!empty($allContent))
                 @foreach($allContent as $item)
-                <article class="group relative bg-white overflow-hidden cursor-pointer dark:!bg-bg-card transition-all duration-300">
-                    <a href="{{ $item['type'] === 'movie' ? route('movies.show', $item['id']) : route('tv-shows.show', $item['id']) }}" class="block">
+                @php
+                    $isArticle = ($item['content_type'] ?? 'custom') === 'article';
+                    // Determine route based on type, articles can be either movie or tv_show type
+                    $isMovieType = in_array($item['type'] ?? 'movie', ['movie', 'documentary', 'short_film']);
+                    $routeName = $isMovieType ? 'movies.show' : 'tv-shows.show';
+                @endphp
+                <article class="group relative bg-white overflow-hidden cursor-pointer dark:!bg-bg-card transition-all duration-300 {{ $isArticle ? 'article-card' : '' }}">
+                    <a href="{{ route($routeName, $item['id']) }}" class="block">
                         <!-- Full Image - Backdrop Image with 16:9 Aspect Ratio -->
                         <div class="relative overflow-hidden w-full aspect-video bg-gray-200 dark:bg-gray-800" style="background-color: transparent !important;">
                             @php
@@ -164,8 +191,13 @@
                                 $dubbingLanguage = $item['dubbing_language'] ?? null;
                             @endphp
                             
+                            <!-- Article Badge - Top Left (Priority) -->
+                            @if($isArticle)
+                            <div class="absolute top-2 left-2 bg-green-600 text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg" style="font-family: 'Poppins', sans-serif; font-weight: 700; z-index: 3; backdrop-filter: blur(4px); background-color: rgba(22, 163, 74, 0.95); border: 1px solid rgba(255, 255, 255, 0.2);">
+                                📝 Article
+                            </div>
+                            @elseif(!empty($contentTypeName))
                             <!-- Content Type Badge - Top Left -->
-                            @if(!empty($contentTypeName))
                             <div class="absolute top-2 left-2 bg-accent text-white px-3 py-1 rounded-full text-xs font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600; z-index: 3; backdrop-filter: blur(4px); background-color: rgba(229, 9, 20, 0.9);">
                                 {{ $contentTypeName }}
                             </div>

@@ -24,11 +24,8 @@ class HomeController extends Controller
         $page = (int)$request->get('page', 1);
         $perPage = 20; // Items per page
 
-        // Get all custom content (published only) - sorted by latest updated/created
+        // Get all custom content (published only)
         $allCustomContent = Content::published()
-            ->orderBy('updated_at', 'desc') // Latest updated first
-            ->orderBy('created_at', 'desc') // Then latest created
-            ->orderBy('sort_order', 'asc')
             ->get();
 
         // Convert custom content to array format
@@ -51,24 +48,56 @@ class HomeController extends Controller
                 'content_type' => $content->content_type ?? 'custom',
                 'content_type_name' => $content->type,
                 'dubbing_language' => $content->dubbing_language,
+                'is_article' => ($content->content_type ?? 'custom') === 'article',
+                'sort_order' => $content->sort_order ?? 0,
             ];
         }
 
-        // Sort by updated_at (latest updated first), then created_at (latest created first)
+        // Sort with priority:
+        // 1. Articles first (content_type = 'article'), sorted by upload time (created_at)
+        // 2. Then other content, sorted by upload time (created_at)
+        // 3. Most recent uploads (created_at) show first
+        // 4. Then by updated_at, then sort_order
         usort($customContentArray, function($a, $b) {
-            // First sort by updated_at (most recent first)
-            $updatedA = $a['updated_at'] ?? '1970-01-01 00:00:00';
-            $updatedB = $b['updated_at'] ?? '1970-01-01 00:00:00';
-            $updatedCompare = strcmp($updatedB, $updatedA);
+            $aIsArticle = $a['is_article'] ?? false;
+            $bIsArticle = $b['is_article'] ?? false;
             
-            if ($updatedCompare !== 0) {
-                return $updatedCompare;
+            // Priority 1: Articles always on top
+            if ($aIsArticle && !$bIsArticle) {
+                return -1; // $a (article) comes first
+            }
+            if (!$aIsArticle && $bIsArticle) {
+                return 1; // $b (article) comes first
             }
             
-            // If updated_at is same, sort by created_at (most recent first)
+            // If both are articles OR both are not articles, sort by upload time (created_at) first
+            // Priority 2: Sort by created_at (upload time) - most recent uploads first
             $createdA = $a['created_at'] ?? '1970-01-01 00:00:00';
             $createdB = $b['created_at'] ?? '1970-01-01 00:00:00';
-            return strcmp($createdB, $createdA);
+            
+            $createdTimestampA = strtotime($createdA);
+            $createdTimestampB = strtotime($createdB);
+            
+            // Compare upload timestamps (higher = more recent upload)
+            if ($createdTimestampB != $createdTimestampA) {
+                return $createdTimestampB <=> $createdTimestampA; // Descending order (newest upload first)
+            }
+            
+            // Priority 3: If created_at is same, sort by updated_at (most recent update first)
+            $updatedA = $a['updated_at'] ?? '1970-01-01 00:00:00';
+            $updatedB = $b['updated_at'] ?? '1970-01-01 00:00:00';
+            
+            $updatedTimestampA = strtotime($updatedA);
+            $updatedTimestampB = strtotime($updatedB);
+            
+            if ($updatedTimestampB != $updatedTimestampA) {
+                return $updatedTimestampB <=> $updatedTimestampA; // Descending order (newest update first)
+            }
+            
+            // Priority 4: Finally by sort_order (ascending)
+            $sortA = $a['sort_order'] ?? 0;
+            $sortB = $b['sort_order'] ?? 0;
+            return $sortA <=> $sortB;
         });
 
         // Paginate custom content after sorting

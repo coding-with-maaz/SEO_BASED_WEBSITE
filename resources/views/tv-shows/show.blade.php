@@ -341,89 +341,6 @@
     @endif
     @endif
 
-    <!-- Watch All Episodes Section (if content has watch_link or servers) -->
-    @if(isset($isCustom) && $isCustom && isset($content))
-    @php
-        // Get normalized active servers for content level (all episodes in one)
-        $contentServers = $content->getActiveServers();
-        
-        // If no servers but watch_link exists, create a default server
-        if (empty($contentServers) && $content->watch_link) {
-            $contentServers = [[
-                'id' => 'default',
-                'name' => 'Server 1',
-                'url' => $content->watch_link,
-                'quality' => 'HD',
-                'active' => true,
-                'sort_order' => 0
-            ]];
-        }
-        
-        // Get the first server as default for player
-        $defaultContentServer = !empty($contentServers) ? reset($contentServers) : null;
-        $currentContentServerUrl = $defaultContentServer['url'] ?? $content->watch_link ?? '';
-        
-        // Get all download links (from servers and content level)
-        $contentDownloadLinks = $content->getAllDownloadLinks();
-    @endphp
-    
-    @if(!empty($contentServers) || $content->watch_link)
-    <div class="bg-white border border-gray-200 p-6 mb-8 dark:!bg-bg-card dark:!border-border-secondary rounded-lg">
-        <h2 class="text-xl font-bold text-gray-900 mb-4 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">Watch All Episodes</h2>
-        
-        <!-- Video Player Container -->
-        <div class="mb-4">
-            <div class="relative w-full bg-black rounded-lg overflow-hidden" style="padding-bottom: 56.25%;">
-                <iframe id="tvShowPlayer" 
-                        src="{{ $currentContentServerUrl }}" 
-                        class="absolute top-0 left-0 w-full h-full border-0" 
-                        allow="autoplay; fullscreen" 
-                        allowfullscreen
-                        frameborder="0">
-                </iframe>
-            </div>
-        </div>
-
-        <!-- Server Selection -->
-        @if(count($contentServers) > 1)
-        <div class="mb-4">
-            <label class="block text-sm font-semibold text-gray-900 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Select Server:</label>
-            <div class="flex flex-wrap gap-2">
-                @foreach($contentServers as $index => $server)
-                    @if(!empty($server['url']))
-                    <button onclick="changeTvShowServer('{{ $server['url'] }}', this)" 
-                            class="tv-server-btn px-4 py-2 rounded-lg transition-colors {{ $index === 0 ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:!bg-bg-card-hover dark:!text-text-secondary dark:!hover:bg-bg-card dark:!hover:text-white' }}"
-                            style="font-family: 'Poppins', sans-serif; font-weight: 500;">
-                        {{ $server['name'] ?? 'Server ' . ($index + 1) }}@if(!empty($server['quality'])) - {{ $server['quality'] }}@endif
-                    </button>
-                    @endif
-                @endforeach
-            </div>
-        </div>
-        @endif
-
-        <!-- Download Links -->
-        @if(!empty($contentDownloadLinks))
-        <div class="mt-4 pt-4 border-t border-gray-200 dark:!border-border-secondary">
-            <h3 class="text-lg font-bold text-gray-900 mb-3 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">Download</h3>
-            <div class="flex flex-wrap gap-3">
-                @foreach($contentDownloadLinks as $download)
-                <a href="{{ $download['url'] }}" 
-                   target="_blank" 
-                   class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
-                   style="font-family: 'Poppins', sans-serif; font-weight: 600;">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                    </svg>
-                    {{ $download['name'] }}
-                </a>
-                @endforeach
-            </div>
-        </div>
-        @endif
-    </div>
-    @endif
-    @endif
 
     <!-- Episodes Section -->
     <div class="bg-white border border-gray-200 p-6 dark:!bg-bg-card dark:!border-border-secondary rounded-lg mb-8">
@@ -474,43 +391,7 @@
                     @if($episode->servers && $episode->servers->count() > 0)
                     @php
                         $episodeServers = $episode->servers->where('is_active', true);
-                        $firstEpisodeServer = $episodeServers->first();
-                        $episodePlayerUrl = $firstEpisodeServer ? ($firstEpisodeServer->watch_link ?? null) : null;
-                        $hasMultipleServers = $episodeServers->count() > 1;
                     @endphp
-                    
-                    <!-- Embedded Player for Episode (if watch link available) -->
-                    @if($episodePlayerUrl)
-                    <div class="mt-3 mb-3">
-                        <div class="relative w-full bg-black rounded-lg overflow-hidden" style="padding-bottom: 56.25%;">
-                            <iframe id="episodePlayer-{{ $episode->id }}" 
-                                    src="{{ $episodePlayerUrl }}" 
-                                    class="absolute top-0 left-0 w-full h-full border-0" 
-                                    allow="autoplay; fullscreen" 
-                                    allowfullscreen
-                                    frameborder="0">
-                            </iframe>
-                        </div>
-                        
-                        <!-- Server Selection for Episode -->
-                        @if($hasMultipleServers)
-                        <div class="mt-3">
-                            <label class="block text-xs font-semibold text-gray-900 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Select Server:</label>
-                            <div class="flex flex-wrap gap-2">
-                                @foreach($episodeServers as $index => $server)
-                                    @if($server->watch_link)
-                                    <button onclick="changeEpisodeServer('{{ $episode->id }}', '{{ $server->watch_link }}', this)" 
-                                            class="episode-server-btn-{{ $episode->id }} px-3 py-1.5 text-xs rounded-lg transition-colors {{ $index === 0 ? 'bg-accent text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:!bg-bg-card-hover dark:!text-text-secondary dark:!hover:bg-bg-card dark:!hover:text-white' }}"
-                                            style="font-family: 'Poppins', sans-serif; font-weight: 500;">
-                                        {{ $server->server_name }}@if($server->quality) - {{ $server->quality }}@endif
-                                    </button>
-                                    @endif
-                                @endforeach
-                            </div>
-                        </div>
-                        @endif
-                    </div>
-                    @endif
                     
                     <!-- Server Links Table -->
                     <div class="mt-3">
@@ -542,14 +423,7 @@
                                             <a href="{{ $server->download_link }}" target="_blank" class="text-yellow-600 hover:text-yellow-700 dark:!text-yellow-400 dark:!hover:text-yellow-300 font-semibold" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Download</a>
                                             @endif
                                             @if($server->watch_link)
-                                                @php
-                                                    $isTurbovidhls = str_contains($server->watch_link, 'turbovidhls.com');
-                                                @endphp
-                                                @if($isTurbovidhls)
-                                                    <button onclick="openVideoPlayer('{{ $server->watch_link }}', '{{ $server->server_name }}', '{{ $episode->id }}')" class="text-yellow-600 hover:text-yellow-700 dark:!text-yellow-400 dark:!hover:text-yellow-300 font-semibold ml-3" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Watch</button>
-                                                @else
-                                                    <a href="{{ $server->watch_link }}" target="_blank" class="text-yellow-600 hover:text-yellow-700 dark:!text-yellow-400 dark:!hover:text-yellow-300 font-semibold ml-3" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Watch</a>
-                                                @endif
+                                            <a href="{{ $server->watch_link }}" target="_blank" class="text-yellow-600 hover:text-yellow-700 dark:!text-yellow-400 dark:!hover:text-yellow-300 font-semibold ml-3" style="font-family: 'Poppins', sans-serif; font-weight: 600;">Watch</a>
                                             @endif
                                         </td>
                                     </tr>
@@ -559,19 +433,6 @@
                         </div>
                     </div>
                     
-                    <!-- Video Player Modal/Embed for TurbovidHLS -->
-                    <div id="videoPlayerModal-{{ $episode->id }}" class="hidden fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4">
-                        <div class="relative w-full max-w-5xl bg-black rounded-lg overflow-hidden">
-                            <button onclick="closeVideoPlayer('{{ $episode->id }}')" class="absolute top-4 right-4 z-10 bg-black/70 hover:bg-black/90 text-white rounded-full w-10 h-10 flex items-center justify-center transition-colors">
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                </svg>
-                            </button>
-                            <div class="relative w-full" style="padding-bottom: 56.25%;">
-                                <iframe id="videoFrame-{{ $episode->id }}" class="absolute top-0 left-0 w-full h-full" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
-                            </div>
-                        </div>
-                    </div>
                     @else
                     <p class="text-xs text-gray-500 dark:!text-text-tertiary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">No servers available</p>
                     @endif
@@ -970,101 +831,6 @@
     }
 </style>
 
-<script>
-    function openVideoPlayer(videoUrl, serverName, episodeId) {
-        const modal = document.getElementById('videoPlayerModal-' + episodeId);
-        const iframe = document.getElementById('videoFrame-' + episodeId);
-        
-        if (modal && iframe) {
-            // Set the iframe source to the video URL
-            iframe.src = videoUrl;
-            // Show the modal
-            modal.classList.remove('hidden');
-            // Prevent body scroll when modal is open
-            document.body.style.overflow = 'hidden';
-        }
-    }
-
-    function closeVideoPlayer(episodeId) {
-        const modal = document.getElementById('videoPlayerModal-' + episodeId);
-        const iframe = document.getElementById('videoFrame-' + episodeId);
-        
-        if (modal && iframe) {
-            // Hide the modal
-            modal.classList.add('hidden');
-            // Clear the iframe source to stop video playback
-            iframe.src = '';
-            // Restore body scroll
-            document.body.style.overflow = '';
-        }
-    }
-
-    // Close modal when clicking outside the video player
-    document.addEventListener('click', function(event) {
-        if (event.target.classList.contains('bg-black/90')) {
-            const modals = document.querySelectorAll('[id^="videoPlayerModal-"]');
-            modals.forEach(modal => {
-                if (!modal.classList.contains('hidden')) {
-                    const episodeId = modal.id.replace('videoPlayerModal-', '');
-                    closeVideoPlayer(episodeId);
-                }
-            });
-        }
-    });
-
-    // Close modal with Escape key
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            const modals = document.querySelectorAll('[id^="videoPlayerModal-"]');
-            modals.forEach(modal => {
-                if (!modal.classList.contains('hidden')) {
-                    const episodeId = modal.id.replace('videoPlayerModal-', '');
-                    closeVideoPlayer(episodeId);
-                }
-            });
-        }
-    });
-
-    // Change TV Show server (for "Watch All Episodes" player)
-    function changeTvShowServer(videoUrl, buttonElement) {
-        const iframe = document.getElementById('tvShowPlayer');
-        if (iframe) {
-            iframe.src = videoUrl;
-            
-            // Update active button state
-            const allButtons = document.querySelectorAll('.tv-server-btn');
-            allButtons.forEach(btn => {
-                btn.classList.remove('bg-accent', 'text-white');
-                btn.classList.add('bg-gray-200', 'text-gray-700', 'dark:!bg-bg-card-hover', 'dark:!text-text-secondary');
-            });
-            
-            if (buttonElement) {
-                buttonElement.classList.remove('bg-gray-200', 'text-gray-700', 'dark:!bg-bg-card-hover', 'dark:!text-text-secondary');
-                buttonElement.classList.add('bg-accent', 'text-white');
-            }
-        }
-    }
-
-    // Change episode server (for individual episode players)
-    function changeEpisodeServer(episodeId, videoUrl, buttonElement) {
-        const iframe = document.getElementById('episodePlayer-' + episodeId);
-        if (iframe) {
-            iframe.src = videoUrl;
-            
-            // Update active button state for this episode
-            const allButtons = document.querySelectorAll('.episode-server-btn-' + episodeId);
-            allButtons.forEach(btn => {
-                btn.classList.remove('bg-accent', 'text-white');
-                btn.classList.add('bg-gray-200', 'text-gray-700', 'dark:!bg-bg-card-hover', 'dark:!text-text-secondary');
-            });
-            
-            if (buttonElement) {
-                buttonElement.classList.remove('bg-gray-200', 'text-gray-700', 'dark:!bg-bg-card-hover', 'dark:!text-text-secondary');
-                buttonElement.classList.add('bg-accent', 'text-white');
-            }
-        }
-    }
-</script>
 
     <!-- Comments Section -->
     @if(isset($isCustom) && $isCustom && isset($content))
