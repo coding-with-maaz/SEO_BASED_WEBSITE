@@ -80,6 +80,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
 // Admin routes for custom content management (protected)
 Route::prefix('admin')->name('admin.')->middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Analytics routes
+    Route::get('analytics', [\App\Http\Controllers\Admin\AnalyticsController::class, 'index'])->name('analytics.index');
+    Route::get('analytics/overview', [\App\Http\Controllers\Admin\AnalyticsController::class, 'overview'])->name('analytics.overview');
+    Route::get('analytics/views-over-time', [\App\Http\Controllers\Admin\AnalyticsController::class, 'viewsOverTime'])->name('analytics.views-over-time');
+    Route::get('analytics/content-growth', [\App\Http\Controllers\Admin\AnalyticsController::class, 'contentGrowth'])->name('analytics.content-growth');
+    Route::get('analytics/top-content', [\App\Http\Controllers\Admin\AnalyticsController::class, 'topContent'])->name('analytics.top-content');
+    Route::get('analytics/content-by-type', [\App\Http\Controllers\Admin\AnalyticsController::class, 'contentByType'])->name('analytics.content-by-type');
+    Route::get('analytics/views-by-type', [\App\Http\Controllers\Admin\AnalyticsController::class, 'viewsByType'])->name('analytics.views-by-type');
+    Route::get('analytics/status-breakdown', [\App\Http\Controllers\Admin\AnalyticsController::class, 'statusBreakdown'])->name('analytics.status-breakdown');
+    Route::get('analytics/source-breakdown', [\App\Http\Controllers\Admin\AnalyticsController::class, 'sourceBreakdown'])->name('analytics.source-breakdown');
+    Route::get('analytics/episodes', [\App\Http\Controllers\Admin\AnalyticsController::class, 'episodeAnalytics'])->name('analytics.episodes');
+    Route::get('analytics/comments', [\App\Http\Controllers\Admin\AnalyticsController::class, 'commentsAnalytics'])->name('analytics.comments');
+    Route::get('analytics/daily-stats', [\App\Http\Controllers\Admin\AnalyticsController::class, 'dailyStats'])->name('analytics.daily-stats');
+    
     Route::resource('contents', ContentController::class);
     
     // Server Management routes (for movies)
@@ -104,6 +119,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', \App\Http\Middleware
             Route::post('servers', [ContentController::class, 'addServer'])->name('contents.servers.store');
             Route::put('servers/update', [ContentController::class, 'updateServer'])->name('contents.servers.update');
             Route::delete('servers/delete', [ContentController::class, 'deleteServer'])->name('contents.servers.destroy');
+            Route::post('add-embed', [ContentController::class, 'addEmbed'])->name('contents.add-embed');
             
             // Cast management routes (using ID for route model binding)
             Route::get('cast', [CastController::class, 'index'])->name('contents.cast.index');
@@ -115,6 +131,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', \App\Http\Middleware
             
             // Episode management routes
             Route::resource('episodes', EpisodeController::class)->except(['show']);
+            Route::post('episodes/import-from-tmdb', [EpisodeController::class, 'importFromTmdb'])->name('contents.episodes.import-from-tmdb');
             
                     // Episode server routes
                     Route::prefix('episodes/{episode}')->group(function () {

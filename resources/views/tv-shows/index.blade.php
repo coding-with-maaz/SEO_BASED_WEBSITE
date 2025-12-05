@@ -16,6 +16,68 @@
                 TV Shows
             </h2>
 
+            <!-- Recent Content Section -->
+            @if(isset($recentTvShows) && $recentTvShows->count() > 0)
+            <div class="mb-8 bg-gradient-to-r from-accent/5 to-accent/10 rounded-xl p-6 border border-accent/20">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:!text-white mb-1" style="font-family: 'Poppins', sans-serif; font-weight: 700;">
+                            Recent TV Shows
+                        </h3>
+                        <p class="text-sm text-gray-600 dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                            Latest additions to our collection
+                        </p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    @foreach($recentTvShows as $recent)
+                    @php
+                        $tvShowId = $recent->slug ?? ('custom_' . $recent->id);
+                        $posterPath = $recent->poster_path ?? $recent->backdrop_path;
+                        $imageUrl = null;
+                        
+                        if ($posterPath) {
+                            $contentType = $recent->content_type ?? 'custom';
+                            if (str_starts_with($posterPath, 'http')) {
+                                $imageUrl = $posterPath;
+                            } elseif (in_array($contentType, ['tmdb', 'article']) || str_starts_with($posterPath, '/')) {
+                                $imageUrl = app(\App\Services\TmdbService::class)->getImageUrl($posterPath, 'w300');
+                            } else {
+                                $imageUrl = $posterPath;
+                            }
+                        }
+                    @endphp
+                    <a href="{{ route('tv-shows.show', $tvShowId) }}" class="group">
+                        <div class="relative overflow-hidden rounded-lg bg-gray-200 dark:!bg-gray-800 aspect-[2/3] shadow-md group-hover:shadow-xl transition-all duration-300">
+                            <img src="{{ $imageUrl ?? 'https://via.placeholder.com/300x450?text=No+Image' }}" 
+                                 alt="{{ $recent->title }}" 
+                                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                 onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
+                                <div class="absolute bottom-0 left-0 right-0 p-3">
+                                    <h4 class="text-white text-sm font-bold line-clamp-2 mb-1" style="font-family: 'Poppins', sans-serif; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">
+                                        {{ $recent->title }}
+                                    </h4>
+                                    @if($recent->release_date)
+                                    <p class="text-white/90 text-xs" style="font-family: 'Poppins', sans-serif; font-weight: 400; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
+                                        {{ $recent->release_date->format('Y') }}
+                                    </p>
+                                    @endif
+                                </div>
+                            </div>
+                            <!-- New Badge -->
+                            @if($recent->created_at->isAfter(now()->subDays(7)))
+                            <div class="absolute top-2 right-2 bg-accent text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                                New
+                            </div>
+                            @endif
+                        </div>
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
             @php
                 $allTvShows = [];
                 

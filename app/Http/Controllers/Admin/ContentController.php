@@ -190,6 +190,8 @@ class ContentController extends Controller
             'watch_link' => 'nullable|url',
             'download_link' => 'nullable|url',
             'status' => 'required|string|in:published,draft,upcoming',
+            'embed_servers' => 'nullable|array',
+            'embed_servers.*' => 'nullable|string|in:vidsrc,vidlink',
         ]);
 
         $tmdbId = $validated['tmdb_id'];
@@ -368,8 +370,50 @@ class ContentController extends Controller
             }
         }
 
+        // Handle embed servers if requested
+        $embedServers = $request->input('embed_servers', []);
+        $addedServers = [];
+        
+        if (!empty($embedServers) && $content->tmdb_id) {
+            if ($type === 'movie') {
+                // For movies, add embeds as watch_link if not already set
+                if (!$content->watch_link && in_array('vidsrc', $embedServers)) {
+                    $embedUrl = $this->generateVidsrcMovieUrl($content->tmdb_id);
+                    $content->update(['watch_link' => $embedUrl]);
+                    $addedServers[] = 'Vidsrc.icu';
+                }
+                if (in_array('vidlink', $embedServers)) {
+                    $this->addVidlinkEmbedToMovie($content, $content->tmdb_id);
+                    $addedServers[] = 'Vidlink.pro';
+                }
+            } else {
+                // For TV shows, add embeds to existing episodes if any
+                if (in_array('vidsrc', $embedServers)) {
+                    $this->addVidsrcEmbedsToEpisodes($content, $content->tmdb_id, 1);
+                    $addedServers[] = 'Vidsrc.icu';
+                }
+                if (in_array('vidlink', $embedServers)) {
+                    $this->addVidlinkEmbedsToEpisodes($content, $content->tmdb_id, 1);
+                    $addedServers[] = 'Vidlink.pro';
+                }
+            }
+        }
+
+        $successMessage = 'Article content created successfully with backdrop image and watch/download buttons.';
+        if (!empty($addedServers)) {
+            $serversText = implode(' and ', $addedServers);
+            if ($type === 'movie') {
+                $successMessage .= " {$serversText} embed link(s) have been added.";
+            } else {
+                $episodeCount = $content->allEpisodes()->count();
+                if ($episodeCount > 0) {
+                    $successMessage .= " {$serversText} embed servers have been added to {$episodeCount} episode(s).";
+                }
+            }
+        }
+
         return redirect()->route('admin.contents.edit', $content)
-            ->with('success', 'Article content created successfully with backdrop image and watch/download buttons.');
+            ->with('success', $successMessage);
     }
 
     /**
@@ -425,6 +469,8 @@ class ContentController extends Controller
             'tmdb_id' => 'required|integer',
             'type' => 'required|string|in:movie,tv',
             'dubbing_language' => 'nullable|string',
+            'embed_servers' => 'nullable|array',
+            'embed_servers.*' => 'nullable|string|in:vidsrc,vidlink',
         ]);
 
         $tmdbId = $validated['tmdb_id'];
@@ -661,6 +707,34 @@ class ContentController extends Controller
             \Log::info('No TMDB cast data available for content ID: ' . $content->id);
         }
 
+        // Handle embed servers if requested
+        $embedServers = $request->input('embed_servers', []);
+        $addedServers = [];
+        
+        if (!empty($embedServers) && $content->tmdb_id) {
+            if ($type === 'movie') {
+                // For movies, add embeds immediately
+                if (in_array('vidsrc', $embedServers)) {
+                    $this->addVidsrcEmbedToMovie($content, $content->tmdb_id);
+                    $addedServers[] = 'Vidsrc.icu';
+                }
+                if (in_array('vidlink', $embedServers)) {
+                    $this->addVidlinkEmbedToMovie($content, $content->tmdb_id);
+                    $addedServers[] = 'Vidlink.pro';
+                }
+            } else {
+                // For TV shows, add embeds to existing episodes if any
+                if (in_array('vidsrc', $embedServers)) {
+                    $this->addVidsrcEmbedsToEpisodes($content, $content->tmdb_id, 1);
+                    $addedServers[] = 'Vidsrc.icu';
+                }
+                if (in_array('vidlink', $embedServers)) {
+                    $this->addVidlinkEmbedsToEpisodes($content, $content->tmdb_id, 1);
+                    $addedServers[] = 'Vidlink.pro';
+                }
+            }
+        }
+
         // Build success message with cast information
         $castCount = 0;
         if (isset($tmdbData['credits']['cast']) && is_array($tmdbData['credits']['cast'])) {
@@ -673,6 +747,20 @@ class ContentController extends Controller
         
         if ($castCount > 0) {
             $successMessage .= ' ' . $castCount . ' cast member(s) have been automatically added.';
+        }
+        
+        if (!empty($addedServers)) {
+            $serversText = implode(' and ', $addedServers);
+            if ($type === 'movie') {
+                $successMessage .= " {$serversText} embed link(s) have been added.";
+            } else {
+                $episodeCount = $content->allEpisodes()->count();
+                if ($episodeCount > 0) {
+                    $successMessage .= " {$serversText} embed servers have been added to {$episodeCount} episode(s).";
+                } else {
+                    $successMessage .= " {$serversText} embed servers will be added automatically when episodes are created.";
+                }
+            }
         }
         
         return redirect()->route('admin.contents.edit', $content)
@@ -778,5 +866,219 @@ class ContentController extends Controller
         $content->update(['servers' => $servers]);
 
         return redirect()->back()->with('success', 'Server deleted successfully.');
+    }
+
+    /**
+     * Add embed server to content
+     */
+    public function addEmbed(Request $request, Content $content)
+    {
+        if (!$content->tmdb_id) {
+            return redirect()->back()->with('error', 'Content must have a TMDB ID to add embed server.');
+        }
+
+        $validated = $request->validate([
+            'embed_server' => 'required|string|in:vidsrc,vidlink',
+        ]);
+
+        $embedServer = $validated['embed_server'];
+        $serverName = $embedServer === 'vidsrc' ? 'Vidsrc.icu' : 'Vidlink.pro';
+
+        if ($content->type === 'movie') {
+            // Add embed for movie
+            if ($embedServer === 'vidsrc') {
+                $this->addVidsrcEmbedToMovie($content, $content->tmdb_id);
+            } else {
+                $this->addVidlinkEmbedToMovie($content, $content->tmdb_id);
+            }
+            return redirect()->back()->with('success', "{$serverName} embed link has been added successfully.");
+        } elseif (in_array($content->type, ['tv_show', 'web_series', 'anime', 'reality_show', 'talk_show'])) {
+            // Add embeds to all episodes
+            if ($embedServer === 'vidsrc') {
+                $this->addVidsrcEmbedsToEpisodes($content, $content->tmdb_id, 1);
+            } else {
+                $this->addVidlinkEmbedsToEpisodes($content, $content->tmdb_id, 1);
+            }
+            $episodeCount = $content->allEpisodes()->count();
+            return redirect()->back()->with('success', "{$serverName} embed servers have been added to {$episodeCount} episode(s).");
+        }
+
+        return redirect()->back()->with('error', 'Invalid content type for embed server.');
+    }
+
+    /**
+     * Generate vidsrc.icu embed URL for movies
+     */
+    private function generateVidsrcMovieUrl($tmdbId)
+    {
+        return "https://vidsrc.icu/embed/movie/{$tmdbId}";
+    }
+
+    /**
+     * Generate vidsrc.icu embed URL for TV shows
+     */
+    private function generateVidsrcTvUrl($tmdbId, $season = 1, $episode = 1)
+    {
+        return "https://vidsrc.icu/embed/tv/{$tmdbId}/{$season}/{$episode}";
+    }
+
+    /**
+     * Add vidsrc embed to content (for movies)
+     */
+    private function addVidsrcEmbedToMovie(Content $content, $tmdbId)
+    {
+        if (!$tmdbId) {
+            return;
+        }
+
+        $embedUrl = $this->generateVidsrcMovieUrl($tmdbId);
+        
+        // Add as watch_link if not set, or add as server
+        if (!$content->watch_link) {
+            $content->update(['watch_link' => $embedUrl]);
+        } else {
+            // Add as a server instead
+            $servers = $content->servers ?? [];
+            $serverId = uniqid('vidsrc_', true);
+            
+            $servers[] = [
+                'id' => $serverId,
+                'name' => 'Vidsrc.icu',
+                'url' => $embedUrl,
+                'quality' => 'HD',
+                'download_link' => null,
+                'sort_order' => count($servers),
+                'active' => true,
+            ];
+            
+            $content->update(['servers' => $servers]);
+        }
+    }
+
+    /**
+     * Add vidsrc embed servers to all episodes of a TV show
+     */
+    private function addVidsrcEmbedsToEpisodes(Content $content, $tmdbId, $season = 1)
+    {
+        if (!$tmdbId) {
+            return;
+        }
+
+        $episodes = $content->allEpisodes()->get();
+        
+        foreach ($episodes as $episode) {
+            $embedUrl = $this->generateVidsrcTvUrl($tmdbId, $season, $episode->episode_number);
+            
+            // Check if vidsrc server already exists for this episode
+            $existingServer = \App\Models\EpisodeServer::where('episode_id', $episode->id)
+                ->where('server_name', 'Vidsrc.icu')
+                ->first();
+            
+            if (!$existingServer) {
+                // Get current max sort_order for this episode
+                $maxSortOrder = \App\Models\EpisodeServer::where('episode_id', $episode->id)
+                    ->max('sort_order') ?? 0;
+                
+                \App\Models\EpisodeServer::create([
+                    'episode_id' => $episode->id,
+                    'server_name' => 'Vidsrc.icu',
+                    'quality' => 'HD',
+                    'watch_link' => $embedUrl,
+                    'download_link' => null,
+                    'sort_order' => $maxSortOrder + 1,
+                    'is_active' => true,
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Generate vidlink.pro embed URL for movies
+     */
+    private function generateVidlinkMovieUrl($tmdbId)
+    {
+        return "https://vidlink.pro/movie/{$tmdbId}";
+    }
+
+    /**
+     * Generate vidlink.pro embed URL for TV shows
+     */
+    private function generateVidlinkTvUrl($tmdbId, $season = 1, $episode = 1)
+    {
+        return "https://vidlink.pro/tv/{$tmdbId}/{$season}/{$episode}";
+    }
+
+    /**
+     * Add vidlink.pro embed to content (for movies)
+     */
+    private function addVidlinkEmbedToMovie(Content $content, $tmdbId)
+    {
+        if (!$tmdbId) {
+            return;
+        }
+
+        $embedUrl = $this->generateVidlinkMovieUrl($tmdbId);
+        
+        // Add as server
+        $servers = $content->servers ?? [];
+        
+        // Check if vidlink server already exists
+        $existingServer = collect($servers)->first(function($server) {
+            return isset($server['name']) && $server['name'] === 'Vidlink.pro';
+        });
+        
+        if ($existingServer) {
+            return; // Already exists
+        }
+        
+        $serverId = uniqid('vidlink_', true);
+        $servers[] = [
+            'id' => $serverId,
+            'name' => 'Vidlink.pro',
+            'url' => $embedUrl,
+            'quality' => 'HD',
+            'download_link' => null,
+            'sort_order' => count($servers),
+            'active' => true,
+        ];
+        
+        $content->update(['servers' => $servers]);
+    }
+
+    /**
+     * Add vidlink.pro embed servers to all episodes of a TV show
+     */
+    private function addVidlinkEmbedsToEpisodes(Content $content, $tmdbId, $season = 1)
+    {
+        if (!$tmdbId) {
+            return;
+        }
+
+        $episodes = $content->allEpisodes()->get();
+        
+        foreach ($episodes as $episode) {
+            $embedUrl = $this->generateVidlinkTvUrl($tmdbId, $season, $episode->episode_number);
+            
+            // Check if vidlink server already exists for this episode
+            $existingServer = \App\Models\EpisodeServer::where('episode_id', $episode->id)
+                ->where('server_name', 'Vidlink.pro')
+                ->first();
+            
+            if (!$existingServer) {
+                // Get current max sort_order for this episode
+                $maxSortOrder = \App\Models\EpisodeServer::where('episode_id', $episode->id)
+                    ->max('sort_order') ?? 0;
+                
+                \App\Models\EpisodeServer::create([
+                    'episode_id' => $episode->id,
+                    'server_name' => 'Vidlink.pro',
+                    'quality' => 'HD',
+                    'watch_link' => $embedUrl,
+                    'download_link' => null,
+                    'sort_order' => $maxSortOrder + 1,
+                    'is_active' => true,
+                ]);
+            }
+        }
     }
 }

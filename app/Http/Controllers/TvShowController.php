@@ -52,10 +52,19 @@ class TvShowController extends Controller
             ->take(5)
             ->get();
 
+        // Get recent TV shows (latest 6) for top section
+        $recentTvShows = Content::published()
+            ->whereIn('type', ['tv_show', 'web_series', 'anime', 'reality_show', 'talk_show'])
+            ->orderBy('created_at', 'desc')
+            ->orderBy('updated_at', 'desc')
+            ->take(6)
+            ->get();
+
         return view('tv-shows.index', [
             'tvShows' => [],
             'customTvShows' => $customTvShows,
             'popularTvShows' => $popularTvShows,
+            'recentTvShows' => $recentTvShows,
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'type' => 'custom',

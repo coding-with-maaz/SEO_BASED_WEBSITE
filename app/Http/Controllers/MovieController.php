@@ -52,10 +52,19 @@ class MovieController extends Controller
             ->take(5)
             ->get();
 
+        // Get recent movies (latest 6) for top section
+        $recentMovies = Content::published()
+            ->whereIn('type', ['movie', 'documentary', 'short_film'])
+            ->orderBy('created_at', 'desc')
+            ->orderBy('updated_at', 'desc')
+            ->take(6)
+            ->get();
+
         return view('movies.index', [
             'movies' => [],
             'customMovies' => $customMovies,
             'popularMovies' => $popularMovies,
+            'recentMovies' => $recentMovies,
             'currentPage' => $page,
             'totalPages' => $totalPages,
             'type' => 'custom', // Changed from dynamic type

@@ -66,6 +66,28 @@
                         </div>
                     </div>
                 </div>
+                <div class="mt-4 space-y-2">
+                    <p class="text-sm font-semibold text-gray-700 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                        Add Server Embeds (automatically add embed links using TMDB ID):
+                    </p>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="tmdb-add-vidsrc" name="embed_servers[]" value="vidsrc" 
+                               class="w-4 h-4 text-accent border-gray-300 rounded focus:ring-accent dark:!bg-bg-card-hover dark:!border-border-primary">
+                        <span class="text-sm font-semibold text-gray-700 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                            Vidsrc.icu
+                        </span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="tmdb-add-vidlink" name="embed_servers[]" value="vidlink" 
+                               class="w-4 h-4 text-accent border-gray-300 rounded focus:ring-accent dark:!bg-bg-card-hover dark:!border-border-primary">
+                        <span class="text-sm font-semibold text-gray-700 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                            Vidlink.pro
+                        </span>
+                    </label>
+                    <p class="text-xs text-gray-500 dark:!text-text-secondary mt-1 ml-6" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                        For movies: Adds watch link. For TV shows: Adds embed servers for all episodes when created. You can select both services.
+                    </p>
+                </div>
             </form>
 
             <!-- Loading indicator -->
@@ -190,6 +212,30 @@
                                 <option value="draft">Draft</option>
                                 <option value="upcoming">Upcoming</option>
                             </select>
+                        </div>
+
+                        <!-- Add Embed Option -->
+                        <div class="lg:col-span-2">
+                            <p class="text-sm font-semibold text-gray-700 dark:!text-white mb-2" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                                Add Server Embeds (automatically add embed links using TMDB ID):
+                            </p>
+                            <label class="flex items-center gap-2 cursor-pointer mb-2">
+                                <input type="checkbox" name="embed_servers[]" value="vidsrc" 
+                                       class="w-4 h-4 text-accent border-gray-300 rounded focus:ring-accent dark:!bg-bg-card-hover dark:!border-border-primary">
+                                <span class="text-sm font-semibold text-gray-700 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                                    Vidsrc.icu
+                                </span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="checkbox" name="embed_servers[]" value="vidlink" 
+                                       class="w-4 h-4 text-accent border-gray-300 rounded focus:ring-accent dark:!bg-bg-card-hover dark:!border-border-primary">
+                                <span class="text-sm font-semibold text-gray-700 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                                    Vidlink.pro
+                                </span>
+                            </label>
+                            <p class="text-xs text-gray-500 dark:!text-text-secondary mt-1 ml-6" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
+                                For movies: Adds watch link. For TV shows: Adds embed servers for all episodes when created. You can select both services.
+                            </p>
                         </div>
                     </div>
 
@@ -423,6 +469,9 @@ document.getElementById('tmdb-search-form').addEventListener('submit', async fun
                             @csrf
                             <input type="hidden" name="tmdb_id" value="${item.id}">
                             <input type="hidden" name="type" value="${type}">
+                            ${Array.from(document.querySelectorAll('input[name="embed_servers[]"]:checked')).map(checkbox => 
+                                `<input type="hidden" name="embed_servers[]" value="${checkbox.value}">`
+                            ).join('')}
                             <button type="submit" class="w-full px-4 py-2 bg-accent hover:bg-accent-light text-white rounded-lg transition-colors text-sm" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
                                 Import
                             </button>

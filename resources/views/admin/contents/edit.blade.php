@@ -297,9 +297,44 @@
                 <h2 class="text-xl font-bold text-gray-900 dark:!text-white" style="font-family: 'Poppins', sans-serif; font-weight: 700;">
                     Servers Management
                 </h2>
-                <button onclick="showAddServerModal()" class="px-4 py-2 bg-accent hover:bg-accent-light text-white rounded-lg transition-colors" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
-                    Add Server
-                </button>
+                <div class="flex gap-3 flex-wrap">
+                    @if($content->tmdb_id)
+                        @if($content->type === 'movie')
+                            <form action="{{ route('admin.contents.add-embed', $content) }}" method="POST" class="inline">
+                                @csrf
+                                <input type="hidden" name="embed_server" value="vidsrc">
+                                <button type="submit" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors" style="font-family: 'Poppins', sans-serif; font-weight: 600;" onclick="return confirm('Add Vidsrc.icu embed link for this movie?')">
+                                    + Vidsrc.icu
+                                </button>
+                            </form>
+                            <form action="{{ route('admin.contents.add-embed', $content) }}" method="POST" class="inline">
+                                @csrf
+                                <input type="hidden" name="embed_server" value="vidlink">
+                                <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors" style="font-family: 'Poppins', sans-serif; font-weight: 600;" onclick="return confirm('Add Vidlink.pro embed link for this movie?')">
+                                    + Vidlink.pro
+                                </button>
+                            </form>
+                        @elseif(in_array($content->type, ['tv_show', 'web_series', 'anime', 'reality_show', 'talk_show']))
+                            <form action="{{ route('admin.contents.add-embed', $content) }}" method="POST" class="inline">
+                                @csrf
+                                <input type="hidden" name="embed_server" value="vidsrc">
+                                <button type="submit" class="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition-colors" style="font-family: 'Poppins', sans-serif; font-weight: 600;" onclick="return confirm('Add Vidsrc.icu embed servers to all episodes?')">
+                                    + Vidsrc.icu
+                                </button>
+                            </form>
+                            <form action="{{ route('admin.contents.add-embed', $content) }}" method="POST" class="inline">
+                                @csrf
+                                <input type="hidden" name="embed_server" value="vidlink">
+                                <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors" style="font-family: 'Poppins', sans-serif; font-weight: 600;" onclick="return confirm('Add Vidlink.pro embed servers to all episodes?')">
+                                    + Vidlink.pro
+                                </button>
+                            </form>
+                        @endif
+                    @endif
+                    <button onclick="showAddServerModal()" class="px-4 py-2 bg-accent hover:bg-accent-light text-white rounded-lg transition-colors" style="font-family: 'Poppins', sans-serif; font-weight: 600;">
+                        Add Server
+                    </button>
+                </div>
             </div>
 
             @php
