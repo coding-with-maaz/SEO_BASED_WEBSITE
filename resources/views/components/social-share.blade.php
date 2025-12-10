@@ -209,11 +209,13 @@
         // Create toast element
         const toast = document.createElement('div');
         toast.className = `fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300 ${
-            type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+            type === 'success' ? 'bg-green-600 text-white' : 'bg-red-700 text-white'
         }`;
         toast.textContent = message;
         toast.style.fontFamily = "'Poppins', sans-serif";
         toast.style.fontWeight = '500';
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'polite');
         
         document.body.appendChild(toast);
         

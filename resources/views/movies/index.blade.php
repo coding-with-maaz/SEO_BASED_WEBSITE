@@ -49,9 +49,22 @@
                     @endphp
                     <a href="{{ route('movies.show', $movieId) }}" class="group">
                         <div class="relative overflow-hidden rounded-lg bg-gray-200 dark:!bg-gray-800 aspect-[2/3] shadow-md group-hover:shadow-xl transition-all duration-300">
+                            @php
+                                $srcset = '';
+                                if ($imageUrl && in_array($recent->content_type ?? 'custom', ['tmdb', 'article']) && str_starts_with($posterPath ?? '', '/')) {
+                                    $baseUrl = rtrim(config('services.tmdb.image_base_url'), '/');
+                                    $cleanPath = ltrim($posterPath, '/');
+                                    $srcset = $baseUrl . '/w185/' . $cleanPath . ' 185w, ' .
+                                             $baseUrl . '/w300/' . $cleanPath . ' 300w, ' .
+                                             $baseUrl . '/w500/' . $cleanPath . ' 500w';
+                                }
+                            @endphp
                             <img src="{{ $imageUrl ?? 'https://via.placeholder.com/300x450?text=No+Image' }}" 
+                                 @if($srcset)srcset="{{ $srcset }}" sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px"@endif
                                  alt="{{ $recent->title }}" 
                                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                 loading="lazy"
+                                 decoding="async"
                                  onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
                             <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent">
                                 <div class="absolute bottom-0 left-0 right-0 p-3">
@@ -132,7 +145,13 @@
             @if(!empty($allMovies))
             <!-- 2 Column Grid for Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        @foreach($allMovies as $movie)
+        @foreach($allMovies as $index => $movie)
+        @if($index > 0 && $index % 6 == 0)
+        <!-- AdSense In-Feed Ad -->
+        <div class="col-span-1 md:col-span-2 my-4">
+            <x-adsense-in-feed />
+        </div>
+        @endif
         <article class="group relative bg-white overflow-hidden cursor-pointer dark:!bg-bg-card transition-all duration-300">
             <a href="{{ route('movies.show', $movie['id']) }}" class="block">
                 <!-- Full Image - Backdrop Image with 16:9 Aspect Ratio -->
@@ -159,10 +178,33 @@
                                 }
                             }
                         @endphp
+                        @php
+                            $srcset = '';
+                            if ($imageUrl && ($movie['is_custom'] ?? false) && in_array($movie['content_type'] ?? 'custom', ['tmdb', 'article']) && str_starts_with($imagePath ?? '', '/')) {
+                                $baseUrl = rtrim(config('services.tmdb.image_base_url'), '/');
+                                $cleanPath = ltrim($imagePath, '/');
+                                $srcset = $baseUrl . '/w300/' . $cleanPath . ' 300w, ' .
+                                         $baseUrl . '/w780/' . $cleanPath . ' 780w, ' .
+                                         $baseUrl . '/w1280/' . $cleanPath . ' 1280w';
+                            } elseif ($imageUrl && !($movie['is_custom'] ?? false)) {
+                                $imagePath = $movie['backdrop_path'] ?? $movie['poster_path'] ?? null;
+                                if ($imagePath && str_starts_with($imagePath, '/')) {
+                                    $baseUrl = rtrim(config('services.tmdb.image_base_url'), '/');
+                                    $cleanPath = ltrim($imagePath, '/');
+                                    $srcset = $baseUrl . '/w300/' . $cleanPath . ' 300w, ' .
+                                             $baseUrl . '/w780/' . $cleanPath . ' 780w, ' .
+                                             $baseUrl . '/w1280/' . $cleanPath . ' 1280w';
+                                }
+                            }
+                            // Only lazy load images after the first 2 (likely above fold)
+                            $shouldLazyLoad = $index > 1;
+                        @endphp
                         <img src="{{ $imageUrl ?? 'https://via.placeholder.com/780x439?text=No+Image' }}" 
+                             @if($srcset)srcset="{{ $srcset }}" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 665px"@endif
                              alt="{{ $movie['title'] }}" 
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                              style="display: block !important; visibility: visible !important; opacity: 1 !important; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"
+                             @if($shouldLazyLoad)loading="lazy" decoding="async"@endif
                              onerror="this.src='https://via.placeholder.com/780x439?text=No+Image'">
                     @else
                         @php
@@ -201,9 +243,9 @@
                     <!-- Beautiful Title Overlay - Always Visible -->
                     <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex items-end pointer-events-none" style="z-index: 2;">
                         <div class="w-full p-4 pointer-events-auto">
-                            <h3 class="text-xl font-bold text-white mb-1 line-clamp-2 group-hover:text-accent transition-colors duration-300" style="font-family: 'Poppins', sans-serif; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,0.9);">
+                            <h4 class="text-xl font-bold text-white mb-1 line-clamp-2 group-hover:text-accent transition-colors duration-300" style="font-family: 'Poppins', sans-serif; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,0.9);">
                                 {{ $movie['title'] ?? 'Unknown' }}
-                            </h3>
+                            </h4>
                             @if(!empty($movie['release_date']))
                             <p class="text-sm text-gray-200" style="font-family: 'Poppins', sans-serif; font-weight: 500; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">
                                 {{ \Carbon\Carbon::parse($movie['release_date'])->format('Y') }}
@@ -295,9 +337,22 @@
                         @endphp
                         <a href="{{ route('movies.show', $movieId) }}" class="flex gap-3 group hover:bg-gray-50 p-2 rounded-lg transition-all dark:!hover:bg-bg-card-hover">
                             <div class="flex-shrink-0 w-16 h-24 rounded overflow-hidden bg-gray-100 dark:!bg-bg-card-hover">
+                                @php
+                                    $srcset = '';
+                                    if ($imageUrl && in_array($movie->content_type ?? 'custom', ['tmdb', 'article']) && str_starts_with($posterPath ?? '', '/')) {
+                                        $baseUrl = rtrim(config('services.tmdb.image_base_url'), '/');
+                                        $cleanPath = ltrim($posterPath, '/');
+                                        $srcset = $baseUrl . '/w92/' . $cleanPath . ' 92w, ' .
+                                                 $baseUrl . '/w154/' . $cleanPath . ' 154w, ' .
+                                                 $baseUrl . '/w185/' . $cleanPath . ' 185w';
+                                    }
+                                @endphp
                                 <img src="{{ $imageUrl ?? 'https://via.placeholder.com/185x278?text=No+Image' }}" 
+                                     @if($srcset)srcset="{{ $srcset }}" sizes="112px"@endif
                                      alt="{{ $movie->title }}" 
                                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                     loading="lazy"
+                                     decoding="async"
                                      onerror="this.src='https://via.placeholder.com/185x278?text=No+Image'">
                             </div>
                             <div class="flex-1 min-w-0">

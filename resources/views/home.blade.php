@@ -15,7 +15,7 @@
             
             <!-- Subheading -->
             <p class="text-base md:text-lg text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
-                Search thousands of movies and TV series. Watch, download, and enjoy your favorite content.
+                Search thousands of movies and TV series. Discover, explore, and stay informed about your favorite entertainment content.
             </p>
             
             <!-- Search Form -->
@@ -138,6 +138,9 @@
     </style>
 </section>
 
+<!-- AdSense Horizontal Ad - After Hero Section -->
+<x-adsense-horizontal />
+
 <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-12 py-8">
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Main Content Area (2 columns on large screens) -->
@@ -145,7 +148,13 @@
             <!-- 2 Column Grid for Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 @if(!empty($allContent))
-                @foreach($allContent as $item)
+                @foreach($allContent as $index => $item)
+                @if($index > 0 && $index % 6 == 0)
+                <!-- AdSense In-Feed Ad -->
+                <div class="col-span-1 md:col-span-2 my-4">
+                    <x-adsense-in-feed />
+                </div>
+                @endif
                 @php
                     $isArticle = ($item['content_type'] ?? 'custom') === 'article';
                     // Determine route based on type, articles can be either movie or tv_show type
@@ -178,10 +187,24 @@
                                     }
                                 }
                             @endphp
+                            @php
+                                $srcset = '';
+                                if ($imageUrl && in_array($contentType ?? 'custom', ['tmdb', 'article']) && str_starts_with($imagePath ?? '', '/')) {
+                                    $baseUrl = rtrim(config('services.tmdb.image_base_url'), '/');
+                                    $cleanPath = ltrim($imagePath, '/');
+                                    $srcset = $baseUrl . '/w300/' . $cleanPath . ' 300w, ' .
+                                             $baseUrl . '/w780/' . $cleanPath . ' 780w, ' .
+                                             $baseUrl . '/w1280/' . $cleanPath . ' 1280w';
+                                }
+                                // Only lazy load images after the first 2 (likely above fold)
+                                $shouldLazyLoad = $index > 1;
+                            @endphp
                             <img src="{{ $imageUrl ?? 'https://via.placeholder.com/780x439?text=No+Image' }}" 
+                                 @if($srcset)srcset="{{ $srcset }}" sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 665px"@endif
                                  alt="{{ $item['title'] }}" 
                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                                  style="display: block !important; visibility: visible !important; opacity: 1 !important; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"
+                                 @if($shouldLazyLoad)loading="lazy" decoding="async"@endif
                                  onerror="this.src='https://via.placeholder.com/780x439?text=No+Image'">
                             
                             @php
@@ -213,9 +236,9 @@
                             <!-- Beautiful Title Overlay - Always Visible -->
                             <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent flex items-end pointer-events-none" style="z-index: 2;">
                                 <div class="w-full p-4 pointer-events-auto">
-                                    <h3 class="text-xl font-bold text-white mb-1 line-clamp-2 group-hover:text-accent transition-colors duration-300" style="font-family: 'Poppins', sans-serif; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,0.9);">
+                                    <h4 class="text-xl font-bold text-white mb-1 line-clamp-2 group-hover:text-accent transition-colors duration-300" style="font-family: 'Poppins', sans-serif; font-weight: 800; text-shadow: 0 2px 8px rgba(0,0,0,0.9);">
                                         {{ $item['title'] }}
-                                    </h3>
+                                    </h4>
                                     @if($item['date'])
                                     <p class="text-sm text-gray-200" style="font-family: 'Poppins', sans-serif; font-weight: 500; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">
                                         {{ \Carbon\Carbon::parse($item['date'])->format('Y') }}
@@ -382,9 +405,22 @@
                         @endphp
                         <a href="{{ route($routeName, $itemId) }}" class="flex gap-3 group hover:bg-gray-50 p-2 rounded-lg transition-all dark:!hover:bg-bg-card-hover">
                             <div class="flex-shrink-0 w-16 h-24 rounded overflow-hidden bg-gray-100 dark:!bg-bg-card-hover">
+                                @php
+                                    $srcset = '';
+                                    if ($imageUrl && in_array($item->content_type ?? 'custom', ['tmdb', 'article']) && str_starts_with($posterPath ?? '', '/')) {
+                                        $baseUrl = rtrim(config('services.tmdb.image_base_url'), '/');
+                                        $cleanPath = ltrim($posterPath, '/');
+                                        $srcset = $baseUrl . '/w92/' . $cleanPath . ' 92w, ' .
+                                                 $baseUrl . '/w154/' . $cleanPath . ' 154w, ' .
+                                                 $baseUrl . '/w185/' . $cleanPath . ' 185w';
+                                    }
+                                @endphp
                                 <img src="{{ $imageUrl ?? 'https://via.placeholder.com/185x278?text=No+Image' }}" 
+                                     @if($srcset)srcset="{{ $srcset }}" sizes="112px"@endif
                                      alt="{{ $item->title }}" 
                                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                     loading="lazy"
+                                     decoding="async"
                                      onerror="this.src='https://via.placeholder.com/185x278?text=No+Image'">
                             </div>
                             <div class="flex-1 min-w-0">

@@ -23,3 +23,27 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Cache Control Headers for Static Assets
+# Using mod_headers only (more compatible than mod_expires)
+<IfModule mod_headers.c>
+    # Images - Cache for 1 year
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp|svg|ico)$">
+        Header set Cache-Control "max-age=31536000, public"
+    </FilesMatch>
+    
+    # CSS - Cache for 1 month
+    <FilesMatch "\.(css)$">
+        Header set Cache-Control "max-age=2592000, public"
+    </FilesMatch>
+    
+    # JavaScript - Cache for 1 month
+    <FilesMatch "\.(js)$">
+        Header set Cache-Control "max-age=2592000, public"
+    </FilesMatch>
+    
+    # Fonts - Cache for 1 year
+    <FilesMatch "\.(woff|woff2|ttf|otf|eot)$">
+        Header set Cache-Control "max-age=31536000, public"
+    </FilesMatch>
+</IfModule>

@@ -1,9 +1,43 @@
 <!DOCTYPE html>
-<html lang="{{ $seo['locale'] ?? 'en' }}">
+<html lang="{{ str_replace('_', '-', $seo['locale'] ?? 'en') }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="google-adsense-account" content="ca-pub-9165335002761658">
+    
+    <!-- AMP Auto Ads Script -->
+    <script async custom-element="amp-auto-ads"
+            src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js">
+    </script>
+    
+    <!-- Google AdSense Script -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9165335002761658"
+            crossorigin="anonymous"></script>
+    
+    <!-- Google Funding Choices CMP - GDPR Consent Management Platform -->
+    <!-- This provides 3 choices: Consent, Do not consent, and Manage options -->
+    <!-- Privacy Policy URL: {{ route('privacy') }} -->
+    <script async src="https://fundingchoicesmessages.google.com/i/pub-9165335002761658?ers=1"></script>
+    <script>
+        (function() {
+            function signalGooglefcPresent() {
+                if (!window.frames['googlefcPresent']) {
+                    if (document.body) {
+                        const iframe = document.createElement('iframe');
+                        iframe.style = 'width: 0; height: 0; border: none; z-index: -1000; left: -1000px; top: -1000px;';
+                        iframe.name = 'googlefcPresent';
+                        iframe.title = 'Google Funding Choices consent frame';
+                        iframe.setAttribute('aria-hidden', 'true');
+                        document.body.appendChild(iframe);
+                    } else {
+                        setTimeout(signalGooglefcPresent, 100);
+                    }
+                }
+            }
+            signalGooglefcPresent();
+        })();
+    </script>
     
     @php
         // ALWAYS prioritize PageSeo from database - ignore controller SEO if PageSeo exists
@@ -48,8 +82,8 @@
     <!-- Primary Meta Tags -->
     <title>{{ $seo['title'] ?? 'Nazaarabox - Movies & TV Shows' }}</title>
     <meta name="title" content="{{ $seo['title'] ?? 'Nazaarabox - Movies & TV Shows' }}">
-    <meta name="description" content="{{ $seo['description'] ?? 'Watch and download your favorite movies and TV shows. Browse thousands of titles in high quality.' }}">
-    <meta name="keywords" content="{{ $seo['keywords'] ?? 'movies, tv shows, streaming, download, watch online, entertainment' }}">
+    <meta name="description" content="{{ $seo['description'] ?? 'Discover and explore movies and TV shows. Browse thousands of titles, read reviews, and find information about your favorite entertainment content.' }}">
+    <meta name="keywords" content="{{ $seo['keywords'] ?? 'movies, tv shows, entertainment, reviews, ratings, cast, information, database' }}">
     <meta name="author" content="{{ $seo['author'] ?? 'Nazaarabox' }}">
     <meta name="robots" content="{{ $seo['robots'] ?? 'index, follow' }}">
     <meta name="language" content="{{ $seo['locale'] ?? 'en' }}">
@@ -62,7 +96,7 @@
     <meta property="og:type" content="{{ $seo['type'] ?? 'website' }}">
     <meta property="og:url" content="{{ $seo['url'] ?? url()->current() }}">
     <meta property="og:title" content="{{ $seo['og_title'] ?? $seo['title'] ?? 'Nazaarabox - Movies & TV Shows' }}">
-    <meta property="og:description" content="{{ $seo['og_description'] ?? $seo['description'] ?? 'Watch and download your favorite movies and TV shows. Browse thousands of titles in high quality.' }}">
+    <meta property="og:description" content="{{ $seo['og_description'] ?? $seo['description'] ?? 'Discover and explore movies and TV shows. Browse thousands of titles, read reviews, and find information about your favorite entertainment content.' }}">
     <meta property="og:image" content="{{ $seo['og_image'] ?? $seo['image'] ?? asset('icon.png') }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -83,7 +117,7 @@
     <meta name="twitter:card" content="{{ $seo['twitter_card'] ?? 'summary_large_image' }}">
     <meta name="twitter:url" content="{{ $seo['url'] ?? url()->current() }}">
     <meta name="twitter:title" content="{{ $seo['twitter_title'] ?? $seo['title'] ?? 'Nazaarabox - Movies & TV Shows' }}">
-    <meta name="twitter:description" content="{{ $seo['twitter_description'] ?? $seo['description'] ?? 'Watch and download your favorite movies and TV shows. Browse thousands of titles in high quality.' }}">
+    <meta name="twitter:description" content="{{ $seo['twitter_description'] ?? $seo['description'] ?? 'Discover and explore movies and TV shows. Browse thousands of titles, read reviews, and find information about your favorite entertainment content.' }}">
     <meta name="twitter:image" content="{{ $seo['twitter_image'] ?? $seo['image'] ?? asset('icon.png') }}">
     <meta name="twitter:image:alt" content="{{ $seo['twitter_title'] ?? $seo['title'] ?? 'Nazaarabox' }}">
     @if($seoService->getTwitterHandle())
@@ -113,6 +147,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://image.tmdb.org">
     <link rel="dns-prefetch" href="https://api.themoviedb.org">
+    <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
     
     <!-- Structured Data (JSON-LD) -->
     @if(!empty($seo['schema']))
@@ -127,50 +162,103 @@
     <link rel="icon" type="image/png" href="{{ asset('icon.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('icon.png') }}">
     <link rel="shortcut icon" type="image/png" href="{{ asset('icon.png') }}">
-    <!-- Google Fonts - Poppins -->
+    <!-- Google Fonts - Poppins (Optimized: async load with font-display: swap) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"></noscript>
+    
+    <!-- Critical CSS - Load immediately to prevent FOUC -->
+    <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/components.css') }}">
+    
+    <!-- Prevent FOUC - Hide content until Tailwind loads -->
+    <style>
+        /* Hide body until Tailwind is ready */
+        body.tailwind-loading {
+            visibility: hidden;
+        }
+        /* Show body once Tailwind is loaded */
+        body.tailwind-loaded {
+            visibility: visible;
+        }
+    </style>
+    
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'sans': ['Poppins', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
-                    },
-                    colors: {
-                        'bg-primary': '#0D0D0D',
-                        'bg-secondary': '#181818',
-                        'bg-card': '#1F1F1F',
-                        'bg-card-hover': '#2A2A2A',
-                        'accent': '#E50914',
-                        'accent-dark': '#B20710',
-                        'accent-light': '#F40612',
-                        'text-primary': '#FFFFFF',
-                        'text-secondary': '#B3B3B3',
-                        'text-tertiary': '#808080',
-                        'text-muted': '#666666',
-                        'border-primary': 'rgba(255, 255, 255, 0.1)',
-                        'border-secondary': 'rgba(255, 255, 255, 0.05)',
-                        'rating': '#FFD700',
-                    },
-                    backgroundImage: {
-                        'gradient-primary': 'linear-gradient(135deg, #E50914 0%, #B20710 100%)',
-                        'gradient-overlay': 'linear-gradient(180deg, rgba(13, 13, 13, 0.3) 0%, rgba(13, 13, 13, 0.9) 100%)',
-                    },
-                    boxShadow: {
-                        'accent': '0 10px 30px rgba(229, 9, 20, 0.3)',
-                        'accent-lg': '0 10px 30px rgba(229, 9, 20, 0.4)',
-                        'card': '0 4px 12px rgba(0, 0, 0, 0.3)',
+        (function() {
+            var config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            'sans': ['Poppins', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
+                        },
+                        colors: {
+                            'bg-primary': '#0D0D0D',
+                            'bg-secondary': '#181818',
+                            'bg-card': '#1F1F1F',
+                            'bg-card-hover': '#2A2A2A',
+                            'accent': '#E50914',
+                            'accent-dark': '#B20710',
+                            'accent-light': '#F40612',
+                            'text-primary': '#FFFFFF',
+                            'text-secondary': '#B3B3B3',
+                            'text-tertiary': '#808080',
+                            'text-muted': '#666666',
+                            'border-primary': 'rgba(255, 255, 255, 0.1)',
+                            'border-secondary': 'rgba(255, 255, 255, 0.05)',
+                            'rating': '#FFD700',
+                        },
+                        backgroundImage: {
+                            'gradient-primary': 'linear-gradient(135deg, #E50914 0%, #B20710 100%)',
+                            'gradient-overlay': 'linear-gradient(180deg, rgba(13, 13, 13, 0.3) 0%, rgba(13, 13, 13, 0.9) 100%)',
+                        },
+                        boxShadow: {
+                            'accent': '0 10px 30px rgba(229, 9, 20, 0.3)',
+                            'accent-lg': '0 10px 30px rgba(229, 9, 20, 0.4)',
+                            'card': '0 4px 12px rgba(0, 0, 0, 0.3)',
+                        }
                     }
                 }
+            };
+            
+            // Configure Tailwind
+            if (typeof tailwind !== 'undefined') {
+                tailwind.config = config;
             }
-        }
+            
+            // Function to show content once Tailwind is ready
+            function showContent() {
+                var body = document.body;
+                if (body) {
+                    body.classList.remove('tailwind-loading');
+                    body.classList.add('tailwind-loaded');
+                }
+            }
+            
+            // Check if Tailwind is loaded
+            function checkTailwind() {
+                if (typeof tailwind !== 'undefined') {
+                    // Tailwind is loaded, wait a bit for it to process, then show content
+                    setTimeout(showContent, 100);
+                } else {
+                    // Tailwind not loaded yet, check again
+                    setTimeout(checkTailwind, 50);
+                }
+            }
+            
+            // Start checking when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', checkTailwind);
+            } else {
+                checkTailwind();
+            }
+            
+            // Fallback: Show content after 2 seconds even if Tailwind hasn't loaded
+            setTimeout(showContent, 2000);
+        })();
     </script>
-    <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/components.css') }}">
     <style>
         :root {
             /* ============================================
@@ -818,7 +906,12 @@
         }
     </style>
 </head>
-<body>
+<body class="tailwind-loading">
+    <!-- AMP Auto Ads -->
+    <amp-auto-ads type="adsense"
+            data-ad-client="ca-pub-9165335002761658">
+    </amp-auto-ads>
+    
     <nav class="sticky top-0 z-[100] bg-white backdrop-blur-lg shadow-lg border-b border-gray-200 dark:!bg-bg-primary/95 dark:!border-border-primary">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 md:h-20">
@@ -969,25 +1062,49 @@
         </div>
     </nav>
     
+    <!-- AdSense Horizontal Ad - After Navigation -->
+    <x-adsense-horizontal />
+    
     <main>
         @yield('content')
+        
+        <!-- AdSense Auto-Relaxed Ad - In Main Content Area -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-8">
+            <x-adsense-autorelaxed />
+        </div>
     </main>
+    
+    <!-- AdSense Horizontal Ad - Before Footer -->
+    <x-adsense-horizontal />
     
     <!-- Footer -->
     <footer class="bg-gray-50 border-t border-gray-200 mt-12 dark:!bg-bg-card dark:!border-border-primary">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="text-center space-y-4">
                 <div class="flex justify-center items-center gap-4 mb-4">
-                    <a href="#" class="text-gray-600 hover:text-accent transition-colors dark:!text-text-secondary">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <a href="#" class="text-gray-600 hover:text-accent transition-colors dark:!text-text-secondary" aria-label="Follow us on Instagram">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/>
                         </svg>
                     </a>
-                    <a href="#" class="text-gray-600 hover:text-accent transition-colors dark:!text-text-secondary">
-                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <a href="#" class="text-gray-600 hover:text-accent transition-colors dark:!text-text-secondary" aria-label="Follow us on Facebook">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                             <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221c.328 0 .593.266.593.593v2.716c0 .327-.265.593-.593.593h-1.306v1.306h1.306c.327 0 .593.265.593.593v2.716c0 .327-.266.593-.593.593h-2.716c-.328 0-.593-.266-.593-.593v-1.306H9.221v1.306c0 .327-.265.593-.593.593H5.912c-.327 0-.593-.266-.593-.593v-2.716c0-.328.266-.593.593-.593h1.306V9.221H5.912c-.327 0-.593-.265-.593-.593V5.912c0-.327.266-.593.593-.593h2.716c.328 0 .593.266.593.593v1.306h5.557V5.912c0-.327.265-.593.593-.593h2.716c.327 0 .593.266.593.593v2.716c0 .328-.266.593-.593.593h-1.306v1.306h1.306z"/>
                         </svg>
                     </a>
+                </div>
+                <div class="flex justify-center items-center gap-4 mb-2 flex-wrap">
+                    <a href="{{ route('privacy') }}" class="text-gray-600 hover:text-accent transition-colors text-sm dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 500;">
+                        Privacy Policy
+                    </a>
+                    <span class="text-gray-400 dark:!text-text-tertiary">|</span>
+                    <a href="{{ route('dmca') }}" class="text-gray-600 hover:text-accent transition-colors text-sm dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 500;">
+                        DMCA
+                    </a>
+                    <span class="text-gray-400 dark:!text-text-tertiary">|</span>
+                    <button onclick="window.cookieConsent?.openPreferences()" class="text-gray-600 hover:text-accent transition-colors text-sm dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 500; background: none; border: none; cursor: pointer; padding: 0;">
+                        Manage Cookies
+                    </button>
                 </div>
                 <p class="text-gray-600 text-sm dark:!text-text-secondary" style="font-family: 'Poppins', sans-serif; font-weight: 400;">
                     Copyright © {{ date('Y') }} - Nazaarabox
@@ -1130,6 +1247,299 @@
       // The manager handles all permission and subscription logic automatically
       window.OneSignalDeferred = window.OneSignalDeferred || [];
       
+    </script>
+    
+    <!-- Cookie Consent Banner -->
+    <div id="cookieConsentBanner" class="hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-bg-card border-t border-gray-200 dark:border-border-primary shadow-2xl z-[9999] animate-slide-up" style="font-family: 'Poppins', sans-serif;">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2" style="font-weight: 700;">
+                        🍪 We Use Cookies
+                    </h3>
+                    <p class="text-sm text-gray-600 dark:text-text-secondary leading-relaxed" style="font-weight: 400;">
+                        We use cookies to enhance your browsing experience, analyze site traffic, and personalize content. By clicking "Accept All", you consent to our use of cookies. You can manage your preferences or learn more in our 
+                        <a href="{{ route('privacy') }}#cookies" class="text-accent hover:text-accent-light underline font-semibold" style="font-weight: 600;">Privacy Policy</a>.
+                    </p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
+                    <button onclick="openCookiePreferences()" class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-text-secondary bg-gray-100 dark:bg-bg-card-hover rounded-lg hover:bg-gray-200 dark:hover:bg-bg-card transition-colors" style="font-weight: 600;">
+                        Manage Preferences
+                    </button>
+                    <button onclick="rejectAllCookies()" class="px-4 py-2 text-sm font-semibold text-gray-700 dark:text-text-secondary bg-gray-100 dark:bg-bg-card-hover rounded-lg hover:bg-gray-200 dark:hover:bg-bg-card transition-colors" style="font-weight: 600;">
+                        Reject All
+                    </button>
+                    <button onclick="acceptAllCookies()" class="px-4 py-2 text-sm font-semibold text-white bg-accent rounded-lg hover:bg-accent-light transition-colors" style="font-weight: 600;">
+                        Accept All
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cookie Preferences Modal -->
+    <div id="cookiePreferencesModal" class="hidden fixed inset-0 bg-black/50 dark:bg-black/70 z-[10000] flex items-center justify-center p-4" onclick="closeCookiePreferences(event)">
+        <div class="bg-white dark:bg-bg-card rounded-lg shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-slide-up" onclick="event.stopPropagation()" style="font-family: 'Poppins', sans-serif;">
+            <div class="p-6 border-b border-gray-200 dark:border-border-primary">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-2xl font-bold text-gray-900 dark:text-white" style="font-weight: 700;">
+                        Cookie Preferences
+                    </h2>
+                    <button onclick="closeCookiePreferences()" class="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="p-6 space-y-6">
+                <p class="text-sm text-gray-600 dark:text-text-secondary leading-relaxed" style="font-weight: 400;">
+                    Manage your cookie preferences. You can enable or disable different types of cookies below. Learn more in our 
+                    <a href="{{ route('privacy') }}#cookies" class="text-accent hover:text-accent-light underline font-semibold" style="font-weight: 600;">Privacy Policy</a>.
+                </p>
+
+                <!-- Essential Cookies -->
+                <div class="border border-gray-200 dark:border-border-primary rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex-1">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1" style="font-weight: 700;">
+                                Essential Cookies
+                            </h3>
+                            <p class="text-sm text-gray-600 dark:text-text-secondary" style="font-weight: 400;">
+                                Required for the website to function properly. These cannot be disabled.
+                            </p>
+                        </div>
+                        <div class="ml-4">
+                            <span class="px-3 py-1 text-xs font-semibold bg-gray-200 dark:bg-bg-card-hover text-gray-700 dark:text-text-secondary rounded-full" style="font-weight: 600;">
+                                Always Active
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analytics Cookies -->
+                <div class="border border-gray-200 dark:border-border-primary rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex-1">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1" style="font-weight: 700;">
+                                Analytics Cookies
+                            </h3>
+                            <p class="text-sm text-gray-600 dark:text-text-secondary" style="font-weight: 400;">
+                                Help us understand how visitors interact with our website (e.g., Google Analytics).
+                            </p>
+                        </div>
+                        <div class="ml-4">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="analyticsCookies" class="sr-only peer" onchange="updateCookiePreferences()">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-accent/20 dark:peer-focus:ring-accent/30 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-accent"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Advertising Cookies -->
+                <div class="border border-gray-200 dark:border-border-primary rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex-1">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1" style="font-weight: 700;">
+                                Advertising Cookies
+                            </h3>
+                            <p class="text-sm text-gray-600 dark:text-text-secondary" style="font-weight: 400;">
+                                Used to deliver personalized ads and measure ad performance (e.g., Google AdSense). Managed by Google's Consent Management Platform.
+                            </p>
+                        </div>
+                        <div class="ml-4">
+                            <span class="px-3 py-1 text-xs font-semibold bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full" style="font-weight: 600;">
+                                Managed by Google CMP
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Functional Cookies -->
+                <div class="border border-gray-200 dark:border-border-primary rounded-lg p-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex-1">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-1" style="font-weight: 700;">
+                                Functional Cookies
+                            </h3>
+                            <p class="text-sm text-gray-600 dark:text-text-secondary" style="font-weight: 400;">
+                                Enable enhanced functionality and personalization (e.g., theme preferences, language settings).
+                            </p>
+                        </div>
+                        <div class="ml-4">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="functionalCookies" class="sr-only peer" onchange="updateCookiePreferences()">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-accent/20 dark:peer-focus:ring-accent/30 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-accent"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200 dark:border-border-primary">
+                    <button onclick="saveCookiePreferences()" class="flex-1 px-6 py-3 text-sm font-semibold text-white bg-accent rounded-lg hover:bg-accent-light transition-colors" style="font-weight: 600;">
+                        Save Preferences
+                    </button>
+                    <button onclick="acceptAllCookies()" class="flex-1 px-6 py-3 text-sm font-semibold text-white bg-accent rounded-lg hover:bg-accent-light transition-colors" style="font-weight: 600;">
+                        Accept All
+                    </button>
+                    <button onclick="rejectAllCookies()" class="flex-1 px-6 py-3 text-sm font-semibold text-gray-700 dark:text-text-secondary bg-gray-100 dark:bg-bg-card-hover rounded-lg hover:bg-gray-200 dark:hover:bg-bg-card transition-colors" style="font-weight: 600;">
+                        Reject All
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cookie Consent Script -->
+    <script>
+        // Cookie Consent Management
+        (function() {
+            const COOKIE_CONSENT_KEY = 'cookie_consent';
+            const COOKIE_PREFERENCES_KEY = 'cookie_preferences';
+            const COOKIE_EXPIRY_DAYS = 365;
+
+            // Check if user has already given consent
+            function hasConsent() {
+                return localStorage.getItem(COOKIE_CONSENT_KEY) !== null;
+            }
+
+            // Get cookie preferences
+            function getCookiePreferences() {
+                const prefs = localStorage.getItem(COOKIE_PREFERENCES_KEY);
+                if (prefs) {
+                    return JSON.parse(prefs);
+                }
+                return {
+                    analytics: false,
+                    functional: false,
+                    advertising: false // Managed by Google CMP
+                };
+            }
+
+            // Save cookie preferences
+            function saveCookiePreferences(preferences) {
+                localStorage.setItem(COOKIE_PREFERENCES_KEY, JSON.stringify(preferences));
+                localStorage.setItem(COOKIE_CONSENT_KEY, 'true');
+                setCookie('cookie_consent', 'true', COOKIE_EXPIRY_DAYS);
+            }
+
+            // Set cookie helper
+            function setCookie(name, value, days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                const expires = "expires=" + date.toUTCString();
+                document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax";
+            }
+
+            // Show cookie banner if no consent
+            function showCookieBanner() {
+                if (!hasConsent()) {
+                    const banner = document.getElementById('cookieConsentBanner');
+                    if (banner) {
+                        banner.classList.remove('hidden');
+                    }
+                }
+            }
+
+            // Accept all cookies
+            window.acceptAllCookies = function() {
+                const preferences = {
+                    analytics: true,
+                    functional: true,
+                    advertising: true
+                };
+                saveCookiePreferences(preferences);
+                hideCookieBanner();
+                closeCookiePreferences();
+                updateCookieToggles(true, true);
+            };
+
+            // Reject all cookies (except essential)
+            window.rejectAllCookies = function() {
+                const preferences = {
+                    analytics: false,
+                    functional: false,
+                    advertising: false
+                };
+                saveCookiePreferences(preferences);
+                hideCookieBanner();
+                closeCookiePreferences();
+                updateCookieToggles(false, false);
+            };
+
+            // Open cookie preferences modal
+            window.openCookiePreferences = function() {
+                const modal = document.getElementById('cookiePreferencesModal');
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    const prefs = getCookiePreferences();
+                    updateCookieToggles(prefs.analytics, prefs.functional);
+                }
+            };
+
+            // Close cookie preferences modal
+            window.closeCookiePreferences = function(event) {
+                if (event && event.target !== event.currentTarget) {
+                    return;
+                }
+                const modal = document.getElementById('cookiePreferencesModal');
+                if (modal) {
+                    modal.classList.add('hidden');
+                }
+            };
+
+            // Update cookie toggles
+            function updateCookieToggles(analytics, functional) {
+                const analyticsToggle = document.getElementById('analyticsCookies');
+                const functionalToggle = document.getElementById('functionalCookies');
+                if (analyticsToggle) analyticsToggle.checked = analytics;
+                if (functionalToggle) functionalToggle.checked = functional;
+            }
+
+            // Update cookie preferences from toggles
+            window.updateCookiePreferences = function() {
+                const analytics = document.getElementById('analyticsCookies')?.checked || false;
+                const functional = document.getElementById('functionalCookies')?.checked || false;
+                // Note: Advertising is managed by Google CMP
+            };
+
+            // Save preferences from modal
+            window.saveCookiePreferences = function() {
+                const preferences = {
+                    analytics: document.getElementById('analyticsCookies')?.checked || false,
+                    functional: document.getElementById('functionalCookies')?.checked || false,
+                    advertising: false // Managed by Google CMP
+                };
+                saveCookiePreferences(preferences);
+                hideCookieBanner();
+                closeCookiePreferences();
+            };
+
+            // Hide cookie banner
+            function hideCookieBanner() {
+                const banner = document.getElementById('cookieConsentBanner');
+                if (banner) {
+                    banner.classList.add('hidden');
+                }
+            }
+
+            // Initialize on page load
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', showCookieBanner);
+            } else {
+                showCookieBanner();
+            }
+
+            // Make functions globally available
+            window.cookieConsent = {
+                hasConsent: hasConsent,
+                getPreferences: getCookiePreferences,
+                acceptAll: acceptAllCookies,
+                rejectAll: rejectAllCookies,
+                openPreferences: openCookiePreferences
+            };
+        })();
     </script>
     
     @stack('scripts')

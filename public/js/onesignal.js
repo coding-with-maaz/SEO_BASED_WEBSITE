@@ -401,7 +401,7 @@ class OneSignalManager {
         };
 
         const toast = document.createElement('div');
-        // Use darker red for better contrast (red-600 or red-700)
+        // Use darker colors for better contrast
         const contrastColors = {
             success: 'bg-green-600',
             error: 'bg-red-700',
